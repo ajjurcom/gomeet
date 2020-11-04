@@ -1,0 +1,44 @@
+basePath: /api/v1
+info:
+  contact: {}
+  license: {}
+  title: goLog service's API
+  version: v1
+paths:
+  /admin:
+    post:
+      consumes:
+      - application/json
+      description: 登录验证，获取 token 令牌
+      parameters:
+      - description: 管理员
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: 管理员密码
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token……
+          schema:
+            type: string
+        "400":
+          description: invalid params or the name and password is no correct
+          schema:
+            type: string
+        "404":
+          description: no exist
+          schema:
+            type: string
+        "500":
+          description: the server has error
+          schema:
+            type: string
+      summary: 管理员登录
+swagger: "2.0"
