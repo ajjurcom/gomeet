@@ -19,21 +19,38 @@ func InitRouter() *gin.Engine {
 
 	// 初始化控制器
 	userController := controller.NewUserController()
+	campusController := controller.NewCampusController()
+	buildingController := controller.NewBuildingController()
 
 	api := r.Group(relativePath)
 	{
 		api.POST("/user", userController.Post)
 		api.POST("/session", userController.Login)
+		api.GET("/campus", campusController.GetAllCampus)
+		api.GET("/campus/:onePageCount/:page", campusController.GetCampusByPage)
+		api.GET("/buildings/:onePageCount/:page", buildingController.GetBuildingByCampusAndPage)
+		api.GET("/building/:id", buildingController.GetBuildingByID)
+
+		// apiAdmin
+		api.POST("/campus", campusController.PostCampus)
+		api.DELETE("/campus/:id", campusController.DeleteCampus)
+		api.PUT("/campus", campusController.PutCampus)
+
+		api.POST("/building", buildingController.PostBuilding)
+		api.DELETE("/building/:id", buildingController.DeleteBuilding)
+		api.PUT("/building", buildingController.PutBuilding)
 	}
 
 	apiUser := r.Group(relativePath)
 	apiUser.Use(VerifyPower("user"))
 	{
+
 	}
 
 	apiAdmin := r.Group(relativePath)
 	apiAdmin.Use(VerifyPower("admin"))
 	{
+
 	}
 
 	apiRoot := r.Group(relativePath)

@@ -5,7 +5,6 @@ import (
 	"com/mittacy/gomeet/config"
 	"com/mittacy/gomeet/e"
 	"com/mittacy/gomeet/model"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,10 +14,11 @@ func CorsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
 		origin := c.Request.Header.Get("Origin")
+		tokenName := config.Cfg.Section("jwt").Key("tokenName").String()
 		if origin != "" {
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Methods", "POST, DELETE, PUT, GET, OPTIONS")
-			c.Header("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization")
+			c.Header("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization, " + tokenName)
 			c.Header("Access-Control-Allow-Credentials", "true")
 			c.Set("content-type", "application/json")
 		}
@@ -47,18 +47,18 @@ func VerifyPower(role string) gin.HandlerFunc {
 		} else {
 			var err error
 			session, err = common.ParseToken(token)
-			fmt.Println(session)
-			if err != nil {
+			if err != nil || session == nil {
 				code = e.NOT_POWER
-			}
-			switch role {
-			case "admin":
-				if session.IsAdmin == 0 {
-					code = e.NOT_POWER
-				}
-			case "root":
-				if session.IsAdmin == 0 || session.IsRoot == 0 {
-					code = e.NOT_POWER
+			} else {
+				switch role {
+				case "admin":
+					if session.IsAdmin == 0 {
+						code = e.NOT_POWER
+					}
+				case "root":
+					if session.IsAdmin == 0 || session.IsRoot == 0 {
+						code = e.NOT_POWER
+					}
 				}
 			}
 		}

@@ -60,7 +60,7 @@ func (umr *UserManagerRepository) SelectPasswordByAttr(attrName, attrVal string)
 
 	sqlStr := "select password from " + umr.table + " where " + attrName + " = ?"
 
-	err = database.MysqlDB.QueryRow(sqlStr, attrVal).Scan(&password)
+	err = umr.mysqlConn.QueryRow(sqlStr, attrVal).Scan(&password)
 	return
 }
 
@@ -72,7 +72,7 @@ func (umr *UserManagerRepository) IsExistsByAttr(attrName string, attrVal string
 	sqlStr := "select 1 from " + umr.table + " where " + attrName + " = ? limit 1"
 
 	num := 0
-	database.MysqlDB.QueryRow(sqlStr, attrVal).Scan(&num)
+	umr.mysqlConn.QueryRow(sqlStr, attrVal).Scan(&num)
 	if num == 1 {
 		return true, nil
 	}
@@ -86,7 +86,7 @@ func (umr *UserManagerRepository) SelectStateByAttr(attrName, attrVal string) (s
 
 	sqlStr := "select state from " + umr.table + " where " + attrName + " = ? limit 1"
 
-	err = database.MysqlDB.QueryRow(sqlStr, attrVal).Scan(&state)
+	err = umr.mysqlConn.QueryRow(sqlStr, attrVal).Scan(&state)
 	return
 }
 
@@ -98,7 +98,7 @@ func (umr *UserManagerRepository) SelectIsAdminByAttr(attrName, attrVal string) 
 	sqlStr := "select is_admin from " + umr.table + " where " + attrName + " = ? limit 1"
 
 	var isAdmin int
-	err := database.MysqlDB.QueryRow(sqlStr, attrVal).Scan(&isAdmin)
+	err := umr.mysqlConn.QueryRow(sqlStr, attrVal).Scan(&isAdmin)
 	if isAdmin == 0 {
 		return false, err
 	}

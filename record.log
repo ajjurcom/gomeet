@@ -4,3 +4,29 @@ err: [Error 1146: Table 'golog.user' doesn't exist]
 err: [Error 1062: Duplicate entry '20170310127' for key 'user.uidx_name']
 2020-11-04T17:26:32.007+0800	ERROR	logger/init.go:37	数据库操作错误
 err: [sql: no rows in result set]
+2020-11-06T16:02:35.285+0800	ERROR	logger/init.go:31	获取数据库出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'campus' at line 1]
+2020-11-07T00:16:55.383+0800	ERROR	logger/init.go:31	获取数据库出错
+err: [expected slice but got int]
+2020-11-07T00:17:17.108+0800	ERROR	logger/init.go:31	获取数据库出错
+err: [expected slice but got int]
+2020-11-08T10:44:53.794+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [Error 1364: Field 'campus_id' doesn't have a default value]
+2020-11-08T10:46:53.651+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [Error 1364: Field 'campus_id' doesn't have a default value]
+2020-11-08T10:51:06.134+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [Error 1062: Duplicate entry '学成楼' for key 'building.uidx_name']
+2020-11-08T10:51:45.403+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [Error 1062: Duplicate entry '学成楼' for key 'building.uidx_name']
+2020-11-08T10:52:33.731+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [campus is not exists]
+2020-11-08T10:52:40.662+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [campus is not exists]
+2020-11-08T10:53:10.541+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [campus is not exists]
+2020-11-08T10:53:19.392+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [campus is not exists]
+2020-11-08T10:53:23.426+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [campus is not exists]
+2020-11-08T10:53:34.484+0800	ERROR	logger/init.go:31	添加建筑出错
+err: [Error 1062: Duplicate entry '阿斯蒂芬楼' for key 'building.uidx_name']
