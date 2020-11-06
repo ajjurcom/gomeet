@@ -1,6 +1,6 @@
 package e
 
-var MsgFlags = map[int]string{
+var MsgFlags = map[int]string {
 	SUCCESS:        "ok",
 	BACK_ERROR:     "background err, please look the log",
 	INVALID_PARAMS: "请求参数错误",

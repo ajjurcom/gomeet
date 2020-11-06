@@ -3,22 +3,15 @@ package main
 import (
 	"com/mittacy/gomeet/config"
 	"com/mittacy/gomeet/database"
-	_ "com/mittacy/gomeet/docs"
 	"com/mittacy/gomeet/logger"
 	"com/mittacy/gomeet/router"
 	"flag"
 	"fmt"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-// @title goLog service's API
-// @version v1
-// @description	The GoMeet service's API document.
-// @BasePath /api/v1
 func main() {
 	// 1. 初始化配置文件
 	if err := config.InitConfig(); err != nil {
@@ -40,10 +33,7 @@ func main() {
 	// 4. 路由
 	r := router.InitRouter()
 
-	// 5. API文档生成
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// 6. 服务器配置，启动服务
+	// 5. 服务器配置，启动服务
 
 	// 命令行指定端口，如果没有则使用配置文件的端口
 	serverConfig, err := config.Cfg.GetSection("server")

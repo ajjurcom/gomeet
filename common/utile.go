@@ -7,10 +7,6 @@ import (
 )
 
 // Encryption 使用sha265算法加密密码
-//
-// 参数：password 密码
-//
-// 返回值: string 使用sha265算法加密后的密码，长读64位
 func Encryption(password string) string {
 	h := sha256.New()
 	io.WriteString(h, password)

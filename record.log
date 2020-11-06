@@ -1,0 +1,6 @@
+2020-11-04T13:53:27.044+0800	ERROR	logger/init.go:37	数据库操作错误
+err: [Error 1146: Table 'golog.user' doesn't exist]
+2020-11-04T15:57:40.560+0800	ERROR	logger/init.go:37	数据库操作错误
+err: [Error 1062: Duplicate entry '20170310127' for key 'user.uidx_name']
+2020-11-04T17:26:32.007+0800	ERROR	logger/init.go:37	数据库操作错误
+err: [sql: no rows in result set]

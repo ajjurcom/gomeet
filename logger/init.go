@@ -24,12 +24,6 @@ func InitLogger() error {
 }
 
 // Record 记录日志函数
-//
-// 参数
-//
-// 1. msg	错误信息，自己填写
-//
-// 2. errList	程序出错的err
 func Record(msg string, errList ...error) {
 	if len(errList) == 0 {
 		sugarLogger.Infof("%s", msg)
