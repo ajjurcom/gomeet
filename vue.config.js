@@ -14,7 +14,7 @@ module.exports = {
     configureWebpack: {
         resolve: {
             alias: {
-                pages: '@/pages' // 页面组件目录
+                pages: '@/pages', // 页面组件目录
             }
         },
         output: {
