@@ -35,8 +35,16 @@
                                 <Icon type="ios-pin" />
                                 建筑
                             </template>
-                            <MenuItem name="building-admin">管理建筑</MenuItem>
-                            <MenuItem name="building-add">新增建筑</MenuItem>
+                            <MenuItem
+                                name="building-manager"
+                                :to="{
+                                    name: 'BuildingManager'
+                                }">管理建筑</MenuItem>
+                            <MenuItem
+                                name="building-add"
+                                :to="{
+                                    name: 'BuildingAdd'
+                                }">新增建筑</MenuItem>
                         </Submenu>
                         <Submenu name="meeting">
                             <template slot="title">

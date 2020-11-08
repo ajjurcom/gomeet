@@ -25,4 +25,22 @@ export default class Main {
     static getAllCampus() {
         return http.get('/campus');
     }
+    /*
+     * 建筑API
+     */
+    static addBuilding(data) {
+        return http.post('/building', data);
+    }
+    static deleteBuilding(id) {
+        return http.delete(`/building/${id}`);
+    }
+    static putBuilding(data) {
+        return http.put('/building', data);
+    }
+    static getBuildingByCampusPage(onePageNum, page, campus_id) {
+        return http.get(`/buildings/${onePageNum}/${page}?campus_id=${campus_id}`);
+    }
+    static getBuildingByID(id) {
+        return http.get(`/building/${id}`);
+    }
 }

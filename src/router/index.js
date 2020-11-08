@@ -8,9 +8,12 @@ import Router from 'vue-router';
 import viewDesign from 'view-design';
 import LoginComponent from 'pages/Login';
 import RegisterComponent from 'pages/Register';
-import CampusManager from 'pages/Manager/CampusManager';
-import CampusEdit from 'pages/Manager/CampusEdit';
-import CampusAdd from 'pages/Manager/CampusAdd';
+import CampusManager from 'pages/Manager/Campus/List';
+import CampusEdit from 'pages/Manager/Campus/Edit';
+import CampusAdd from 'pages/Manager/Campus/Add';
+import BuildingManager from 'pages/Manager/Building/List';
+import BuildingEdit from 'pages/Manager/Building/Edit';
+import BuildingAdd from 'pages/Manager/Building/Add';
 
 Vue.use(Router);
 Vue.use(viewDesign);
@@ -40,6 +43,21 @@ const routes = [
         name: 'CampusAdd',
         path: '/back/campus/add',
         component: CampusAdd
+    },
+    {
+        name: 'BuildingManager',
+        path: '/back/building/manager',
+        component: BuildingManager
+    },
+    {
+        name: 'BuildingEdit',
+        path: '/back/building/edit/:id',
+        component: BuildingEdit
+    },
+    {
+        name: 'BuildingAdd',
+        path: '/back/building/add',
+        component: BuildingAdd
     }
 ];
 

@@ -7,7 +7,7 @@
                     class="list-item"
                     v-for="item in itemList"
                     :key="item.id">
-                    <div class="list-item-content">{{item.campus_name}} - 建筑数量: {{item.count}}</div>
+                    <div class="list-item-content">{{item.campus_name}}</div>
                     <div class="list-item-buttons">
                         <Button class="list-item-button" @click="campusEdit(item)" type="info">修改</Button>
                         <Poptip
@@ -131,8 +131,7 @@ export default {
                     id: campus.id,
                     campus_name: campus.campus_name
                 }
-            })
-            console.log('campus -> ', campus);
+            });
         }
     },
     created() {
