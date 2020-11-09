@@ -51,8 +51,16 @@
                                 <Icon type="md-text" />
                                 会议室
                             </template>
-                            <MenuItem name="meeting-manager">管理会议室</MenuItem>
-                            <MenuItem name="meeting-add">新增会议室</MenuItem>
+                            <MenuItem
+                                name="meeting-manager"
+                                :to="{
+                                    name: 'MeetingManager'
+                                }">管理会议室</MenuItem>
+                            <MenuItem
+                                name="meeting-add"
+                                :to="{
+                                    name: 'MeetingAdd'
+                                }">新增会议室</MenuItem>
                         </Submenu>
                     </div>
                     <div class="menu-right">

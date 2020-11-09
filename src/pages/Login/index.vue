@@ -193,7 +193,7 @@ export default {
                     // 登录成功跳转
                     showMessage('info', '登录成功');
                     this.$router.push({
-                        name: "Register",   // todo 修改跳转
+                        name: "CampusManager",   // todo 修改跳转
                     });
                 }
             }).finally(() => {

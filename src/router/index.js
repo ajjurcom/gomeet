@@ -14,6 +14,9 @@ import CampusAdd from 'pages/Manager/Campus/Add';
 import BuildingManager from 'pages/Manager/Building/List';
 import BuildingEdit from 'pages/Manager/Building/Edit';
 import BuildingAdd from 'pages/Manager/Building/Add';
+import MeetingAdd from 'pages/Manager/Meeting/Add';
+import MeetingManager from 'pages/Manager/Meeting/List';
+import MeetingEdit from 'pages/Manager/Meeting/Edit';
 
 Vue.use(Router);
 Vue.use(viewDesign);
@@ -58,6 +61,21 @@ const routes = [
         name: 'BuildingAdd',
         path: '/back/building/add',
         component: BuildingAdd
+    },
+    {
+        name: 'MeetingAdd',
+        path: '/back/meeting/add',
+        component: MeetingAdd
+    },
+    {
+        name: 'MeetingManager',
+        path: '/back/meeting/manager',
+        component: MeetingManager
+    },
+    {
+        name: 'MeetingEdit',
+        path: '/back/meeting/edit/:id',
+        component: MeetingEdit
     }
 ];
 

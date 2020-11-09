@@ -43,4 +43,31 @@ export default class Main {
     static getBuildingByID(id) {
         return http.get(`/building/${id}`);
     }
+    /*
+     * 会议室API
+     */
+    static addMeeting(data) {
+        return http.post('/meeting', data);
+    }
+    static deleteMeeting(id) {
+        return http.delete(`/meeting/${id}`);
+    }
+    static putMeeting(data) {
+        return http.put('/meeting', data);
+    }
+    static getMeetingByID(id) {
+        return http.get(`/meeting/${id}`);
+    }
+    static getMeetingOptions() {
+        return http.get('/meeting_options');
+    }
+    static getAllBuildingsByCampus(campus_id) {
+        return http.get(`/campus_buildings/${campus_id}`);
+    }
+    static getBuildingLayer(campus_id) {
+        return http.get(`/campus_layer/${campus_id}`);
+    }
+    static getMeetingsByPage(onePageNum, page, building_id) {
+        return http.get(`/meetings/${onePageNum}/${page}?building_id=${building_id}`);
+    }
 }
