@@ -40,7 +40,7 @@ func (uc *UserController) Post(c *gin.Context) {
 	}
 	// 2. 操作数据库
 	// 判断校区是否存在
-	exists, err := uc.CampusService.IsExists(user.CampusID)
+	exists, err := uc.CampusService.IsCampusExists(user.CampusID)
 	if err != nil {
 		common.ResolveResult(c, false, e.BACK_ERROR, nil)
 		return

@@ -13,9 +13,12 @@ type IBuildingRepository interface {
 	InsertBuilding(building model.Building) error
 	DeleteBuilding(id int) error
 	UpdateBuilding(building model.Building) error
-	SelectBuildingByCampusAndPage(page, onePageCount, campusID int) ([]model.Building, error)
-	SelectBuildingCountByCampus(campusID int) (int, error)
 	SelectBuildingByID(id int) (model.Building, error)
+	SelectBuildingsByPage(page, onePageCount, campusID int) ([]model.Building, error)
+	SelectBuildingCountByCampus(campusID int) (int, error)
+	IsBuildingExists(id int) (bool, error)
+	SelectAllBuildingsByCampus(campusID int) ([]model.Building, error)
+	SelectBuildingLayer(campusID int) (int, error)
 }
 
 func NewBuildingRepository(table string) IBuildingRepository {
@@ -28,7 +31,7 @@ type BuildingManagerRepository struct {
 }
 
 func (bmr *BuildingManagerRepository) Conn() error {
-	if bmr == nil {
+	if bmr.mysqlConn == nil {
 		if err := database.InitMysql(); err != nil {
 			return err
 		}
@@ -107,7 +110,7 @@ func (bmr *BuildingManagerRepository) UpdateBuilding(building model.Building) er
 	return nil
 }
 
-func (bmr *BuildingManagerRepository) SelectBuildingByCampusAndPage(page, onePageCount, campusID int) (buildings []model.Building, err error) {
+func (bmr *BuildingManagerRepository) SelectBuildingsByPage(page, onePageCount, campusID int) (buildings []model.Building, err error) {
 	if err = bmr.Conn(); err != nil {
 		return
 	}
@@ -136,5 +139,40 @@ func (bmr *BuildingManagerRepository) SelectBuildingCountByCampus(campusID int) 
 
 	sqlStr := "select count(*) from " + bmr.buildingTable + " where campus_id = ?"
 	err = bmr.mysqlConn.QueryRow(sqlStr, campusID).Scan(&count)
+	return
+}
+
+func (bmr *BuildingManagerRepository) SelectBuildingLayer(campusID int) (count int, err error) {
+	if err = bmr.Conn(); err != nil {
+		return
+	}
+
+	sqlStr := "select layer from " + bmr.buildingTable + " where id = ?"
+
+	err = bmr.mysqlConn.QueryRow(sqlStr, campusID).Scan(&count)
+	return
+}
+
+func (bmr *BuildingManagerRepository) IsBuildingExists(id int) (bool, error) {
+	if err := bmr.Conn(); err != nil {
+		return false, err
+	}
+	sqlStr := "select 1 from " + bmr.buildingTable + " where id = ? limit 1"
+
+	num := 0
+	bmr.mysqlConn.QueryRow(sqlStr, id).Scan(&num)
+	if num == 1 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (bmr *BuildingManagerRepository) SelectAllBuildingsByCampus(campusID int) (buildings []model.Building, err error) {
+	if err = bmr.Conn(); err != nil {
+		return
+	}
+
+	sqlStr := "select id, building_name from " + bmr.buildingTable + " where campus_id = ?"
+	err = bmr.mysqlConn.Select(&buildings, sqlStr, campusID)
 	return
 }

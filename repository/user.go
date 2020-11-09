@@ -25,7 +25,7 @@ type UserManagerRepository struct {
 }
 
 func (umr *UserManagerRepository) Conn() error {
-	if umr == nil {
+	if umr.mysqlConn == nil {
 		if err := database.InitMysql(); err != nil {
 			return err
 		}

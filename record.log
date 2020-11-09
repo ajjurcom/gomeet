@@ -30,3 +30,19 @@ err: [campus is not exists]
 err: [campus is not exists]
 2020-11-08T10:53:34.484+0800	ERROR	logger/init.go:31	添加建筑出错
 err: [Error 1062: Duplicate entry '阿斯蒂芬楼' for key 'building.uidx_name']
+2020-11-09T15:30:22.316+0800	ERROR	logger/init.go:31	添加会议室错误
+err: [Error 1265: Data truncated for column 'meeting_type' at row 1]
+2020-11-09T15:49:20.253+0800	ERROR	logger/init.go:31	添加会议室时，查询建筑是否存在错误
+err: [sql: no rows in result set]
+2020-11-09T15:54:13.751+0800	ERROR	logger/init.go:31	添加会议室时，查询建筑是否存在错误
+err: [Error 1054: Unknown column 'building_id' in 'where clause']
+2020-11-09T15:57:07.715+0800	ERROR	logger/init.go:31	修改会议室错误
+err: [sql: expected 6 arguments, got 5]
+2020-11-09T16:06:30.447+0800	ERROR	logger/init.go:31	修改会议室错误
+err: [sql: expected 6 arguments, got 5]
+2020-11-10T00:27:16.777+0800	ERROR	logger/init.go:31	添加会议室错误
+err: [Error 1364: Field 'room_number' doesn't have a default value]
+2020-11-10T00:27:23.529+0800	ERROR	logger/init.go:31	添加会议室错误
+err: [Error 1364: Field 'room_number' doesn't have a default value]
+2020-11-10T00:28:37.468+0800	ERROR	logger/init.go:31	添加会议室错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'room_number) values(?, ?, ?, ?, ?, ?)' at line 1]

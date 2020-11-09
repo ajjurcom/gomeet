@@ -16,7 +16,7 @@ type ICampusRepository interface {
 	SelectCount() (int, error)
 	SelectAllCampus() ([]model.Campus, error)
 	SelectCampusByPage(page, onePageCount int) ([]model.Campus, error)
-	IsExists(id int) (bool, error)
+	IsCampusExists(id int) (bool, error)
 }
 
 func NewCampusRepository(table string) ICampusRepository {
@@ -29,7 +29,7 @@ type CampusManagerRepository struct {
 }
 
 func (cmr *CampusManagerRepository) Conn() error {
-	if cmr == nil {
+	if cmr.mysqlConn == nil {
 		if err := database.InitMysql(); err != nil {
 			return err
 		}
@@ -146,7 +146,7 @@ func (cmr *CampusManagerRepository) SelectAllCampus() (campus []model.Campus, er
 }
 
 // IsExists 查询校区是否存在
-func (cmr *CampusManagerRepository) IsExists(id int) (bool, error) {
+func (cmr *CampusManagerRepository) IsCampusExists(id int) (bool, error) {
 	if err := cmr.Conn(); err != nil {
 		return false, err
 	}
