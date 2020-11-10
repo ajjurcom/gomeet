@@ -2,6 +2,7 @@ import axios from 'axios';
 import {showMessage, getLocalStorage} from '@/Utils';
 import Vue from 'vue';
 import viewDesign from 'view-design';
+import vue from "../main";
 
 Vue.use(viewDesign);
 
@@ -43,7 +44,16 @@ WebHttp.interceptors.response.use(res => {
 }, error => {
     viewDesign.LoadingBar.error();
     let msg = '';
-    if (error.response && error.response.data && error.response.data.msg) {
+    if (error.response.status === 401) {
+        msg = "暂无权限, 即将跳转登录页面!";
+        setTimeout(() => {
+            // 跳转页面
+            vue.$router.push({
+                name: "Login"
+            });
+        }, 2000)
+    }
+    else if (error.response && error.response.data && error.response.data.msg) {
         msg = error.response.data.msg;
     }
     showMessage('error', msg);

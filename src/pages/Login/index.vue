@@ -192,14 +192,18 @@ export default {
                     setLocalStorage('loginToken', res.loginToken);
                     // 登录成功跳转
                     showMessage('info', '登录成功');
-                    this.$router.push({
-                        name: "CampusManager",   // todo 修改跳转
-                    });
+                    window.location.href = "http://localhost:8080/back/campus/manager"
+                    // this.$router.push({
+                    //     name: "CampusManager",
+                    // });
                 }
             }).finally(() => {
                 this.loading = false;
             });
         }
     },
+    created() {
+        console.log()
+    }
 };
 </script>

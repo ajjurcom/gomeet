@@ -4,11 +4,12 @@ import router from './router';
 import store from './store/index';
 
 import global from './Globals';
+
 Vue.use(global);
 
 Vue.config.productionTip = false;
 
-new Vue({
+export default new Vue({
   router,
   store,
   render: function (h) { return h(App) },
