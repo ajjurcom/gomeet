@@ -1,7 +1,7 @@
 <template>
     <div class="custom-menu">
         <div class="main">
-            <Menu class="main-menu" mode="horizontal" theme="light" :active-name="activeItem">
+            <Menu class="main-menu" mode="horizontal" theme="light" :active-name="activeItem" @on-select="selectMenu">
                 <div class="menu-items">
                     <div class="menu-left">
                         <div class="menu-logo">GOMEET</div>
@@ -64,13 +64,13 @@
                         </Submenu>
                     </div>
                     <div class="menu-right">
-                        <Submenu name="5">
+                        <Submenu name="personal">
                             <template slot="title">
                                 <Icon type="ios-contact" />
                                 陈铭涛
                             </template>
-                            <MenuItem name="5-1">修改信息</MenuItem>
-                            <MenuItem name="6-2">退出</MenuItem>
+                            <MenuItem name="personal-edit">修改信息</MenuItem>
+                            <MenuItem name="personal-signOut">退出</MenuItem>
                         </Submenu>
                     </div>
                 </div>
@@ -117,6 +117,7 @@
 </style>
 
 <script>
+import {removeLocalStorage} from '@/Utils';
 export default {
     name: 'CustomMenu',
     props: {
@@ -125,9 +126,24 @@ export default {
             default: "user-normal"
         }
     },
-    data() {
-        return {
-            
+    methods: {
+        selectMenu(name) {
+            if (name === "personal-signOut") {
+                this.$Modal.confirm({
+                    title: '退出',
+                    content: '<p>是否确认退出</p>',
+                    onOk: () => {
+                        this.$Message.info('退出成功');
+                        removeLocalStorage('loginToken');
+                        this.$router.push({
+                            name: 'Login'
+                        });
+                    },
+                    onCancel: () => {
+                        this.$Message.info('取消退出');
+                    }
+                });
+            }
         }
     }
 }

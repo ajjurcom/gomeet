@@ -192,10 +192,9 @@ export default {
                     setLocalStorage('loginToken', res.loginToken);
                     // 登录成功跳转
                     showMessage('info', '登录成功');
-                    window.location.href = "http://localhost:8080/back/campus/manager"
-                    // this.$router.push({
-                    //     name: "CampusManager",
-                    // });
+                    this.$router.push({
+                        name: "CampusManager",
+                    });
                 }
             }).finally(() => {
                 this.loading = false;

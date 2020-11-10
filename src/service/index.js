@@ -14,7 +14,6 @@ export const variables = {
 
 export const WebHttp = axios.create({
     baseURL: variables.getApiUrl(),
-    headers: { 'loginToken': getLocalStorage('loginToken') === null ? '' : getLocalStorage('loginToken')},
     withCredentials: false
 });
 
@@ -22,16 +21,17 @@ WebHttp.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 
 
 // 请求前
-WebHttp.interceptors.response.use(config => {
+WebHttp.interceptors.request.use(config => {
     viewDesign.LoadingBar.start();
+    config.headers['loginToken'] = getLocalStorage('loginToken') || '';
     return config;
 }, error => {
     viewDesign.LoadingBar.error();
-    return Promise.reject(error)
-})
+    return Promise.reject(error);
+});
 
 
-// 相应处理
+// 响应处理
 WebHttp.interceptors.response.use(res => {
     const {success, data, msg} = res.data;
     if (!success) {
@@ -44,7 +44,7 @@ WebHttp.interceptors.response.use(res => {
 }, error => {
     viewDesign.LoadingBar.error();
     let msg = '';
-    if (error.response.status === 401) {
+    if (error.response.status === 401 && error.response.data.msg === "跳转登录页面") {
         msg = "暂无权限, 即将跳转登录页面!";
         setTimeout(() => {
             // 跳转页面

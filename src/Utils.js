@@ -20,7 +20,6 @@ export const showMessage = (type, content) => {
  */
 export const setLocalStorage = (name, value) => {
     window.localStorage.setItem(name, value);
-    console.log('设置成功');
 }
 
 /**
@@ -28,7 +27,6 @@ export const setLocalStorage = (name, value) => {
  * @params {*} name
  */
 export const getLocalStorage = (name) => {
-    console.log('获取localStroge');
     return window.localStorage.getItem(name);
 }
 
