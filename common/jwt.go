@@ -8,7 +8,7 @@ import (
 )
 
 // GenerateToken 生成token函数
-func GenerateToken(user *model.Session) (string, error) {
+func GenerateToken(session *model.Session) (string, error) {
 	// 获取参数
 	now := time.Now()
 	num, err := config.Cfg.Section("jwt").Key("expire").Int()
@@ -21,10 +21,10 @@ func GenerateToken(user *model.Session) (string, error) {
 
 	// 创建Token
 	claims := model.Session {
-		Sno: user.Sno,
-		Phone: user.Phone,
-		IsAdmin: user.IsAdmin,
-		IsRoot: user.IsRoot,
+		Sno: session.Sno,
+		Phone: session.Phone,
+		IsAdmin: session.IsAdmin,
+		IsRoot: session.IsRoot,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
 			Issuer:    name,
@@ -33,10 +33,11 @@ func GenerateToken(user *model.Session) (string, error) {
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	jwtSecret := []byte(config.Cfg.Section("jwt").Key("secret").String())
-	token, err := tokenClaims.SignedString(jwtSecret)
 
-	return token, err
+	return tokenClaims.SignedString(jwtSecret)
 }
+
+// DeleteToken 删除token
 
 // ParseToken 解析token返回保存信息
 func ParseToken(token string) (*model.Session, error) {

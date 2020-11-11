@@ -7,18 +7,18 @@ type User struct {
 	Sno string	`json:"sno" db:"sno" binding:"required"`
 	Phone string `json:"phone" db:"phone" binding:"required"`
 	Password string `json:"password" db:"password" binding:"required"`
-	IsAdmin int `json:"is_admin" db:"is_admin"`
 	State string `json:"state" db:"state"`
 	Ban timestamp.Timestamp `json:"ban" db:"ban"`
-	CampusID int `json:"campus_id" db:"campus_id" binding:"required"`
 	Username string `json:"username" db:"username" binding:"required"`
 	Email string `json:"email" db:"email" binding:"required,email"`
 }
 
 const (
-	StateVerifyUser = "verify_user"
-	StateVerifyAdmin = "verify_admin"
-	StateRefuse = "refuse"
-	StateNormal = "normal"
-	StateBlacklist = "blacklist"
+	VerifyUser = "verify_user"
+	NormalUser = "normal_user"
+	RefuseUser = "refuse_user"
+	BlackList = "blacklist"
+	VerifyAdmin = "verify_admin"
+	NormalAdmin = "normal_admin"
+	Root = "root"
 )

@@ -12,7 +12,7 @@ type IUserRepository interface {
 	SelectPasswordByAttr(attrName, attrVal string) (string, error)
 	IsExistsByAttr(attrName, attrVal string) (bool, error)
 	SelectStateByAttr(attrName, attrVal string) (string, error)
-	SelectIsAdminByAttr(attrName, attrVal string) (bool, error)
+	//SelectIsAdminByAttr(attrName, attrVal string) (bool, error)
 }
 
 func NewUserRepository(table string) IUserRepository {
@@ -42,14 +42,14 @@ func (umr *UserManagerRepository) Add(user *model.User) error {
 		return err
 	}
 
-	sqlStr := "insert into " + umr.table + "(sno, phone, password, campus_id, username, email) values (?, ?, ?, ?, ?, ?)"
+	sqlStr := "insert into " + umr.table + "(sno, phone, password, username, email) values (?, ?, ?, ?, ?)"
 	stmt, err := umr.mysqlConn.Prepare(sqlStr)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Sno, user.Phone, user.Password, user.CampusID, user.Username, user.Email)
+	_, err = stmt.Exec(user.Sno, user.Phone, user.Password, user.Username, user.Email)
 	return err
 }
 
@@ -90,17 +90,17 @@ func (umr *UserManagerRepository) SelectStateByAttr(attrName, attrVal string) (s
 	return
 }
 
-func (umr *UserManagerRepository) SelectIsAdminByAttr(attrName, attrVal string) (bool, error) {
-	if err := umr.Conn(); err != nil {
-		return false, err
-	}
-
-	sqlStr := "select is_admin from " + umr.table + " where " + attrName + " = ? limit 1"
-
-	var isAdmin int
-	err := umr.mysqlConn.QueryRow(sqlStr, attrVal).Scan(&isAdmin)
-	if isAdmin == 0 {
-		return false, err
-	}
-	return true, err
-}
+//func (umr *UserManagerRepository) SelectIsAdminByAttr(attrName, attrVal string) (bool, error) {
+//	if err := umr.Conn(); err != nil {
+//		return false, err
+//	}
+//
+//	sqlStr := "select is_admin from " + umr.table + " where " + attrName + " = ? limit 1"
+//
+//	var isAdmin int
+//	err := umr.mysqlConn.QueryRow(sqlStr, attrVal).Scan(&isAdmin)
+//	if isAdmin == 0 {
+//		return false, err
+//	}
+//	return true, err
+//}

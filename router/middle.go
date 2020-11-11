@@ -52,11 +52,11 @@ func VerifyPower(role string) gin.HandlerFunc {
 			} else {
 				switch role {
 				case "admin":
-					if session.IsAdmin == 0 {
+					if !session.IsAdmin {
 						code = e.NOT_POWER
 					}
 				case "root":
-					if session.IsAdmin == 0 || session.IsRoot == 0 {
+					if !session.IsRoot {
 						code = e.NOT_POWER
 					}
 				}
