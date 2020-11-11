@@ -8,8 +8,8 @@
             </div>
             <div class="login-container">
                 <div class="login-role">
-                    <div class="login-user" :class="{'active-role': currentRole === 'user'}" @click="changeRole('user')">用户</div>
-                    <div class="login-admin" :class="{'active-role': currentRole === 'admin'}" @click="changeRole('admin')">管理员</div>
+                    <div class="login-user" :class="{'active-role': currentRole === 'user'}" @click="changeRole('user')">会议预定</div>
+                    <div class="login-admin" :class="{'active-role': currentRole === 'admin'}" @click="changeRole('admin')">后台管理</div>
                 </div>
                 <div class="login-form">
                     <input class="form-input" v-model="value" :placeholder="loginWay" style="width: 100%" />
@@ -169,11 +169,11 @@ export default {
                 sno: '',
                 phone: '',
                 password: this.password,
-                is_admin: 0
+                is_admin: false
             };
             // 2. 判断角色
             if (this.currentRole === 'admin') {
-                postUser.is_admin = 1;
+                postUser.is_admin = true;
             }
             // 3. 判断登录方式: 学号/手机号
             if (this.loginWay === '学号') {
@@ -192,9 +192,16 @@ export default {
                     setLocalStorage('loginToken', res.loginToken);
                     // 登录成功跳转
                     showMessage('info', '登录成功');
-                    this.$router.push({
-                        name: "CampusManager",
-                    });
+                    if (this.currentRole === 'admin') {
+                        this.$router.push({
+                            name: "CampusManager",
+                        });
+                    } else {
+                        // todo 跳转到会议室预定界面
+                        // this.$router.push({
+                        //     name: "CampusManager",
+                        // });
+                    }
                 }
             }).finally(() => {
                 this.loading = false;

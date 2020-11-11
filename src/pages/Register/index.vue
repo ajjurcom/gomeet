@@ -23,17 +23,6 @@
                     <FormItem label="邮箱" prop="email">
                         <Input v-model="formValidate.email" placeholder="Enter your e-mail"></Input>
                     </FormItem>
-                    <FormItem label="校区" prop="campus_id">
-                        <Select v-model="formValidate.campus_id" placeholder="Select your campus">
-                            <Option 
-                                v-for="(item, index) in campusList"
-                                :value="item.id+''"
-                                :key="index"
-                                >
-                                {{item.campus_name}}
-                            </Option>
-                        </Select>
-                    </FormItem>
                     <FormItem label="密码" prop="password">
                         <Input type="password" v-model="formValidate.password" placeholder="Enter your password"></Input>
                     </FormItem>
@@ -138,7 +127,6 @@ export default {
                 phone: '',
                 username: '',
                 email: '',
-                campus_id: 0,
                 password: '',
                 passwdCheck: '',
             },
@@ -159,9 +147,6 @@ export default {
                     { required: true, message: 'Mailbox cannot be empty', trigger: 'blur' },
                     { type: 'email', message: 'Incorrect email format', trigger: 'blur' }
                 ],
-                campus_id: [
-                    { required: true, message: 'Please select the campus', trigger: 'blur' },
-                ],
                 password: [
                     { required: true, message: 'The password cannot be empty', trigger: 'blur' },
                     { type: 'string', min: 6, message: 'length must longger than 6' },
@@ -181,11 +166,10 @@ export default {
             this.$refs[name].validate((valid) => {
                 if (valid && this.formValidate.password === this.formValidate.passwdCheck) {
                     this.loading = false;
-                    this.formValidate.campus_id = Number(this.formValidate.campus_id);
                     this.$service.MainAPI.addUser(this.formValidate).then((res) => {
-                        showMessage('success', '注册成功');
+                        showMessage('success', '注册成功, 跳转登录页面');
                         this.$router.push({
-                            name: "Login",   // todo 修改跳转
+                            name: "Login",
                         });
                     }).finally(() => {
                         this.loading = false;
@@ -200,11 +184,6 @@ export default {
         handleReset (name) {
             this.$refs[name].resetFields();
         }
-    },
-    created() {
-        this.$service.MainAPI.getAllCampus().then((res) => {
-            this.campusList = res.campusList;
-        });
     }
 };
 </script>
