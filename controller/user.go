@@ -27,7 +27,7 @@ type IUserController interface {
 	Login(c *gin.Context)
 	GetUsersByPage(c *gin.Context)
 	GetUserByID(c *gin.Context)
-	SelectAllUserState(c *gin.Context)
+	GetAllUserState(c *gin.Context)
 }
 
 func NewUserController() IUserController {
@@ -82,7 +82,6 @@ func (uc *UserController) Login(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
 		return
 	}
-	fmt.Println(session)
 
 	var (
 		loginWay string	// 登录方式：手机/学号
@@ -171,6 +170,7 @@ func (uc *UserController) Login(c *gin.Context) {
 	result[name] = token
 	result["id"] = id
 	result["username"] = username
+	result["isRoot"] = session.IsRoot
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
 
@@ -302,10 +302,6 @@ func (uc *UserController) GetUsersByPage(c *gin.Context) {
 		return
 	}
 	state := c.Query("state")
-	if !(state == model.NormalUser || state == model.VerifyUser || state == model.BlackList || state == model.VerifyAdmin) {
-		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "状态参数错误")
-		return
-	}
 	/* 数据操作
 	 * 1. 获取state状态的用户总数量
 	 * 2. 获取state用户列表
@@ -356,7 +352,10 @@ func (uc *UserController) GetUserByID(c *gin.Context) {
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
 
-// SelectAllUserState 获取所有用户状态
-func (uc *UserController) SelectAllUserState(c *gin.Context) {
-
+// GetAllUserState 获取所有用户状态
+func (uc *UserController) GetAllUserState(c *gin.Context) {
+	result := map[string]interface{}{
+		"stateList": model.AllState(),
+	}
+	common.ResolveResult(c, true, e.SUCCESS, result)
 }

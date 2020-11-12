@@ -39,6 +39,7 @@ func InitRouter() *gin.Engine {
 		apiUser.PUT("/user_password", userController.PutPassword)
 		apiUser.GET("/user/:id", userController.GetUserByID)
 		apiUser.GET("/users/:onePageCount/:page", userController.GetUsersByPage)
+		apiUser.GET("/user_states", userController.GetAllUserState)
 		/*
 		 * 校区所需API
 		 */
@@ -66,7 +67,7 @@ func InitRouter() *gin.Engine {
 		/*
 		 * 管理用户API
 		 */
-		apiAdmin.DELETE("/user", userController.Delete)
+		apiAdmin.DELETE("/user/:id", userController.Delete)
 		/*
 		 * 校区所需API
 		 */
