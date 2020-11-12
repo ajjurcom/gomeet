@@ -191,15 +191,18 @@ export default {
                 else {
                     // 保存token
                     setLocalStorage('loginToken', res.loginToken);
-                    // 保存用户ID、Name到store
+                    // 保存用户ID、Name、isRoot到store
                     this.$store.commit('App/setUserID', res.id || -1);
                     this.$store.commit('App/setUserName', res.username || 'Guest');
-                    // this.$store.dispatch('changeUserID', 24);
+                    this.$store.commit('App/setUserIsRoot', res.isRoot);
                     // 登录成功跳转
                     showMessage('info', '登录成功');
                     if (this.currentRole === 'admin') {
                         this.$router.push({
-                            name: "CampusManager",
+                            name: "UserManager",
+                            query: {
+                                state: 'verify_user'
+                            }
                         });
                     } else {
                         // todo 跳转到会议室预定界面

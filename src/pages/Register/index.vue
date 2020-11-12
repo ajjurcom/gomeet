@@ -167,7 +167,7 @@ export default {
                 if (valid && this.formValidate.password === this.formValidate.passwdCheck) {
                     this.loading = false;
                     this.$service.MainAPI.addUser(this.formValidate).then((res) => {
-                        showMessage('success', '注册成功, 跳转登录页面');
+                        showMessage('success', '注册成功, 请等待邮件通知');
                         this.$router.push({
                             name: "Login",
                         });

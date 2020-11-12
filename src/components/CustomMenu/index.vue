@@ -5,15 +5,17 @@
                 <div class="menu-items">
                     <div class="menu-left">
                         <div class="menu-logo">GOMEET</div>
-                        <Submenu name="user">
-                            <template slot="title">
-                                <Icon type="logo-octocat" />
-                                用户
-                            </template>
-                            <MenuItem name="user-verify">待审核</MenuItem>
-                            <MenuItem name="user-blacklist">黑名单</MenuItem>
-                            <MenuItem name="user-normal">正常状态</MenuItem>
-                        </Submenu>
+                        <MenuItem
+                            name="user"
+                            :to="{
+                                name: 'UserManager',
+                                query: {
+                                    state: 'verify_user'
+                                }
+                            }">
+                            <Icon type="logo-octocat" />
+                            用户管理
+                        </MenuItem>
                         <Submenu name="campus">
                             <template slot="title">
                                 <Icon type="ios-school" />
@@ -144,7 +146,7 @@ export default {
     props: {
         activeItem: {
             type: String,
-            default: "user-normal"
+            default: "user"
         }
     },
     methods: {

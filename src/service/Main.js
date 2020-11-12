@@ -19,6 +19,18 @@ export default class Main {
     static getUser(id) {
         return http.get(`/user/${id}`);
     }
+    static getAllStateList() {
+        return http.get('/user_states');
+    }
+    static getUserInfo(id) {
+        return http.get(`/user/${id}`);
+    }
+    static getUsersByPage(obj) {
+        return http.get(`/users/${obj.onePageNum}/${obj.page}?state=${obj.state}`);
+    }
+    static deleteUser(id) {
+        return http.delete(`/user/${id}`);
+    }
     /*
      * 校区API
      */
