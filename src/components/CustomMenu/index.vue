@@ -67,9 +67,24 @@
                         <Submenu name="personal">
                             <template slot="title">
                                 <Icon type="ios-contact" />
-                                陈铭涛
+                                {{userName}}
                             </template>
-                            <MenuItem name="personal-edit">修改信息</MenuItem>
+                            <MenuItem
+                                name="personal-edit"
+                                :to="{
+                                    name: 'UserEdit',
+                                    params: {
+                                        id: userID
+                                    }
+                                }">修改信息</MenuItem>
+                                <MenuItem
+                                name="personal-password"
+                                :to="{
+                                    name: 'UserEditPwd',
+                                    params: {
+                                        id: userID
+                                    }
+                                }">修改密码</MenuItem>
                             <MenuItem name="personal-signOut">退出</MenuItem>
                         </Submenu>
                     </div>
@@ -120,6 +135,12 @@
 import {removeLocalStorage} from '@/Utils';
 export default {
     name: 'CustomMenu',
+    data() {
+        return {
+            userID: this.$store.getters['App/getUserID'],
+            userName: this.$store.getters['App/getUserName']
+        }
+    },
     props: {
         activeItem: {
             type: String,
@@ -145,6 +166,6 @@ export default {
                 });
             }
         }
-    }
+    },
 }
 </script>

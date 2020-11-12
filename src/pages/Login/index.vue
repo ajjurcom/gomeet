@@ -189,7 +189,12 @@ export default {
                     showMessage('error', '获取token失败');
                 }
                 else {
+                    // 保存token
                     setLocalStorage('loginToken', res.loginToken);
+                    // 保存用户ID、Name到store
+                    this.$store.commit('App/setUserID', res.id || -1);
+                    this.$store.commit('App/setUserName', res.username || 'Guest');
+                    // this.$store.dispatch('changeUserID', 24);
                     // 登录成功跳转
                     showMessage('info', '登录成功');
                     if (this.currentRole === 'admin') {
@@ -207,9 +212,6 @@ export default {
                 this.loading = false;
             });
         }
-    },
-    created() {
-        console.log()
     }
 };
 </script>

@@ -1,11 +1,23 @@
 import {WebHttp as http} from './index.js';
 
 export default class Main {
+    /*
+     * 用户API
+     */
     static login(data) {
         return http.post('/session', data);
     }
     static addUser(data) {
         return http.post('/user', data);
+    }
+    static putUser(data) {
+        return http.put('/user', data);
+    }
+    static putUserPwd(data) {
+        return http.put('/user_password', data);
+    }
+    static getUser(id) {
+        return http.get(`/user/${id}`);
     }
     /*
      * 校区API

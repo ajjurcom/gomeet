@@ -138,7 +138,6 @@ export default {
             this.$service.MainAPI.getMeetingsByPage(this.getMeetingsParams.onePageNum, this.getMeetingsParams.page, this.getMeetingsParams.buildingID).then(res => {
                 this.totalCount = res.count;
                 this.itemList = res.meetingList;
-                console.log(this.itemList);
             })
         },
         changeCampus(value) {

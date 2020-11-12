@@ -17,6 +17,8 @@ import BuildingAdd from 'pages/Manager/Building/Add';
 import MeetingAdd from 'pages/Manager/Meeting/Add';
 import MeetingManager from 'pages/Manager/Meeting/List';
 import MeetingEdit from 'pages/Manager/Meeting/Edit';
+import UserEdit from 'pages/User/Edit';
+import UserEditPwd from 'pages/User/EditPwd';
 
 Vue.use(Router);
 Vue.use(viewDesign);
@@ -76,6 +78,16 @@ const routes = [
         name: 'MeetingEdit',
         path: '/back/meeting/edit/:id',
         component: MeetingEdit
+    },
+    {
+        name: 'UserEdit',
+        path: '/user/edit/:id',
+        component: UserEdit
+    },
+    {
+        name: 'UserEditPwd',
+        path: '/user/editpwd/:id',
+        component: UserEditPwd
     }
 ];
 

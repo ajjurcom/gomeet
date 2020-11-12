@@ -1,23 +1,16 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+/**
+ * @file Vuex配置文件
+ * @author chenmingtao
+ */
 
-Vue.use(Vuex)
+import Vue from 'vue';
+import Vuex from 'vuex';
+import App from './modules/App';
 
-// 创建Vuex实例
-const store = new Vuex.Store({
-    state: {
-        demoName: ''
-    },
-    mutations: {
-        changeDemoNameFunc(state, str) {
-            state.demoName = str
-        }
-    },
-    actions: {
-        changeDemoName(context, str) {
-            context.commit('changeDemoNameFunc', str)
-        }
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+    modules: {
+        App
     }
 });
-
-export default store;
