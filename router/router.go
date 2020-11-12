@@ -27,15 +27,22 @@ func InitRouter() *gin.Engine {
 	{
 		api.POST("/user", userController.Post)
 		api.POST("/session", userController.Login)
-		api.GET("/campus", campusController.GetAllCampus)
 	}
 
 	apiUser := r.Group(relativePath)
 	apiUser.Use(VerifyPower("user"))
 	{
 		/*
+		 * 用户
+		 */
+		apiUser.PUT("/user", userController.Put)
+		apiUser.PUT("/user_password", userController.PutPassword)
+		apiUser.GET("/user/:id", userController.GetUserByID)
+		apiUser.GET("/users/:onePageCount/:page", userController.GetUsersByPage)
+		/*
 		 * 校区所需API
 		 */
+		apiUser.GET("/campus", campusController.GetAllCampus)
 		apiUser.GET("/campus/:onePageCount/:page", campusController.GetCampusByPage)
 		/*
 		 * 建筑所需API
@@ -56,6 +63,10 @@ func InitRouter() *gin.Engine {
 	apiAdmin := r.Group(relativePath)
 	apiAdmin.Use(VerifyPower("admin"))
 	{
+		/*
+		 * 管理用户API
+		 */
+		apiAdmin.DELETE("/user", userController.Delete)
 		/*
 		 * 校区所需API
 		 */

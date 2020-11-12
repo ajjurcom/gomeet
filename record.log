@@ -46,3 +46,9 @@ err: [Error 1364: Field 'room_number' doesn't have a default value]
 err: [Error 1364: Field 'room_number' doesn't have a default value]
 2020-11-10T00:28:37.468+0800	ERROR	logger/init.go:31	添加会议室错误
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'room_number) values(?, ?, ?, ?, ?, ?)' at line 1]
+2020-11-12T10:47:56.363+0800	ERROR	logger/init.go:31	获取用户详细信息出错
+err: [sql: Scan error on column index 5, name "ban": unsupported Scan, storing driver.Value type <nil> into type *timestamp.Timestamp]
+2020-11-12T10:57:12.667+0800	ERROR	logger/init.go:31	获取用户详细信息出错
+err: [sql: Scan error on column index 5, name "ban": unsupported Scan, storing driver.Value type []uint8 into type *time.Time]
+2020-11-12T15:19:09.450+0800	ERROR	logger/init.go:31	新建用户错误
+err: [Error 1062: Duplicate entry '15217899926' for key 'user.uidx_phone']

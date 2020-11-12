@@ -7,6 +7,7 @@ import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
@@ -230,7 +231,7 @@ func (mc *MeetingController) GetMeetingsByPage(c *gin.Context) {
 	}
 	// 获取会议室
 	meetingList, err := mc.MeetingService.GetMeetingsByPage(page, onePageCount, buildingID)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		logger.Record("获取建筑的会议室错误", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, result)
 		return
