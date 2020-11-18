@@ -27,7 +27,7 @@ type IUserController interface {
 	Login(c *gin.Context)
 	GetUsersByPage(c *gin.Context)
 	GetUserByID(c *gin.Context)
-	GetAllUserState(c *gin.Context)
+	GetUserStateOptions(c *gin.Context)
 }
 
 func NewUserController() IUserController {
@@ -274,14 +274,36 @@ func (uc *UserController) PutPassword(c *gin.Context) {
 
 // PutState 修改状态
 func (uc *UserController) PutState(c *gin.Context) {
-	// 1. 获取新状态
-	state := ""
-	if !(state == model.NormalUser || state == model.VerifyUser || state == model.RefuseUser || state == model.BlackList || state == model.VerifyAdmin) {
-		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "状态参数错误")
+	// 1. 解析请求
+	newState := c.Query("state")
+	if newState == "" {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "缺少新状态参数")
 		return
 	}
-	// 2. 修改到数据库
-	// 3. 返回结果
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "用户ID必须为数字")
+		return
+	}
+	// 2. 验证权限
+	token := c.Request.Header.Get(config.Cfg.Section("jwt").Key("tokenName").String())
+	session, _ := common.ParseToken(token)
+	if !session.IsRoot && (newState == "verify_admin" || newState == "normal_admin" || newState == "root") {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "该操作只能由Root发起")
+		return
+	}
+	// 3. 修改到数据库
+	if err := uc.UserService.PutUserState(id, newState); err != nil {
+		if strings.Contains(err.Error(), "Data truncated for column 'state'") {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "状态参数错误")
+			return
+		}
+		logger.Record("更新用户状态出错", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, nil, "更新用户状态失败")
+		return
+	}
+	// 4. 返回结果
+	common.ResolveResult(c, true, e.SUCCESS, nil)
 }
 
 // GetUsersByPage 获取用户
@@ -352,10 +374,22 @@ func (uc *UserController) GetUserByID(c *gin.Context) {
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
 
-// GetAllUserState 获取所有用户状态
-func (uc *UserController) GetAllUserState(c *gin.Context) {
+/* GetUserStateOptionsByAdmin 用户管理初始化数据
+ * 1. 参数 ?role=root  root
+ * 2. 参数 ?role=admin 管理者
+ */
+func (uc *UserController) GetUserStateOptions(c *gin.Context) {
+	role := c.Query("role")
+	if role == "" || (role != "admin" && role != "root") {
+		msg := "role值错误"
+		if role == "" {
+			msg = "缺少role参数"
+		}
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, msg)
+		return
+	}
 	result := map[string]interface{}{
-		"stateList": model.AllState(),
+		"stateList": model.StateOptions(role),
 	}
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }

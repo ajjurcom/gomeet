@@ -9,6 +9,7 @@ type IUserService interface {
 	CreateUser(user *model.User) error
 	DeleteUser(id int) error
 	PutUser(user *model.User) error
+	PutUserState(id int, state string) error
 	PutPassword(id int, password string) error
 	IsExistsByAttr(attrName, attrVal string) (bool, error)
 	GetPasswordByAttr(attrName, attrVal string) (string, error)
@@ -37,6 +38,10 @@ func (us *UserService) DeleteUser(id int) error {
 
 func (us *UserService) PutUser(user *model.User) error {
 	return us.UserRepository.Put(user)
+}
+
+func (us *UserService) PutUserState(id int, state string) error {
+	return us.UserRepository.UpdateAttr(id, "state", state)
 }
 
 func (us *UserService) PutPassword(id int, password string) error {

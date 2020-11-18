@@ -21,7 +21,14 @@ const (
 	Root = "root"
 )
 
-func AllState() []string {
-	return []string{"verify_user", "normal_user", "refuse_user", "blacklist", "verify_admin", "normal_admin"}
+// StateOptions 不同角色可以管理的状态用户
+// 1. 管理员可以管理普通用户
+// 2. 只有root才可以管理管理员
+func StateOptions(role string) []string {
+	state := []string{"verify_user", "normal_user", "refuse_user", "blacklist"}
+	if role == "root" {
+		state = append(state, "verify_admin", "normal_admin")
+	}
+	return state
 }
 

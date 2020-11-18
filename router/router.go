@@ -25,8 +25,31 @@ func InitRouter() *gin.Engine {
 
 	api := r.Group(relativePath)
 	{
+		/*
+		 * 用户
+		 */
 		api.POST("/user", userController.Post)
 		api.POST("/session", userController.Login)
+		api.GET("/user/:id", userController.GetUserByID)
+		api.GET("/users/:onePageCount/:page", userController.GetUsersByPage)
+		/*
+		 * 校区所需API
+		 */
+		api.GET("/campus", campusController.GetAllCampus)
+		api.GET("/campus/:onePageCount/:page", campusController.GetCampusByPage)
+		/*
+		 * 建筑所需API
+		 */
+		api.GET("/buildings/:onePageCount/:page", buildingController.GetBuildingsByPage)
+		api.GET("/building/:id", buildingController.GetBuildingByID)
+		/*
+		 * 会议室所需API
+		 */
+		api.GET("/campus_layer/:campus_id", buildingController.GetBuildingLayer)
+		api.GET("/campus_buildings/:campus_id", buildingController.GetAllBuildingsByCampus)
+		api.GET("/meeting/:id", meetingController.GetMeetingByID)
+		api.GET("/meetings/:onePageCount/:page", meetingController.GetMeetingsByPage)
+		api.GET("/meeting_options", meetingController.GetMeetingOptions)
 	}
 
 	apiUser := r.Group(relativePath)
@@ -37,28 +60,7 @@ func InitRouter() *gin.Engine {
 		 */
 		apiUser.PUT("/user", userController.Put)
 		apiUser.PUT("/user_password", userController.PutPassword)
-		apiUser.GET("/user/:id", userController.GetUserByID)
-		apiUser.GET("/users/:onePageCount/:page", userController.GetUsersByPage)
-		apiUser.GET("/user_states", userController.GetAllUserState)
-		/*
-		 * 校区所需API
-		 */
-		apiUser.GET("/campus", campusController.GetAllCampus)
-		apiUser.GET("/campus/:onePageCount/:page", campusController.GetCampusByPage)
-		/*
-		 * 建筑所需API
-		 */
-
-		apiUser.GET("/buildings/:onePageCount/:page", buildingController.GetBuildingsByPage)
-		apiUser.GET("/building/:id", buildingController.GetBuildingByID)
-		/*
-		 * 会议室所需API
-		 */
-		apiUser.GET("/campus_layer/:campus_id", buildingController.GetBuildingLayer)
-		apiUser.GET("/campus_buildings/:campus_id", buildingController.GetAllBuildingsByCampus)
-		apiUser.GET("/meeting/:id", meetingController.GetMeetingByID)
-		apiUser.GET("/meetings/:onePageCount/:page", meetingController.GetMeetingsByPage)
-		apiUser.GET("/meeting_options", meetingController.GetMeetingOptions)
+		apiUser.GET("/user_options", userController.GetUserStateOptions)
 	}
 
 	apiAdmin := r.Group(relativePath)
@@ -68,6 +70,7 @@ func InitRouter() *gin.Engine {
 		 * 管理用户API
 		 */
 		apiAdmin.DELETE("/user/:id", userController.Delete)
+		apiAdmin.PUT("/user_state/:id", userController.PutState)
 		/*
 		 * 校区所需API
 		 */
