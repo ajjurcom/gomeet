@@ -27,7 +27,7 @@
                     class="list-item"
                     v-for="item in itemList"
                     :key="item.id">
-                    <div class="list-item-content">{{item.meeting_name}} - 类型: {{item.meeting_type}} - 容量: {{item.scale}} - 位于{{item.layer}}楼 - 门牌号: {{item.room_number}} </div>
+                    <div class="list-item-content">{{item.meeting_type}}会议室 - {{item.meeting_name}} - {{item.scale}} - {{item.layer}}F - {{item.room_number}} </div>
                     <div class="list-item-buttons">
                         <Button class="list-item-button" @click="meetingEdit(item.id, getMeetingsParams.campusID)" type="info">修改</Button>
                         <Poptip

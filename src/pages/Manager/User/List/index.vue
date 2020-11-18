@@ -5,7 +5,7 @@
             <div class="select-items">
                 <Select class="select-item" v-model="getMeetingsParams.state" placeholder="状态" @on-change="changeState">
                     <Option 
-                        v-for="state in selectState"
+                        v-for="state in stateList"
                         :value="state"
                         :key="state"
                         >
@@ -17,19 +17,28 @@
                 <div
                     class="list-item"
                     v-for="item in itemList"
-                    :key="item.id"
-                    @click="showUserInfo(item.id)">
+                    :key="item.id">
                     <div class="list-item-content">
                         <div class="list-item-text">
                             {{item.sno}} - {{item.username}}
                         </div>
                     </div>
                     <div class="list-item-buttons">
+                        <Select class="list-item-buttons-state" v-model="item.state" placeholder="状态" @on-change="putUserState(item.id, item.state)">
+                            <Option 
+                                v-for="state in stateList"
+                                :value="state"
+                                :key="state"
+                                >
+                                {{state}}
+                            </Option>
+                        </Select>
+                        <Button class="list-item-button" type="success" :loading="detailsLoading" @click="showUserInfo(item.id)">详情</Button>
                         <Poptip
                             confirm
                             title="删除将无法恢复"
                             @on-ok="deleteUser(item.id)">
-                            <Button class="list-item-button" :loading="loading" type="error">删除</Button>
+                            <Button class="list-item-button" :loading="deleteLoading" type="error">删除</Button>
                         </Poptip>
                     </div>
                 </div>
@@ -87,6 +96,12 @@
                 color: #17233d;
                 font-weight: 550;
                 .list-item-buttons {
+                    display: flex;
+                    flex-direction: row;
+                    .list-item-buttons-state {
+                        width: 115px;
+                        margin-right: 10px;
+                    }
                     .list-item-button {
                         margin-left: 6px;
                     }
@@ -115,6 +130,7 @@ export default {
     },
     data() {
         return {
+            isRoot: this.$store.getters['App/getUserIsRoot'],
             stateMap: {
                 "verify_user": "待审核用户",
                 "normal_user": "正常用户",
@@ -123,8 +139,7 @@ export default {
                 "verify_admin": "待审核管理员",
                 "normal_admin": "正常管理员"
             },
-            selectState: [],
-            stateAbleList: [],
+            stateList: [],
             totalCount: 0,
             getMeetingsParams: {
                 page: 0,
@@ -133,7 +148,8 @@ export default {
             },
             userInfo: {},
             itemList: [],
-            loading: false
+            deleteLoading: false,
+            detailsLoading: false,
         }
     },
     methods: {
@@ -169,15 +185,21 @@ export default {
             this.getDataList();
         },
         deleteUser(id) {
-            this.loading = true;
+            this.deleteLoading = true;
             this.$service.MainAPI.deleteUser(id).then(res => {
                 this.$Message.info('删除成功');
                 this.getDataList();
             }).finally(() => {
-                this.loading = false;
+                this.deleteLoading = false;
+            });
+        },
+        putUserState(id, state) {
+            this.$service.MainAPI.putUserState(id, state).then(res => {
+                this.$Message.success("修改成功");
             });
         },
         showUserInfo(id) {
+            this.detailsLoading = true;
             this.$service.MainAPI.getUserInfo(id).then(res => {
                 this.userInfo = res.user || {};
                 const title = '用户详情';
@@ -189,23 +211,19 @@ export default {
                 if (this.userInfo.state === 'blacklist') {
                     content += `<p>解封时间: ${this.userInfo.ban}</p>`;
                 }
-                
                 this.$Modal.info({
                     title: title,
                     content: content
                 });
+            }).finally(() => {
+                this.detailsLoading = false;
             });
         },
     },
     created() {
-        if (this.$store.getters['App/getUserIsRoot']) {
-            this.selectState = ["verify_user", "refuse_user", "normal_user", "blacklist", "verify_admin", "normal_admin"];
-        } else {
-            this.selectState = ["verify_user", "refuse_user", "normal_user", "blacklist"];
-        }
         // 获取选项
-        this.$service.MainAPI.getAllStateList().then(res => {
-            this.stateAbleList = res.stateList || [];
+        this.$service.MainAPI.getUserOptions(this.isRoot ? 'root' : 'admin').then(res => {
+            this.stateList = res.stateList || [];
         });
         // 获取用户列表
         if (this.getMeetingsParams.state === "") {

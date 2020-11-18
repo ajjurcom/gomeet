@@ -13,14 +13,17 @@ export default class Main {
     static putUser(data) {
         return http.put('/user', data);
     }
+    static putUserState(id, state) {
+        return http.put(`/user_state/${id}?state=${state}`);
+    }
     static putUserPwd(data) {
         return http.put('/user_password', data);
     }
     static getUser(id) {
         return http.get(`/user/${id}`);
     }
-    static getAllStateList() {
-        return http.get('/user_states');
+    static getUserOptions(role) {
+        return http.get(`/user_options?role=${role}`);
     }
     static getUserInfo(id) {
         return http.get(`/user/${id}`);
