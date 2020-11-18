@@ -16,6 +16,22 @@
                             <Icon type="logo-octocat" />
                             用户管理
                         </MenuItem>
+                        <Submenu name="group">
+                            <template slot="title">
+                                <Icon type="md-text" />
+                                用户组
+                            </template>
+                            <MenuItem
+                                name="group-manager"
+                                :to="{
+                                    name: 'MeetingManager'
+                                }">管理用户组</MenuItem>
+                            <MenuItem
+                                name="group-add"
+                                :to="{
+                                    name: 'MeetingAdd'
+                                }">新增用户组</MenuItem>
+                        </Submenu>
                         <Submenu name="campus">
                             <template slot="title">
                                 <Icon type="ios-school" />

@@ -25,6 +25,7 @@
 <style lang="less" scoped>
 .container-wrap {
     width: 100%;
+    min-width: 1200px;
     .container {
         width: 80%;
         min-width: 1024px;
