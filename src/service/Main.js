@@ -97,4 +97,10 @@ export default class Main {
     static getMeetingsByPage(onePageNum, page, building_id) {
         return http.get(`/meetings/${onePageNum}/${page}?building_id=${building_id}`);
     }
+    /*
+     * 预约API
+     */
+    static getScheduleOptions() {
+        return http.get('/schedule_options');
+    }
 }

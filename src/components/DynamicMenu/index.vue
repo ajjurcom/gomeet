@@ -6,7 +6,7 @@
                 class="main-menu"
                 mode="horizontal"
                 theme="light"
-                :active-name="defaultActiveName"
+                :active-name="currentActiveName"
                 @on-select="selectMenu">
                 <div class="menu-items">
                     <div class="menu-left">
@@ -30,7 +30,7 @@
                                 {{this.$store.getters['App/getUserName']}}
                             </template>
                             <MenuItem
-                                name="personal-edit"
+                                name="useredit"
                                 :to="{
                                     name: 'UserEdit',
                                     params: {
@@ -38,7 +38,7 @@
                                     }
                                 }">修改信息</MenuItem>
                                 <MenuItem
-                                name="personal-password"
+                                name="usereditpwd"
                                 :to="{
                                     name: 'UserEditPwd',
                                     params: {
@@ -126,17 +126,12 @@
              *         to 链接(外链则加上协议头) [String]
              *         icon 图标 [String]
              *         children 子菜单 [Array]
-             *         isRender 渲染条件, 返回结果为true则渲染 [Function]
              */
             menu: {
                 type: Array,
                 default() {
                     return [];
                 }
-            },
-            defaultActiveName: {
-                type: String,
-                required: true
             },
             isAdmin: {
                 type: Boolean,
@@ -148,47 +143,13 @@
         },
         data() {
             return {
-                menuItem: [
-                    {
-                        name: 'user',
-                        to: {
-                            name: 'UserManager',
-                            query: {
-                                state: 'verify_user'
-                            }
-                        },
-                        iconName: 'logo-octocat',
-                        text: '用户管理'
-                    }
-                ],
+                currentActiveName: this.$route.name.toLowerCase()
             };
         },
         watch: {
             $route: 'onRouteChange',
         },
         methods: {
-            getMenuMap(arr) {
-                /**
-                 * 获取menu中to和item的映射
-                */
-                let result = {};
-                arr.forEach(item => {
-                    if (item.children) {
-                        result = {
-                            ...result,
-                            ...this.getMenuMap(item.children)
-                        };
-                    } else {
-                        result[item.to] = item;
-                    }
-                });
-                return result;
-            },
-            onRouteChange(route) {
-                this.$nextTick(() => {
-                    this.$refs.menu.updateOpened();
-                });
-            },
             selectMenu(name) {
                 if (name === "personal-signOut") {
                     this.$Modal.confirm({
@@ -204,7 +165,6 @@
                         },
                         onCancel: () => {
                             this.$Message.info('取消退出');
-                            // this.$refs.menu.currentActiveName = this.menuActiveName;
                         }
                     });
                 }
@@ -217,6 +177,13 @@
                     content: content
                 });
             },
+            onRouteChange(route) {
+                this.$nextTick(() => {
+                    this.currentActiveName = this.$route.name.toLowerCase();
+                    this.$refs.menu.updateOpened();
+                    this.$refs.menu.updateActiveName();
+                });
+            }
         },
     };
 </script>

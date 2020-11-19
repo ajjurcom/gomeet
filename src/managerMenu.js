@@ -7,7 +7,7 @@ const getManagerMenu = context => {
     const menu = [
         {
             title: '用户管理',
-            name: "user",
+            name: "usermanager",
             icon: 'logo-octocat',
             to: {
                 name: 'UserManager',
@@ -38,14 +38,14 @@ const getManagerMenu = context => {
             children: [
                 {
                     title: '管理校区',
-                    name: 'campus-manager',
+                    name: 'campusmanager',
                     to: {
                         name: 'CampusManager'
                     }
                 },
                 {
                     title: '新增校区',
-                    name: 'campus-add',
+                    name: 'campusadd',
                     to: {
                         name: 'CampusAdd'
                     }
@@ -59,14 +59,14 @@ const getManagerMenu = context => {
             children: [
                 {
                     title: '管理建筑',
-                    name: 'building-manager',
+                    name: 'buildingmanager',
                     to: {
                         name: 'BuildingManager'
                     }
                 },
                 {
                     title: '新增建筑',
-                    name: 'building-add',
+                    name: 'buildingadd',
                     to: {
                         name: 'BuildingAdd'
                     }
@@ -75,19 +75,19 @@ const getManagerMenu = context => {
         },
         {
             title: '会议室',
-            name: 'meeting-manager',
+            name: 'meeting',
             icon: 'md-text',
             children: [
                 {
                     title: '管理会议室',
-                    name: 'meeting-manager',
+                    name: 'meetingmanager',
                     to: {
                         name: 'MeetingManager'
                     }
                 },
                 {
                     title: '新增会议室',
-                    name: 'meeting-add',
+                    name: 'meetingadd',
                     to: {
                         name: 'MeetingAdd'
                     }

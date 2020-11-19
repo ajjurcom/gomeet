@@ -26,7 +26,14 @@
                     class="list-item"
                     v-for="item in itemList"
                     :key="item.id">
-                    <div class="list-item-content">{{item.meeting_type}}会议室 - {{item.meeting_name}} - {{item.scale}} - {{item.layer}}F - {{item.room_number}} </div>
+                    <div class="list-item-content">
+                        <div class="list-item-content-top">
+                            {{item.layer}}楼{{item.room_number}}  - {{item.meeting_name}}
+                        </div>
+                        <div class="list-item-content--bottom">
+                            {{item.scale}} - 功能: {{item.meeting_type}}
+                        </div>
+                    </div>
                     <div class="list-item-buttons">
                         <Button class="list-item-button" @click="meetingEdit(item.id, getMeetingsParams.campusID)" type="info">修改</Button>
                         <Poptip
@@ -81,16 +88,27 @@
                 justify-content: space-between;
                 align-items: center;
                 width: 100%;
-                height: 50px;
+                // height: 50px;
                 padding: 0 20px;
                 margin-bottom: 10px;
                 border: 1px solid #e8eaec;
                 border-radius: 4px;
                 cursor: pointer;
                 transition: all .2s ease;
-                font-size: 14px;
-                color: #17233d;
-                font-weight: 550;
+                .list-item-content {
+                    padding: 10px 0;
+                }
+                .list-item-content-top {
+                    font-size: 16px;
+                    color: #17233d;
+                    font-weight: 550;
+                    margin-bottom: 5px;
+                }
+                .list-item-content--bottom {
+                    font-size: 10px;
+                    color: #66686d;
+                    font-weight: 550;
+                }
                 .list-item-buttons {
                     .list-item-button {
                         margin-left: 6px;

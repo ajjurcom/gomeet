@@ -29,6 +29,9 @@ export default {
                 name: "Login"
             });
         }
+        this.$service.MainAPI.getScheduleOptions().then(res => {
+            console.log(res);
+        });
     }
 };
 </script>

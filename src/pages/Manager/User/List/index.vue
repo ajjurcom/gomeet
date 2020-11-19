@@ -29,7 +29,7 @@
                                 :value="state"
                                 :key="state"
                                 >
-                                {{state}}
+                                {{stateMap[state]}}
                             </Option>
                         </Select>
                         <Button class="list-item-button" type="success" :loading="detailsLoading" @click="showUserInfo(item.id)">详情</Button>
@@ -136,6 +136,7 @@ export default {
                 "normal_admin": "正常管理员"
             },
             stateList: [],
+            putStateList: [],
             totalCount: 0,
             getMeetingsParams: {
                 page: 0,
@@ -220,6 +221,12 @@ export default {
         // 获取选项
         this.$service.MainAPI.getUserOptions(this.isRoot ? 'root' : 'admin').then(res => {
             this.stateList = res.stateList || [];
+            this.putStateList = this.stateList;
+            // 不能改成黑名单，将黑名单选项删除
+            const i = this.putStateList.indexOf('blacklist');
+            if (i !== -1) {
+                this.putStateList.splice(i, 1);
+            }
         });
         // 获取用户列表
         if (this.getMeetingsParams.state === "") {

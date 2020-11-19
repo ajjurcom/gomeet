@@ -8,14 +8,14 @@ const getUserMenu = context => {
     const menu = [
         {
             title: '会议室预定',
-            name: 'reserve-meeting',
+            name: 'reservemeeting',
             to: {
                 name: 'ReserveMeeting'
             }
         },
         {
             title: '我的会议',
-            name: 'my-meeting',
+            name: 'mymeeting',
             to: {
                 name: 'ReserveMeeting'
             }

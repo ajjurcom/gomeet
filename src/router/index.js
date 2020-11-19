@@ -94,7 +94,8 @@ const routes = [
     {
         name: 'UserManager',
         path: '/back/user/manager',
-        component: UserManager
+        component: UserManager,
+        menuName: 'user'
     },
     {
         name: 'ReserveMeeting',
