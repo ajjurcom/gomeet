@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="personal-edit"></custom-menu>
         <div class="container">
             <Form class="register-form" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
                 <FormItem label="学号" prop="sno">
@@ -39,12 +38,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: "UserEdit",
-    components: {
-        CustomMenu
-    },
     data () {
         return {
             loading: false,

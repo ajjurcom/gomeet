@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="campus-manager"></custom-menu>
         <div class="container">
             <div class="list-items">
                 <div
@@ -84,12 +83,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: 'CampusManager',
-    components: {
-        CustomMenu
-    },
     data() {
         return {
             totalCount: 0,

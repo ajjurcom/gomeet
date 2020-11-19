@@ -43,6 +43,7 @@
 <style lang="less" scoped>
 .container {
     width: 100%;
+    min-width: 1200px;
     .back-image {
         position: fixed;
         top: 0;

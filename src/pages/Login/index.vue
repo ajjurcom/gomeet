@@ -198,6 +198,7 @@ export default {
                     // 登录成功跳转
                     showMessage('info', '登录成功');
                     if (this.currentRole === 'admin') {
+                        this.$store.commit('App/setCurrentRole', 'admin');
                         this.$router.push({
                             name: "UserManager",
                             query: {
@@ -205,10 +206,11 @@ export default {
                             }
                         });
                     } else {
-                        // todo 跳转到会议室预定界面
-                        // this.$router.push({
-                        //     name: "CampusManager",
-                        // });
+                        // 跳转到会议室预定界面
+                        this.$store.commit('App/setCurrentRole', 'user');
+                        this.$router.push({
+                            name: "ReserveMeeting",
+                        });
                     }
                 }
             }).finally(() => {

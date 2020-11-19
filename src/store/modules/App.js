@@ -1,19 +1,26 @@
 /**
  * @file vuex App
- * @author chenruofeng
+ * @author 陈铭涛
  */
 
 export default {
     namespaced: true,
     state: {
         userID: -1,
-        userName: 'Guest',
-        isRoot: false
+        userName: 'guest',
+        /* 
+         * 1. guest: 隐藏菜单
+         * 2. admin: 显示管理菜单
+         * 3. user: 显示用户菜单
+         */
+        currentRole: 'guest',
+        isRoot: false,
     },
     getters: {
         getUserID: state => state.userID,
         getUserName: state => state.userName,
-        getUserIsRoot: state => state.isRoot
+        getUserIsRoot: state => state.isRoot,
+        getCurrentRole: state => state.currentRole
     },
     mutations: {
         setUserID(state, value) {
@@ -24,6 +31,9 @@ export default {
         },
         setUserIsRoot(state, value) {
             state.isRoot = value;
+        },
+        setCurrentRole(state, value) {
+            state.currentRole = value;
         }
     },
     actions: {},

@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="building-manager"></custom-menu>
         <div class="container">
             <div class="select-building">
                 <Select v-model="requestObj.campusID" style="width:200px" placeholder="选择校区"  @on-change="changeCampus">
@@ -92,12 +91,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: 'BuildingManager',
-    components: {
-        CustomMenu
-    },
     data() {
         return {
             campusList: [],

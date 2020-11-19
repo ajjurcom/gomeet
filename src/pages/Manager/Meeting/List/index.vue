@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="meeting-manager"></custom-menu>
         <div class="container">
             <div class="select-items">
                 <Select class="select-item" v-model="getMeetingsParams.campusID" placeholder="校区" @on-change="changeCampus">
@@ -113,12 +112,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: 'MeetingManager',
-    components: {
-        CustomMenu
-    },
     data() {
         return {
             campusList: [],

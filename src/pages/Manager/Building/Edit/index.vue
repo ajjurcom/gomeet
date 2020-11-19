@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="building-manager"></custom-menu>
         <div class="container">
             <Form class="register-form" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
                 <FormItem label="建筑名字" prop="building_name">
@@ -44,12 +43,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: 'BuildingEdit',
-    components: {
-        CustomMenu
-    },
     data() {
         return {
             loading: false,

@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="meeting-manager"></custom-menu>
         <div class="container">
             <Form class="meeting-form" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="100">
                 <FormItem label="会议室名字" prop="meeting_name">
@@ -87,12 +86,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: 'MeetingEdit',
-    components: {
-        CustomMenu
-    },
     data() {
         return {
             loading: false,

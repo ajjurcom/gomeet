@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="user"></custom-menu>
         <div class="container">
             <div class="select-items">
                 <Select class="select-item" v-model="getMeetingsParams.state" placeholder="状态" @on-change="changeState">
@@ -123,12 +122,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: 'UserManager',
-    components: {
-        CustomMenu
-    },
     data() {
         return {
             isRoot: this.$store.getters['App/getUserIsRoot'],

@@ -1,6 +1,5 @@
 <template>
     <div class="container-wrap">
-        <custom-menu activeItem="campus-manager"></custom-menu>
         <div class="container">
             <Form :model="campusData" :label-width="80">
                 <FormItem label="新名字">
@@ -28,12 +27,8 @@
 </style>
 
 <script>
-import CustomMenu from '@/components/CustomMenu';
 export default {
     name: 'CampusEdit',
-    components: {
-        CustomMenu
-    },
     data() {
         return {
             loading: false,
