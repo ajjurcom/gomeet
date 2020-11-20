@@ -14,7 +14,7 @@ type IMeetingRepository interface {
 	DeleteMeeting(id int) error
 	UpdateMeeting(meeting model.Meeting) error
 	SelectMeetingByID(id int) (model.Meeting, error)
-	SelectMeetingsByPage(page, onePageCount, buildingID int) ([]model.Meeting, error)
+	SelectMeetingsByBuilding(buildingID int, pageAndOnePageCount ...int) ([]model.Meeting, error)
 	SelectMeetingCountCountByBuilding(buildingID int) (int, error)
 	SelectAllMeetingTypes() []string
 	SelectAllScaleTypes() []string
@@ -120,13 +120,27 @@ func (mr *MeetingRepository) SelectMeetingByID(id int) (meeting model.Meeting, e
 	return
 }
 
-func (mr *MeetingRepository) SelectMeetingsByPage(page, onePageCount, buildingID int) (meetings []model.Meeting, err error) {
+/* SelectMeetingsByBuilding 查询建筑中 全部/分页 会议室
+ * 1. buildingID
+ * 2. pageAndOnePageCount[0]: page 第几页, 从0开始
+ * 3. pageAndOnePageCount[1]: onePageCount 一页多少个
+ */
+func (mr *MeetingRepository) SelectMeetingsByBuilding(buildingID int, pageAndOnePageCount ...int) (meetings []model.Meeting, err error) {
 	if err = mr.Conn(); err != nil {
 		return
 	}
 
-	startIndex := strconv.Itoa(page * onePageCount)
-	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number  from " + mr.table + " where building_id = ? limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	/* 是否有页和页码
+	 * 1. 有 -> 分页查询
+	 * 2. 没有 -> 查询全部
+	 */
+	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number  from " + mr.table + " where building_id = ?"
+	if len(pageAndOnePageCount) >= 2 {
+		page := pageAndOnePageCount[0]
+		onePageCount := pageAndOnePageCount[1]
+		startIndex := strconv.Itoa(page * onePageCount)
+		sqlStr += " limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	}
 	err = mr.mysqlConn.Select(&meetings, sqlStr, buildingID)
 	return
 }

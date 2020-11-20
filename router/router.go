@@ -22,6 +22,7 @@ func InitRouter() *gin.Engine {
 	campusController := controller.NewCampusController()
 	buildingController := controller.NewBuildingController()
 	meetingController := controller.NewMeetingController()
+	scheduleController := controller.NewScheduleController()
 
 	api := r.Group(relativePath)
 	{
@@ -50,6 +51,10 @@ func InitRouter() *gin.Engine {
 		api.GET("/meeting/:id", meetingController.GetMeetingByID)
 		api.GET("/meetings/:onePageCount/:page", meetingController.GetMeetingsByPage)
 		api.GET("/meeting_options", meetingController.GetMeetingOptions)
+		/*
+		 * 预定页面所需API
+		 */
+		api.GET("/schedule_options", scheduleController.GetOptions)
 	}
 
 	apiUser := r.Group(relativePath)

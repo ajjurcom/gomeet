@@ -54,3 +54,9 @@ err: [sql: Scan error on column index 5, name "ban": unsupported Scan, storing d
 err: [Error 1062: Duplicate entry '15217899926' for key 'user.uidx_phone']
 2020-11-12T22:07:16.920+0800	ERROR	logger/init.go:31	新建用户错误
 err: [Error 1062: Duplicate entry '20170310128' for key 'user.uidx_name']
+2020-11-20T11:23:03.669+0800	ERROR	logger/init.go:31	获取校区的全部建筑出错
+err: [sql: expected 0 arguments, got 1]
+2020-11-20T11:23:15.277+0800	ERROR	logger/init.go:31	获取校区的全部建筑出错
+err: [sql: expected 0 arguments, got 1]
+2020-11-20T11:28:46.846+0800	ERROR	logger/init.go:31	获取建筑的会议室错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '?limit 0, 10' at line 1]

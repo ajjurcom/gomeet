@@ -14,6 +14,8 @@ type IMeetingService interface {
 	GetMeetingsByPage(page, onePageCount, buildingID int) ([]model.Meeting, error)
 	GetAllMeetingTypes() []string
 	GetAllScaleTypes() []string
+	GetAllMeetingByLayer() ([]model.Meeting, error)
+	GetAllMeetingByBuilding(buildingID int) ([]model.Meeting, error)
 }
 
 func NewMeetingService(meetingRepo repository.IMeetingRepository) IMeetingService {
@@ -63,7 +65,7 @@ func (ms *MeetingService) GetMeetingCountByBuilding(buildingID int) (int, error)
 }
 
 func (ms *MeetingService) GetMeetingsByPage(page, onePageCount, buildingID int) ([]model.Meeting, error) {
-	return ms.MeetingRepository.SelectMeetingsByPage(page, onePageCount, buildingID)
+	return ms.MeetingRepository.SelectMeetingsByBuilding(buildingID, page, onePageCount)
 }
 
 func (ms *MeetingService) GetAllMeetingTypes() []string {
@@ -72,6 +74,14 @@ func (ms *MeetingService) GetAllMeetingTypes() []string {
 
 func (ms *MeetingService) GetAllScaleTypes() []string {
 	return ms.MeetingRepository.SelectAllScaleTypes()
+}
+
+func (ms *MeetingService) GetAllMeetingByLayer() ([]model.Meeting, error) {
+	return []model.Meeting{}, nil
+}
+
+func (ms *MeetingService) GetAllMeetingByBuilding(buildingID int) ([]model.Meeting, error) {
+	return ms.MeetingRepository.SelectMeetingsByBuilding(buildingID)
 }
 
 

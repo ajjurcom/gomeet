@@ -18,10 +18,10 @@ var meetingTypeDict = map[string]bool{
 }
 
 var scaleTypeDict = map[string]bool{
-	"mini(<=9)":     true,
-	"small(10-20)":  true,
-	"middle(21-30)": true,
-	"big(>=31)":     true,
+	"微型会议室(容纳0-10人)":  true,
+	"小型会议室(容纳0-20人)":  true,
+	"中型会议室(可容纳0-30人)": true,
+	"大型会议室(容纳30人以上)":  true,
 }
 
 func IsMeetingType(typeStr string) bool {

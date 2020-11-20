@@ -17,7 +17,6 @@ type IMeetingController interface {
 	PostMeeting(c *gin.Context)
 	DeleteMeeting(c *gin.Context)
 	PutMeeting(c *gin.Context)
-
 	GetMeetingByID(c *gin.Context)
 	GetMeetingsByPage(c *gin.Context)
 	GetMeetingOptions(c *gin.Context)
@@ -259,4 +258,3 @@ func (mc *MeetingController) GetMeetingOptions(c *gin.Context) {
 	result["meetingScales"] = mc.MeetingService.GetAllScaleTypes()
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
-
