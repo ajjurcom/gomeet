@@ -23,9 +23,14 @@ func InitRouter() *gin.Engine {
 	buildingController := controller.NewBuildingController()
 	meetingController := controller.NewMeetingController()
 	scheduleController := controller.NewScheduleController()
+	groupController := controller.NewGroupController()
 
 	api := r.Group(relativePath)
 	{
+		api.POST("/user_group", groupController.Post)
+		api.DELETE("/user_group/:id", groupController.Delete)
+		api.PUT("/user_name", groupController.PutName)
+		api.PUT("/user_member", groupController.PutMember)
 		/*
 		 * 用户
 		 */

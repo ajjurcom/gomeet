@@ -8,6 +8,7 @@ type User struct {
 	State string `json:"state" db:"state"`
 	Ban string `json:"ban" db:"ban"`
 	Username string `json:"username" db:"username" binding:"required"`
+	GroupList string `json:"group_list" db:"group_list"`
 	Email string `json:"email" db:"email" binding:"required,email"`
 }
 

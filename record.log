@@ -60,3 +60,13 @@ err: [sql: expected 0 arguments, got 1]
 err: [sql: expected 0 arguments, got 1]
 2020-11-20T11:28:46.846+0800	ERROR	logger/init.go:31	获取建筑的会议室错误
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '?limit 0, 10' at line 1]
+2020-11-20T23:19:46.291+0800	ERROR	logger/init.go:31	新建成员组出错
+err: [sql: expected 1 arguments, got 2]
+2020-11-20T23:20:28.282+0800	ERROR	logger/init.go:31	新建成员组出错
+err: [Error 1292: Truncated incorrect INTEGER value: '1,23,44']
+2020-11-20T23:27:56.204+0800	ERROR	logger/init.go:31	新建成员组出错
+err: [some ID don't exist]
+2020-11-21T00:42:49.764+0800	ERROR	logger/init.go:31	删除成员组出错
+err: [sql: transaction has already been committed or rolled back]
+2020-11-21T02:01:41.763+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [sql: expected 2 arguments, got 1]
