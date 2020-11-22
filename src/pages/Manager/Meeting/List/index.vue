@@ -138,7 +138,7 @@ export default {
             buildingList: [],
             totalCount: 0,
             getMeetingsParams: {
-                page: 0,
+                page: 1,
                 onePageNum: 10,
                 campusID: Number(this.$route.query.campus_id) || -1,
                 buildingID: Number(this.$route.query.building_id) || -1

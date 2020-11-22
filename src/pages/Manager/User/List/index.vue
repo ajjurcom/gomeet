@@ -139,7 +139,7 @@ export default {
             putStateList: [],
             totalCount: 0,
             getMeetingsParams: {
-                page: 0,
+                page: 1,
                 onePageNum: 10,
                 state: this.$route.query.state || ''
             },

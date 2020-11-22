@@ -188,7 +188,7 @@ export default {
             loading: true,
             totalCount: 0,
             getMeetingsParams: {
-                page: 0,
+                page: 1,
                 onePageNum: 10,
                 creator: Number(this.$store.getters['App/getUserID']),
             },

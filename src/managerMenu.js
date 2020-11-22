@@ -17,21 +17,6 @@ const getManagerMenu = context => {
             }
         },
         {
-            title: '用户组',
-            name: 'group',
-            icon: 'md-chatboxes',
-            children: [
-                {
-                    title: '管理用户组',
-                    name: 'group-manager'
-                },
-                {
-                    title: '新增用户组',
-                    name: 'group-add'
-                },
-            ]
-        },
-        {
             title: '校区',
             name: "campus",
             icon: 'ios-school',
