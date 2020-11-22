@@ -31,7 +31,11 @@ func MemberListToStr(idList []string) string {
 
 // MemberStrToList 将成员字符串转为列表
 func MemberStrToList(idStr string) []string {
-	return strings.Split(strings.Trim(idStr, ","), ",")
+	str := strings.Trim(idStr, ",")
+	if str == "" {
+		return []string{}
+	}
+	return strings.Split(str, ",")
 }
 
 /* DiffMember 计算出idList、idList2的差异元素

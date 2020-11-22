@@ -17,7 +17,9 @@ type IUserService interface {
 	GetUserByPage(page, onePageCount int, state string) ([]model.User, error)
 	GetUserByID(id int) (model.User, error)
 	GetCountByState(state string) (int, error)
-	GetIDNameByAtr(attrName, attrVal string) (int, string, error)
+	GetIDNameByAttr(attrName, attrVal string) (int, string, error)
+	SearchUsersByAttr(attrName, attrVal string) ([]model.User, error)
+	GetAllUsersByIDs(ids string) ([]model.User, error)
 }
 
 func NewUserService(repository repository.IUserRepository) IUserService {
@@ -72,6 +74,14 @@ func (us *UserService) GetCountByState(state string) (int, error) {
 	return us.UserRepository.SelectCountByState(state)
 }
 
-func (us *UserService) GetIDNameByAtr(attrName, attrVal string) (int, string, error) {
+func (us *UserService) GetIDNameByAttr(attrName, attrVal string) (int, string, error) {
 	return us.UserRepository.SelectIDNameByAtr(attrName, attrVal)
+}
+
+func (us *UserService) SearchUsersByAttr(attrName, attrVal string) ([]model.User, error) {
+	return us.UserRepository.SearchUsersByAttr(attrName, attrVal)
+}
+
+func (us *UserService) GetAllUsersByIDs(ids string) ([]model.User, error) {
+	return us.UserRepository.SelectAllUsersByIDs(ids)
 }

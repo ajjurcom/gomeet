@@ -10,6 +10,9 @@ type IGroupService interface {
 	DeleteGroup(id int) error
 	PutName(group model.Group) error
 	PutMember(group model.Group) error
+	GetGroupByID(id int) (model.Group, error)
+	GetGroupsByCreatorAndPage(creator, page, onePageCount int) ([]model.Group, error)
+	GetGroupCountByCreator(creator int) (int, error)
 }
 
 func NewGroupService(repository repository.IGroupRepository) IGroupService {
@@ -34,4 +37,16 @@ func (gs *GroupService) PutName(group model.Group) error {
 
 func (gs *GroupService) PutMember(group model.Group) error {
 	return gs.GroupRepository.PutMember(group)
+}
+
+func (gs *GroupService) GetGroupByID(id int) (model.Group, error) {
+	return gs.GroupRepository.SelectGroupByID(id)
+}
+
+func (gs *GroupService) GetGroupsByCreatorAndPage(creator, page, onePageCount int) ([]model.Group, error) {
+	return gs.GroupRepository.SelectGroupsByCreator(creator, page, onePageCount)
+}
+
+func (gs *GroupService) GetGroupCountByCreator(creator int) (int, error) {
+	return gs.GroupRepository.SelectGroupCountByCreator(creator)
 }

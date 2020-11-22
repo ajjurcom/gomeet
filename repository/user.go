@@ -21,6 +21,8 @@ type IUserRepository interface {
 	SelectUserByID(id int) (model.User, error)
 	SelectCountByState(state string) (int, error)
 	SelectIDNameByAtr(attrName, attrVal string) (int, string, error)
+	SearchUsersByAttr(attrName, attrVal string) ([]model.User, error)
+	SelectAllUsersByIDs(ids string) ([]model.User, error)
 }
 
 func NewUserRepository(table string) IUserRepository {
@@ -193,5 +195,37 @@ func (umr *UserManagerRepository) SelectCountByState(state string) (count int, e
 
 	sqlStr := "select count(*) from " + umr.table + " where state = ?"
 	err = umr.mysqlConn.QueryRow(sqlStr, state).Scan(&count)
+	return
+}
+
+func (umr *UserManagerRepository) SearchUsersByAttr(attrName, attrVal string) (userList []model.User, err error) {
+	if err = umr.Conn(); err != nil {
+		return
+	}
+
+	var sqlStr string
+	switch attrName {
+	case "username", "sno":
+		sqlStr = "select id, sno, username from " + umr.table + " where " + attrName + " like ('%" + attrVal + "%')"
+	case "phone":
+		sqlStr = "select id, phone, username from " + umr.table + " where " + attrName + " like ('%" + attrVal + "%')"
+	default:
+		err = errors.New("查询方法只能为学号、手机号、用户名")
+		return
+	}
+	err = umr.mysqlConn.Select(&userList, sqlStr)
+	return
+}
+
+func (umr *UserManagerRepository) SelectAllUsersByIDs(ids string) (userList []model.User, err error) {
+	if ids == "" {
+		return
+	}
+	if err = umr.Conn(); err != nil {
+		return
+	}
+
+	sqlStr := "select id, sno, username from " + umr.table + " where id in (" + ids + ")"
+	err = umr.mysqlConn.Select(&userList, sqlStr)
 	return
 }

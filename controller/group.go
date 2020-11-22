@@ -7,6 +7,7 @@ import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
@@ -17,6 +18,7 @@ type IGroupController interface {
 	Delete(c *gin.Context)
 	PutName(c *gin.Context)
 	PutMember(c *gin.Context)
+	GetMeetingsByPage(c *gin.Context)
 }
 
 func NewGroupController() IGroupController {
@@ -117,4 +119,47 @@ func (gc *GroupController) PutMember(c *gin.Context) {
 	}
 	// 3. 返回结果
 	common.ResolveResult(c, true, e.SUCCESS, nil)
+}
+
+// 分页获取创建者的分组
+func (gc *GroupController) GetMeetingsByPage(c *gin.Context) {
+	result := map[string]interface{}{
+		"groupList": []model.Group{},
+		"count": 0,
+	}
+	// 1. 解析请求
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "page参数必须为数字")
+		return
+	}
+	onePageCount, err := strconv.Atoi(c.Param("onePageCount"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "onePageCount参数必须为数字")
+		return
+	}
+	creator, err := strconv.Atoi(c.Query("creator"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "creator参数必须为数字")
+		return
+	}
+	// 2. 数据操作
+	// 2.1 获取创建者的所有组数量
+	count, err := gc.GroupService.GetGroupCountByCreator(creator)
+	if err != nil {
+		logger.Record("获取用户组数量出错", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+	// 2.2 分页获取组
+	groupList, err := gc.GroupService.GetGroupsByCreatorAndPage(creator, page, onePageCount)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Record("获取用户组错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+
+	result["count"] = count
+	result["groupList"] = groupList
+	common.ResolveResult(c, true, e.SUCCESS, result)
 }

@@ -70,3 +70,33 @@ err: [some ID don't exist]
 err: [sql: transaction has already been committed or rolled back]
 2020-11-21T02:01:41.763+0800	ERROR	logger/init.go:31	修改成员组成员出错
 err: [sql: expected 2 arguments, got 1]
+2020-11-21T12:36:22.919+0800	ERROR	logger/init.go:31	获取用户组数量出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '*) from user_group where creator = ?' at line 1]
+2020-11-21T20:21:38.791+0800	ERROR	logger/init.go:31	根据关键字搜索用户错误
+err: [Error 1065: Query was empty]
+2020-11-22T11:37:01.009+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:37:17.752+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:37:34.334+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:37:57.642+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:38:17.739+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:42:01.392+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:42:37.232+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:46:09.896+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1054: Unknown column 'undefined' in 'where clause']
+2020-11-22T11:47:15.329+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:50:53.893+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:53:04.167+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T11:54:36.971+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T12:03:00.244+0800	ERROR	logger/init.go:31	获取用户组成员信息出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]

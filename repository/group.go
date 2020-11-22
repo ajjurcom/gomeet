@@ -5,7 +5,6 @@ import (
 	"com/mittacy/gomeet/database"
 	"com/mittacy/gomeet/model"
 	"errors"
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"strconv"
 )
@@ -16,6 +15,9 @@ type IGroupRepository interface {
 	Delete(id int) error
 	PutName(group model.Group) error
 	PutMember(newGroup model.Group) error
+	SelectGroupByID(id int) (group model.Group, err error)
+	SelectGroupsByCreator(creator int, pageAndOnePageCount ...int) ([]model.Group, error)
+	SelectGroupCountByCreator(creator int) (int, error)
 }
 
 type GroupRepository struct {
@@ -60,8 +62,8 @@ func (gr *GroupRepository) Add(group model.Group) error {
 
 	var id int64 = -1
 	// 1. 将memberList转为字符串保存到member_list
-	sqlStr := "insert into " + gr.groupTable + "(group_name, member_list) values (?, ?)"
-	result, err := tx.Exec(sqlStr, group.GroupName, group.MemberList)
+	sqlStr := "insert into " + gr.groupTable + "(creator, group_name, member_list) values (?, ?, ?)"
+	result, err := tx.Exec(sqlStr, group.Creator, group.GroupName, group.MemberList)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -170,11 +172,9 @@ func (gr *GroupRepository) PutMember(newGroup model.Group) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("旧的members: ", oldGroup, "新的members: ", newGroup.MemberList)
 
 	// 2. 计算新旧list的差异: deleteList, addList
 	deleteList, addList := common.DiffMember(common.MemberStrToList(oldGroup.MemberList), common.MemberStrToList(newGroup.MemberList))
-	fmt.Println("被删members: ", deleteList, "新增members: ", addList)
 
 	// 3. 查询deleteList所有成员信息
 	var deleteUserList []model.User
@@ -196,7 +196,6 @@ func (gr *GroupRepository) PutMember(newGroup model.Group) error {
 		tx.Rollback()
 		return err
 	}
-	fmt.Println("更新member_list到group完成")
 
 	// 6. 将deleteUserList中的每个成员删除该ID
 	idStr := strconv.Itoa(newGroup.ID)
@@ -215,7 +214,6 @@ func (gr *GroupRepository) PutMember(newGroup model.Group) error {
 			}
 		}
 	}
-	fmt.Println("删除成员完成")
 	// 7. 向addUserList中的每个成员添加该ID
 	if len(addList) > 0 {
 		sqlStr = "update " + gr.userTable + " set group_list=concat(group_list, '," + idStr + "') where id in (" + common.MemberListToStr(addList) + ")"
@@ -230,7 +228,6 @@ func (gr *GroupRepository) PutMember(newGroup model.Group) error {
 			return errors.New("some ID don't exist")
 		}
 	}
-	fmt.Println("新增成员完成")
 	tx.Commit()
 	return nil
 }
@@ -241,5 +238,40 @@ func (gr *GroupRepository) SelectGroupByID(id int) (group model.Group, err error
 	}
 	sqlStr := "select * from user_group where id = ?"
 	err = gr.mysqlConn.Get(&group, sqlStr, id)
+	return
+}
+
+/* SelectMeetingsByBuilding 查询建筑中 全部/分页 会议室
+ * 1. creator 创建者
+ * 2. pageAndOnePageCount[0]: page 第几页, 从0开始
+ * 3. pageAndOnePageCount[1]: onePageCount 一页多少个
+ */
+func (gr *GroupRepository) SelectGroupsByCreator(creator int, pageAndOnePageCount ...int) (groups []model.Group, err error) {
+	if err = gr.Conn(); err != nil {
+		return
+	}
+
+	/* 是否有页和页码
+	 * 1. 有 -> 分页查询
+	 * 2. 没有 -> 查询全部
+	 */
+	sqlStr := "select id, group_name  from " + gr.groupTable + " where creator = ?"
+	if len(pageAndOnePageCount) >= 2 {
+		page := pageAndOnePageCount[0]
+		onePageCount := pageAndOnePageCount[1]
+		startIndex := strconv.Itoa(page * onePageCount)
+		sqlStr += " limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	}
+	err = gr.mysqlConn.Select(&groups, sqlStr, creator)
+	return
+}
+
+func (gr *GroupRepository) SelectGroupCountByCreator(creator int) (count int, err error) {
+	if err = gr.Conn(); err != nil {
+		return
+	}
+
+	sqlStr := "select count(*) from " + gr.groupTable + " where creator = ?"
+	err = gr.mysqlConn.QueryRow(sqlStr, creator).Scan(&count)
 	return
 }

@@ -7,7 +7,6 @@ import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
@@ -162,7 +161,6 @@ func (bc *BuildingController) GetBuildingsByPage(c *gin.Context) {
 	// 获取校区
 	buildingList, err := bc.BuildingService.GetBuildingsByPage(page, onePageCount, campusID)
 	if err != nil {
-		fmt.Println(err)
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
 		return
 	}

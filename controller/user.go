@@ -8,12 +8,9 @@ import (
 	"database/sql"
 	"strconv"
 
-	//"com/mittacy/gomeet/logger"
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
-	//"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
@@ -28,19 +25,26 @@ type IUserController interface {
 	GetUsersByPage(c *gin.Context)
 	GetUserByID(c *gin.Context)
 	GetUserStateOptions(c *gin.Context)
+	SearchUsers(c *gin.Context)
+	GetAllUserByIDs(c *gin.Context)
 }
 
 func NewUserController() IUserController {
 	repo := repository.NewUserRepository("user")
 	userService := service.NewUserService(repo)
+
 	repoCampus := repository.NewCampusRepository("campus")
 	campusService := service.NewCampusService(repoCampus)
-	return &UserController{userService, campusService}
+
+	repoGroup := repository.NewGroupRepository("user_group", "user")
+	groupService := service.NewGroupService(repoGroup)
+	return &UserController{userService, campusService, groupService}
 }
 
 type UserController struct {
 	UserService service.IUserService
 	CampusService service.ICampusService
+	GroupService service.IGroupService
 }
 
 // 注册用户
@@ -78,7 +82,6 @@ func (uc *UserController) Login(c *gin.Context) {
 	// 1. 解析请求
 	session := model.Session{}
 	if err := c.ShouldBindJSON(&session); err != nil {
-		fmt.Println("登录用户错误: ", err)
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
 		return
 	}
@@ -116,7 +119,6 @@ func (uc *UserController) Login(c *gin.Context) {
 	msg := ""
 	isOk := true
 	if !session.IsAdmin {	// 普通用户登录
-		fmt.Println("test...")
 		switch state {
 		case model.VerifyUser:
 			msg = "账号还未通过审核"
@@ -161,7 +163,7 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 	// 7. 查询用户ID和名字
-	id, username, err := uc.UserService.GetIDNameByAtr(loginWay, wayVal)
+	id, username, err := uc.UserService.GetIDNameByAttr(loginWay, wayVal)
 	if err != nil {
 		common.ResolveResult(c, false, e.SUCCESS, password, "登录成功，但获取个人ID和名字失败")
 		return
@@ -200,7 +202,6 @@ func (uc *UserController) Put(c *gin.Context) {
 	// 1. 解析请求
 	user := model.User{}
 	if err := c.ShouldBindJSON(&user); err != nil {
-		fmt.Println("修改用户错误", err)
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -240,7 +241,6 @@ func (uc *UserController) PutPassword(c *gin.Context) {
 	// 1. 解析请求
 	user := model.Session{}
 	if err := c.ShouldBindJSON(&user); err != nil {
-		fmt.Println(err)
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -391,5 +391,82 @@ func (uc *UserController) GetUserStateOptions(c *gin.Context) {
 	result := map[string]interface{}{
 		"stateList": model.StateOptions(role),
 	}
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+/* 通过关键字搜索用户, 返回 [{"id": 1, "sno/phone", "username": "陈铭涛"}, ……]
+ * 1. 学号
+ * 2. 手机号
+ * 3. 用户名
+ */
+func (uc *UserController) SearchUsers(c *gin.Context) {
+	result := map[string]interface{}{
+		"userList": []model.User{},
+	}
+	// 1. 解析参数
+	searchWay := c.Query("searchWay")
+	if searchWay != "phone" && searchWay != "sno" && searchWay != "username" {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "查询方法只能为学号、手机号、用户名")
+		return
+	}
+	// 2. 请求数据库
+	keyword := c.Query("keyword")
+	userList, err := uc.UserService.SearchUsersByAttr(searchWay, keyword)
+	if err != nil {
+		if strings.Contains(err.Error(), "查询方法只能为") {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result, err.Error())
+		} else {
+			logger.Record("根据关键字搜索用户错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, result)
+		}
+		return
+	}
+
+	result["userList"] = userList
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
+	result := map[string]interface{}{
+		"idList": []int{},
+		"userList": []model.User{},
+	}
+	// 1. 解析请求
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户id必须为数字")
+		return
+	}
+	// 2. 数据库查询
+	// 2.1 获取用户组id列表
+	group, err := uc.GroupService.GetGroupByID(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户组不存在")
+		} else {
+			logger.Record("获取用户组成员信息出错", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, result)
+		}
+		return
+	}
+	// 2.2 获取用户组用户信息
+	group.MemberList = strings.Trim(group.MemberList, ",")
+	userList, err := uc.UserService.GetAllUsersByIDs(group.MemberList)
+	if err != nil {
+		logger.Record("获取用户组成员信息出错", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+
+	// 转化 ID字符串 -> 整数类型列表
+	idStrList := common.MemberStrToList(group.MemberList)
+	idList := make([]int, len(idStrList))
+	for i := 0; i < len(idStrList); i++ {
+		idList[i], _ = strconv.Atoi(idStrList[i])
+	}
+
+	// 3. 返回结果
+	result["idList"] = idList
+	result["userList"] = userList
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }

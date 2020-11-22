@@ -27,17 +27,19 @@ func InitRouter() *gin.Engine {
 
 	api := r.Group(relativePath)
 	{
-		api.POST("/user_group", groupController.Post)
-		api.DELETE("/user_group/:id", groupController.Delete)
-		api.PUT("/user_name", groupController.PutName)
-		api.PUT("/user_member", groupController.PutMember)
 		/*
 		 * 用户
 		 */
+		api.GET("/members/:id", userController.GetAllUserByIDs)
+		api.GET("/users", userController.SearchUsers)
 		api.POST("/user", userController.Post)
 		api.POST("/session", userController.Login)
 		api.GET("/user/:id", userController.GetUserByID)
 		api.GET("/users/:onePageCount/:page", userController.GetUsersByPage)
+		/*
+		 * 用户组
+		 */
+		api.GET("/user_group/:onePageCount/:page", groupController.GetMeetingsByPage)
 		/*
 		 * 校区所需API
 		 */
@@ -71,6 +73,13 @@ func InitRouter() *gin.Engine {
 		apiUser.PUT("/user", userController.Put)
 		apiUser.PUT("/user_password", userController.PutPassword)
 		apiUser.GET("/user_options", userController.GetUserStateOptions)
+		/*
+		 * 用户组
+		 */
+		apiUser.POST("/user_group", groupController.Post)
+		apiUser.DELETE("/user_group/:id", groupController.Delete)
+		apiUser.PUT("/user_name", groupController.PutName)
+		apiUser.PUT("/user_member", groupController.PutMember)
 	}
 
 	apiAdmin := r.Group(relativePath)
