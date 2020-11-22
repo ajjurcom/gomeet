@@ -37,3 +37,21 @@ export const getLocalStorage = (name) => {
 export const removeLocalStorage = (name) => {
     return window.localStorage.removeItem(name);
 }
+
+/**
+ * intArrayToStr
+ * @params {*} intList
+ */
+
+export const intArrayToStr = (intList) => {
+    let str = ""
+    let length = intList.length
+    if (length === 0) {
+        return str;
+    }
+    for (let i = 0; i < length-1; i++) {
+        str = str + intList[i] + ",";
+    }
+    str += intList[length-1];
+    return str;
+}

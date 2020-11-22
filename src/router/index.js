@@ -20,6 +20,7 @@ import MeetingEdit from 'pages/Manager/Meeting/Edit';
 import UserEdit from 'pages/User/Edit';
 import UserEditPwd from 'pages/User/EditPwd';
 import UserManager from 'pages/Manager/User/List';
+import UserGroup from 'pages/Manager/UserGroup';
 import Reserve from 'pages/Reserve';
 
 Vue.use(Router);
@@ -96,6 +97,12 @@ const routes = [
         path: '/back/user/manager',
         component: UserManager,
         menuName: 'user'
+    },
+    {
+        name: 'UserGroup',
+        path: '/group',
+        component: UserGroup,
+        menuName: 'usergroup'
     },
     {
         name: 'ReserveMeeting',

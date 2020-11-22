@@ -34,6 +34,30 @@ export default class Main {
     static deleteUser(id) {
         return http.delete(`/user/${id}`);
     }
+    static searchUsers(obj) {
+        return http.get(`/users?searchWay=${obj.searchWay}&keyword=${obj.keyword}`)
+    }
+    static getGroupMembers(id) {
+        return http.get(`/members/${id}`);
+    }
+    /*
+     * 用户组API
+     */
+    static addGrouop(data) {
+        return http.post('/user_group', data);
+    }
+    static deleteGroup(id) {
+        return http.delete(`/user_group/${id}`);
+    }
+    static putGroupName(data) {
+        return http.put('/user_name', data);
+    }
+    static putGroupMember(data) {
+        return http.put('/user_member', data);
+    }
+    static getGroupsByPage(obj) {
+        return http.get(`/user_group/${obj.onePageNum}/${obj.page}?creator=${obj.creator}`);
+    }
     /*
      * 校区API
      */

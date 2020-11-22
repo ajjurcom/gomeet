@@ -20,6 +20,13 @@ const getUserMenu = context => {
                 name: 'ReserveMeeting'
             }
         },
+        {
+            title: '分组管理',
+            name: 'usergroup',
+            to: {
+                name: 'UserGroup'
+            }
+        },
     ];
 
     return menu;
