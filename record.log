@@ -100,3 +100,5 @@ err: [Error 1064: You have an error in your SQL syntax; check the manual that co
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
 2020-11-22T12:03:00.244+0800	ERROR	logger/init.go:31	获取用户组成员信息出错
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-22T21:58:31.059+0800	ERROR	logger/init.go:31	获取建筑的会议室错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-10, 10' at line 1]

@@ -136,7 +136,7 @@ func (mr *MeetingRepository) SelectMeetingsByBuilding(buildingID int, pageAndOne
 	 */
 	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number  from " + mr.table + " where building_id = ?"
 	if len(pageAndOnePageCount) >= 2 {
-		page := pageAndOnePageCount[0]
+		page := pageAndOnePageCount[0] - 1
 		onePageCount := pageAndOnePageCount[1]
 		startIndex := strconv.Itoa(page * onePageCount)
 		sqlStr += " limit " + startIndex + ", " + strconv.Itoa(onePageCount)

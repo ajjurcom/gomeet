@@ -257,7 +257,7 @@ func (gr *GroupRepository) SelectGroupsByCreator(creator int, pageAndOnePageCoun
 	 */
 	sqlStr := "select id, group_name  from " + gr.groupTable + " where creator = ?"
 	if len(pageAndOnePageCount) >= 2 {
-		page := pageAndOnePageCount[0]
+		page := pageAndOnePageCount[0] - 1
 		onePageCount := pageAndOnePageCount[1]
 		startIndex := strconv.Itoa(page * onePageCount)
 		sqlStr += " limit " + startIndex + ", " + strconv.Itoa(onePageCount)
