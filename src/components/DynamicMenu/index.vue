@@ -147,7 +147,7 @@
             };
         },
         watch: {
-            $route: 'onRouteChange',
+            '$route.name': 'onRouteChange',
         },
         methods: {
             selectMenu(name) {
@@ -179,8 +179,9 @@
             },
             onRouteChange(route) {
                 this.$nextTick(() => {
+                    console.log('this.$route.name -> ', this.$route.name);
                     this.currentActiveName = this.$route.name.toLowerCase();
-                    this.$refs.menu.updateOpened();
+                    // this.$refs.menu.updateOpened();
                     this.$refs.menu.updateActiveName();
                 });
             }

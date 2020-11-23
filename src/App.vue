@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <DynamicMenu
-          :class="{ hidden: this.$route.name === 'Login' }"
+          :class="{ hidden: this.$route.name === 'Login' || this.$route.name === 'Register' }"
           class="menu"
           :menu="menu"
           :isAdmin="isAdmin"
