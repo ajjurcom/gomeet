@@ -30,83 +30,131 @@ const routes = [
     {
         name: 'Login',
         path: '/login',
+        meta: {
+            roles: ['guest', 'user', 'admin']
+        },
         component: LoginComponent
     },
     {
         name: 'Register',
         path: '/register',
+        meta: {
+            roles: ['guest', 'user', 'admin']
+        },
         component: RegisterComponent
     },
     {
         name: 'CampusManager',
         path: '/back/campus/manager',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: CampusManager
     },
     {
         name: 'CampusEdit',
         path: '/back/campus/edit',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: CampusEdit
     },
     {
         name: 'CampusAdd',
         path: '/back/campus/add',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: CampusAdd
     },
     {
         name: 'BuildingManager',
         path: '/back/building/manager',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: BuildingManager
     },
     {
         name: 'BuildingEdit',
         path: '/back/building/edit/:id',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: BuildingEdit
     },
     {
         name: 'BuildingAdd',
         path: '/back/building/add',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: BuildingAdd
     },
     {
         name: 'MeetingAdd',
         path: '/back/meeting/add',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: MeetingAdd
     },
     {
         name: 'MeetingManager',
         path: '/back/meeting/manager',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: MeetingManager
     },
     {
         name: 'MeetingEdit',
         path: '/back/meeting/edit/:id',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: MeetingEdit
     },
     {
         name: 'UserEdit',
         path: '/user/edit/:id',
+        meta: {
+            roles: ['user', 'admin', 'root']
+        },
         component: UserEdit
     },
     {
         name: 'UserEditPwd',
         path: '/user/editpwd/:id',
+        meta: {
+            roles: ['user', 'admin', 'root']
+        },
         component: UserEditPwd
     },
     {
         name: 'UserManager',
         path: '/back/user/manager',
+        meta: {
+            roles: ['admin', 'root']
+        },
         component: UserManager,
         menuName: 'user'
     },
     {
         name: 'UserGroup',
         path: '/group',
+        meta: {
+            roles: ['user', 'admin', 'root']
+        },
         component: UserGroup,
         menuName: 'usergroup'
     },
     {
         name: 'ReserveMeeting',
         path: '/',
+        meta: {
+            roles: ['user', 'admin', 'root']
+        },
         component: Reserve
     }
 ];
@@ -117,8 +165,19 @@ const router = new Router({
 });
 
 router.beforeEach((to, from, next) => {
-    viewDesign.LoadingBar.start();
-    next();
+    try {
+        const store = window.localStorage.getItem('store') || "{}";
+        const storeJson = JSON.parse(store) || {};
+        let role = storeJson.App ? storeJson.App.currentRole ? storeJson.App.currentRole : "guest" : "guest";
+        if(!to.meta.roles.includes(role)) {
+            next({path: "/login"});
+        } else {
+            viewDesign.LoadingBar.start();
+            next();
+        }
+    } catch(e) {
+        next({path: "/login"});
+    }
 });
 
 router.afterEach(route => {

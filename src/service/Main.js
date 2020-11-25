@@ -127,4 +127,7 @@ export default class Main {
     static getScheduleOptions() {
         return http.get('/schedule_options');
     }
+    static updateOptions(params, way) {
+        return http.get(`/options?way=${way}`, {params});
+    }
 }

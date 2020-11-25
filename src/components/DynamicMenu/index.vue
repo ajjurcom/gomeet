@@ -56,6 +56,8 @@
 
 <style lang="less" scoped>
 .custom-menu {
+    position: relative;
+    z-index: 1000;
     width: 100%;
     min-width: 1200px;
     box-shadow: 0 0 6px rgba(0,0,0,.15);
@@ -179,9 +181,7 @@
             },
             onRouteChange(route) {
                 this.$nextTick(() => {
-                    console.log('this.$route.name -> ', this.$route.name);
                     this.currentActiveName = this.$route.name.toLowerCase();
-                    // this.$refs.menu.updateOpened();
                     this.$refs.menu.updateActiveName();
                 });
             }

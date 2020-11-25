@@ -191,7 +191,7 @@ export default {
                 else {
                     // 保存token
                     setLocalStorage('loginToken', res.loginToken);
-                    // 保存用户ID、Name、isRoot到store
+                    // 保存用户ID、Name、isRoot到store和localStroge
                     this.$store.commit('App/setUserID', res.id || -1);
                     this.$store.commit('App/setUserName', res.username || 'Guest');
                     this.$store.commit('App/setUserIsRoot', res.isRoot);
@@ -199,6 +199,8 @@ export default {
                     showMessage('info', '登录成功');
                     if (this.currentRole === 'admin') {
                         this.$store.commit('App/setCurrentRole', 'admin');
+                        // 保存store到localStroge
+                        setLocalStorage("store", JSON.stringify(this.$store.state));
                         this.$router.push({
                             name: "UserManager",
                             query: {
@@ -208,6 +210,8 @@ export default {
                     } else {
                         // 跳转到会议室预定界面
                         this.$store.commit('App/setCurrentRole', 'user');
+                        // 保存store到localStroge
+                        setLocalStorage("store", JSON.stringify(this.$store.state));
                         this.$router.push({
                             name: "ReserveMeeting",
                         });

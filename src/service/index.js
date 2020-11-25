@@ -22,14 +22,18 @@ WebHttp.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 
 // 请求前
 WebHttp.interceptors.request.use(config => {
+    // if (config.method === 'get') {
+    //     console.log('params -> ', config.params);
+    //     config.paramsSerializer = function(params) {
+    //         return qs.stringify(params, { arrayFormat: 'repeat'});
+    //     }
+    // }
     viewDesign.LoadingBar.start();
-    config.headers['loginToken'] = getLocalStorage('loginToken') || '';
     return config;
 }, error => {
     viewDesign.LoadingBar.error();
     return Promise.reject(error);
 });
-
 
 // 响应处理
 WebHttp.interceptors.response.use(res => {
