@@ -3,8 +3,9 @@ package repository
 import (
 	"com/mittacy/gomeet/database"
 	"com/mittacy/gomeet/model"
-	"github.com/jmoiron/sqlx"
 	"errors"
+	"fmt"
+	"github.com/jmoiron/sqlx"
 	"strconv"
 )
 
@@ -15,6 +16,7 @@ type IMeetingRepository interface {
 	UpdateMeeting(meeting model.Meeting) error
 	SelectMeetingByID(id int) (model.Meeting, error)
 	SelectMeetingsByBuilding(buildingID int, pageAndOnePageCount ...int) ([]model.Meeting, error)
+	SelectAllMeetingsByParams(buildingID int, layer int, meetingType []string, scales []string) ([]model.Meeting, error)
 	SelectMeetingCountCountByBuilding(buildingID int) (int, error)
 	SelectAllMeetingTypes() []string
 	SelectAllScaleTypes() []string
@@ -161,5 +163,39 @@ func (mr *MeetingRepository) SelectAllMeetingTypes() []string {
 
 func (mr *MeetingRepository) SelectAllScaleTypes() []string {
 	return model.GetScaleTypeList()
+}
+
+func (mr *MeetingRepository) SelectAllMeetingsByParams(buildingID int, layer int, meetingType []string, scales []string) (meetings []model.Meeting, err error) {
+	if err = mr.Conn(); err != nil {
+		return
+	}
+
+	/* 是否有页和页码
+	 * 1. 有 -> 分页查询
+	 * 2. 没有 -> 查询全部
+	 */
+	//sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number  from " + mr.table + " where building_id = ?"
+	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number  from " + mr.table + " where building_id = " + strconv.Itoa(buildingID)
+	if layer > 0 {
+		sqlStr += " and layer = " + strconv.Itoa(layer)
+	}
+	if len(meetingType) > 0 {
+		str := "'" + meetingType[0] + "'"
+		for i := 1; i < len(meetingType); i++ {
+			str += ", '" + meetingType[i] + "'"
+		}
+		sqlStr += " and meeting_type in (" + str + ")"
+	}
+	if len(scales) > 0 {
+		str := "'" + scales[0] + "'"
+		for i := 1; i < len(scales); i++ {
+			str += ", '" + scales[i] + "'"
+		}
+		sqlStr += " and scale in (" + str + ")"
+	}
+	fmt.Println(sqlStr)
+	//err = mr.mysqlConn.Select(&meetings, sqlStr, buildingID)
+	err = mr.mysqlConn.Select(&meetings, sqlStr)
+	return
 }
 

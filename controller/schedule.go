@@ -7,11 +7,14 @@ import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 type IScheduleController interface {
 	GetOptions(c *gin.Context)
+	UpdateOptions(c *gin.Context)
 }
 
 func NewScheduleController() IScheduleController {
@@ -70,11 +73,72 @@ func (sc *ScheduleController) GetOptions(c *gin.Context) {
 		common.ResolveResult(c, false, e.BACK_ERROR, result)
 		return
 	}
+
 	result["meetingList"] = meetings
-
 	result["meetingTypes"] = sc.MeetingService.GetAllMeetingTypes()
-
 	result["meetingScales"] = sc.MeetingService.GetAllScaleTypes()
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+func (sc *ScheduleController) UpdateOptions(c *gin.Context) {
+	/* 1. 获取所有请求参数
+	 * 2. 获取改变事件参数
+	 * 3. 根据不同参数，获取不同内容
+	 * 4. 操作数据库
+	 * 5. 返回结果
+	 */
+	// 1. 变量声明
+	var (
+		campusID, buildingID, layer int
+		meetingTypes, meetingScales []string
+		way string
+	)
+	result := map[string]interface{}{
+		"campusList": []model.Campus{},
+		"buildingList": []model.Building{},
+		"meetingList": []model.Meeting{},
+	}
+	// 2. 解析请求
+	var err1, err2, err3 error
+	campusID, err1 = strconv.Atoi(c.Query("campusID"))
+	buildingID, err2 = strconv.Atoi(c.Query("buildingID"))
+	layer, err3 = strconv.Atoi(c.Query("layer"))
+	meetingTypes, _ = c.GetQueryArray("meetingTypes[]")
+	meetingScales, _ = c.GetQueryArray("meetingScales[]")
+	way = c.Query("way")
+	if err1 != nil || err2 != nil || err3 != nil {
+		fmt.Println("err: ", err1, err2, err3)
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "校区、建筑、楼层ID需为数字")
+		return
+	}
+	fmt.Println("campusID: ", campusID)
+	fmt.Println("buildingID: ", buildingID)
+	fmt.Println("layer: ", layer)
+	fmt.Println("meetingTypes: ", meetingTypes)
+	fmt.Println("meetingScales: ", meetingScales)
+	fmt.Println("way: ", way)
+	// 3. 根据不同参数修改不同变量
+	if way == "campus" {	// 更新建筑
+		buildings, err := sc.BuildingService.GetAllBuildingsByCampus(campusID)
+		if err != nil {
+			logger.Record("获取校区的全部建筑出错", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, nil)
+			return
+		}
+		result["buildingList"] = buildings
+		if len(buildings) == 0 {
+			common.ResolveResult(c, true, e.SUCCESS, result, "该校区中没有建筑")
+			return
+		}
+		buildingID = buildings[0].ID
+	}
+	meetings, err := sc.MeetingService.GetAllMeetingsByParams(buildingID, layer, meetingTypes, meetingScales)
+	if err != nil {
+		logger.Record("获取校区的全部建筑出错", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+	result["meetingList"] = meetings
 
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }

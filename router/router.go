@@ -36,6 +36,7 @@ func InitRouter() *gin.Engine {
 		api.POST("/session", userController.Login)
 		api.GET("/user/:id", userController.GetUserByID)
 		api.GET("/users/:onePageCount/:page", userController.GetUsersByPage)
+		api.GET("/user_options", userController.GetUserStateOptions)
 		/*
 		 * 用户组
 		 */
@@ -62,6 +63,7 @@ func InitRouter() *gin.Engine {
 		 * 预定页面所需API
 		 */
 		api.GET("/schedule_options", scheduleController.GetOptions)
+		api.GET("/options", scheduleController.UpdateOptions)
 	}
 
 	apiUser := r.Group(relativePath)
@@ -72,7 +74,7 @@ func InitRouter() *gin.Engine {
 		 */
 		apiUser.PUT("/user", userController.Put)
 		apiUser.PUT("/user_password", userController.PutPassword)
-		apiUser.GET("/user_options", userController.GetUserStateOptions)
+
 		/*
 		 * 用户组
 		 */

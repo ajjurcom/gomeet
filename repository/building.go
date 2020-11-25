@@ -173,7 +173,7 @@ func (bmr *BuildingManagerRepository) SelectAllBuildingsByCampus(campusID int) (
 		return
 	}
 
-	sqlStr := "select id, building_name from " + bmr.buildingTable + " where campus_id = ?"
+	sqlStr := "select id, building_name, layer from " + bmr.buildingTable + " where campus_id = ?"
 	err = bmr.mysqlConn.Select(&buildings, sqlStr, campusID)
 	return
 }

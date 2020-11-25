@@ -18,9 +18,9 @@ var meetingTypeDict = map[string]bool{
 }
 
 var scaleTypeDict = map[string]bool{
-	"微型会议室(容纳0-10人)":  true,
-	"小型会议室(容纳0-20人)":  true,
-	"中型会议室(可容纳0-30人)": true,
+	"微型会议室(最多容纳10人)":  true,
+	"小型会议室(最多容纳20人)":  true,
+	"中型会议室(最多容纳30人)": true,
 	"大型会议室(容纳30人以上)":  true,
 }
 
