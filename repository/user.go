@@ -175,7 +175,7 @@ func (umr *UserManagerRepository) SelectUsersByPage(page, onePageCount int, stat
 
 	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
-	sqlStr := "select id, sno, state, ban, username from " + umr.table + " where state = ? limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	sqlStr := "select id, sno, state, ban, username from " + umr.table + " where state = ? order by id desc limit " + startIndex + ", " + strconv.Itoa(onePageCount)
 	err = umr.mysqlConn.Select(&userList, sqlStr, state)
 	return
 }
@@ -214,6 +214,7 @@ func (umr *UserManagerRepository) SearchUsersByAttr(attrName, attrVal string) (u
 		err = errors.New("查询方法只能为学号、手机号、用户名")
 		return
 	}
+	sqlStr += " limit 0, 500"
 	err = umr.mysqlConn.Select(&userList, sqlStr)
 	return
 }

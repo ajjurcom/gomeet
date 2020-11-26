@@ -255,7 +255,7 @@ func (gr *GroupRepository) SelectGroupsByCreator(creator int, pageAndOnePageCoun
 	 * 1. 有 -> 分页查询
 	 * 2. 没有 -> 查询全部
 	 */
-	sqlStr := "select id, group_name  from " + gr.groupTable + " where creator = ?"
+	sqlStr := "select id, group_name from " + gr.groupTable + " where creator = ? order by id desc"
 	if len(pageAndOnePageCount) >= 2 {
 		page := pageAndOnePageCount[0] - 1
 		onePageCount := pageAndOnePageCount[1]

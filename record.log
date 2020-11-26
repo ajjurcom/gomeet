@@ -104,3 +104,7 @@ err: [Error 1064: You have an error in your SQL syntax; check the manual that co
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-10, 10' at line 1]
 2020-11-25T12:05:43.762+0800	ERROR	logger/init.go:31	获取校区的全部建筑出错
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'layer = 3' at line 1]
+2020-11-26T12:01:48.307+0800	ERROR	logger/init.go:31	获取用户错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'desc' at line 1]
+2020-11-26T12:18:01.530+0800	ERROR	logger/init.go:31	新建用户错误
+err: [Error 1062: Duplicate entry '20170310124' for key 'user.uidx_name']

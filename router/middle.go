@@ -40,7 +40,6 @@ func VerifyPower(role string) gin.HandlerFunc {
 			token string = c.Request.Header.Get(config.Cfg.Section("jwt").Key("tokenName").String())
 			session *model.Session
 		)
-
 		// 2. 检验有效性
 		if token == "" {
 			code = e.NOT_POWER

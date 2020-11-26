@@ -136,7 +136,7 @@ func (mr *MeetingRepository) SelectMeetingsByBuilding(buildingID int, pageAndOne
 	 * 1. 有 -> 分页查询
 	 * 2. 没有 -> 查询全部
 	 */
-	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number  from " + mr.table + " where building_id = ?"
+	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number  from " + mr.table + " where building_id = ? order by id desc"
 	if len(pageAndOnePageCount) >= 2 {
 		page := pageAndOnePageCount[0] - 1
 		onePageCount := pageAndOnePageCount[1]
