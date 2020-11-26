@@ -86,3 +86,31 @@ export const ShowDateFormat = (date) => {
 export const GetNumFromScale = (str) => {
     return str.replace(/[^0-9]/ig, "") || 0;
 }
+
+
+/**
+ * GetNumFromScale
+ * @function myTask任务函数 
+ * @way {hour | minutes} str
+ */
+// export const OnTimeTask = (myTask, way) => {
+//     const date = new Date();
+//     const dateM = date.getMinutes();
+//     const dateS = date.getSeconds();
+//     const dateMS = 1000 - date.getMilliseconds();
+//     let interval, after;
+//     if (way && way === 'minutes') {
+//         interval = 60000;
+//         after = interval - dateS * 1000 - dateMS;
+//     } else {
+//         interval = 3600000;
+//         after = interval - dateM * 60000 - dateS * 1000 - dateMS;
+//     }
+//     console.log('after 毫秒 -> ', after);
+//     setTimeout(function () {
+//         myTask();
+//         setInterval(() => {
+//             myTask();
+//         }, interval);
+//     }, after);
+// }

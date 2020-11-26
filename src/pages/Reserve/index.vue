@@ -75,11 +75,17 @@
                 </div>
             </div>
         </div>
+        <Modal
+            class="search-box"
+            v-model="control.reserveModal"
+            title="预定"
+            @on-ok="confirmReserve">
+        </Modal>
         <div class="main">
             <div class="dates">
                 <div
                     class="date"
-                    :class="{'date-active': item.index === params.dateID}"
+                    :class="{'date-active': item.index === currentTime.dayIndex}"
                     v-for="item in options.dateList"
                     :key="item.index"
                     @click="changeDate(item.index)">
@@ -88,21 +94,16 @@
                 </div>
             </div>
             <div class="date-timeline">
-                <div class="timeline-info"></div>
+                <div class="timeline-info">
+                    {{currentTime.hour}}:{{currentTime.minute}}:{{currentTime.second}}
+                </div>
                 <div class="timeline-reserves">
-                    <div class="timeline-reserve">08:00</div>
-                    <div class="timeline-reserve">09:00</div>
-                    <div class="timeline-reserve">10:00</div>
-                    <div class="timeline-reserve">11:00</div>
-                    <div class="timeline-reserve">12:00</div>
-                    <div class="timeline-reserve">13:00</div>
-                    <div class="timeline-reserve">14:00</div>
-                    <div class="timeline-reserve">15:00</div>
-                    <div class="timeline-reserve">16:00</div>
-                    <div class="timeline-reserve">17:00</div>
-                    <div class="timeline-reserve">18:00</div>
-                    <div class="timeline-reserve">19:00</div>
-                    <div class="timeline-reserve">20:00</div>
+                    <div
+                        class="timeline-reserve"
+                        v-for="index of (options.endTime-options.startTime)"
+                        :key="index">
+                        {{index-1+options.startTime}}:00
+                    </div>
                 </div>
             </div>
             <div
@@ -119,7 +120,30 @@
                         {{item.meeting_type}}（最多容纳{{GetNumFromScale(item.scale)}}人）
                     </div>
                 </div>
-                <div class="meeting-reserve"></div>
+                <div class="meeting-reserves">
+                    <div 
+                        class="meeting-reserve"
+                        v-for="index of (options.endTime-options.startTime)"
+                        :class="{
+                            'meeting-reserve-first': index === 1,
+                            'expire': (currentTime.dayIndex === 0) && (index + options.startTime <= currentTime.hour),
+                            'normal': (currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)
+                        }"
+                        :key="index">
+                        <div
+                            class="resereve-time"
+                            v-if="(currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)">
+                            {{index-1+options.startTime}}:00
+                        </div>
+                        <div
+                            class="reserve-text"
+                            v-if="(currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)"
+                            @click="reserveMeeting(item.id, index-1+options.startTime)">
+                            <div>{{index-1+options.startTime}}:00</div>
+                            <div>预订</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="main-layer">
@@ -134,6 +158,21 @@
                     :class="{'active-layer': index === params.layer}"
                     @click="changeLayer(index)">
                     F{{index}}
+                </div>
+            </div>
+            <div class="main-colors">
+                <div class="main-color">颜色说明:</div>
+                <div class="main-color">
+                    <div class="main-color-demo" style="backgroundColor: #fff"></div>
+                    <div class="main-color-text">可预订</div>
+                </div>
+                <div class="main-color">
+                    <div class="main-color-demo" style="backgroundColor: #5cadff"></div>
+                    <div class="main-color-text">已被预定</div>
+                </div>
+                <div class="main-color">
+                    <div class="main-color-demo" style="backgroundColor: #f8f8f9"></div>
+                    <div class="main-color-text">已过期</div>
                 </div>
             </div>
         </div>
@@ -276,6 +315,27 @@
                 color: #fff;
             }
         }
+        .main-colors {
+            position: absolute;
+            top: 0;
+            right: -110px;
+            width: 100px;
+            color: #afafaf;
+            .main-color {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                margin: 12px 0;
+                height: 10px;
+                .main-color-demo {
+                    width: 12px;
+                    height: 12px;
+                    margin-right: 5px;
+                    // background-color: #fff;
+                    border: 1px solid #dcdee2;
+                }
+            }
+        }
         .dates {
             display: flex;
             flex-direction: row;
@@ -293,16 +353,15 @@
                 flex: 1;
                 text-align:center;
                 color: #c5c8ce;
-                border-right: 1px solid #efefef;
                 font-weight: 500;
                 cursor: pointer;
                 .date-today {
                     font-size: 12px;
                 }
             }
-            .date-last {
-                border-right: none;
-            }
+            // .date-last {
+            //     border-right: none;
+            // }
             .date-active {
                 background-color: #fff;
                 box-shadow: 0 0 5px #dcdee2;
@@ -367,9 +426,60 @@
                     color: #808695;
                 }
             }
-            .meeting-reserve {
+            .meeting-reserves {
+                display: flex;
+                flex-direction: row;
                 width: 80%;
-                background-color: #f8f8f9;
+                height: 100%;
+                .meeting-reserve {
+                    position: relative;
+                    flex: 1;
+                    height: 100%;
+                    border-left: 1px solid #dcdee2;
+                    color: #808695;
+                    font-size: 12px;
+                    background-color: #f8f8f9;
+                    padding: 8px 3px;
+                    .resereve-time {
+                        position: relative;
+                        z-index: 100;
+                    }
+                    .reserve-text {
+                        position: absolute;
+                        top: -3%;
+                        left: -3%;
+                        width: 106%;
+                        height: 106%;
+                        z-index: 200;
+                        background-color: #2d8cf0;
+                        border-radius: 4px;
+                        box-shadow: 0 0 4px #2d8cf0;
+                        opacity: 0;
+                        font-size: 12px;
+                        padding: 8px 3px;
+                    }
+                    .reserve-text:hover {
+                        opacity: 1;
+                    }
+                }
+                .meeting-reserve-first {
+                    border-left: none;
+                }
+                .expire {
+                    background-color: #f8f8f9;
+                    border-left: none;
+                }
+                .normal {
+                    background-color: #fff;
+                    cursor: pointer;
+                }
+                .normal:hover {
+                    color: #fff;
+                    background-color: #2d8cf0;
+                }
+                .reserve {
+                    background-color: rgb(92, 173, 255);
+                }
             }
         }
         .last-meeting {
@@ -398,17 +508,23 @@ export default {
     data () {
         return {
             role : this.$store.getters['App/getCurrentRole'],
+            currentTime: {
+                dayIndex: 0,
+                hour: new Date().getHours(),
+                minute: new Date().getMinutes(),
+                second: new Date().getSeconds(),
+            },
             control: {
                 checkAllScales: false,
                 checkAllTypes: false,
-                meetingLoading: false
+                meetingLoading: false,
+                reserveModal: false,
             },
             params: {   // 已选择的参数
                 campusID: -1,
                 buildingID: -1,
                 meetingTypes: [],
                 meetingScales: [],
-                dateID: 0,
                 layer: 0       // 0表示全部楼层
             },
             options: {
@@ -418,7 +534,9 @@ export default {
                 meetingList: [],  // 会议室
                 scalesList: [],   // 大小
                 meetingsTypesList: [], // 类型
-                layer: 0
+                layer: 0,
+                startTime: 8,      // 可以预定最早几点
+                endTime: 22
             },
             divClass: {
                 moreParamsDiv: {
@@ -428,7 +546,12 @@ export default {
             },
         };
     },
+    computed: {
+    },
     methods: {
+        confirmReserve() {
+            this.$Message.info('预定成功');
+        },
         initOptions() {
             this.$service.MainAPI.getScheduleOptions().then(res => {
                 this.options.scalesList = res.meetingScales || [];
@@ -447,6 +570,7 @@ export default {
                 this.options.layer = this.options.buildingList[0].layer;
                 this.params.buildingID = this.options.buildingList[0].id;
                 this.options.meetingList = res.meetingList || [];
+                console.log(this.options.meetingList);
             });
         },
         updateOptions(way) {
@@ -499,13 +623,13 @@ export default {
         changeParams() {
             this.updateOptions('meetingType');
         },
-        changeDate(dateID) {
-            if (this.params.dateID === dateID) {
+        changeDate(dayIndex) {
+            if (this.currentTime.dayIndex === dayIndex) {
                 return;
             }
-            this.params.dateID = dateID;
+            this.currentTime.dayIndex = dayIndex;
             this.$nextTick(() => {
-                console.log('dateID -> ', this.params.dateID);
+                console.log('dateIndex -> ', this.currentTime.dayIndex);
             });
         },
         initDate() {
@@ -544,6 +668,17 @@ export default {
                 this.params.meetingScales = [];
             }
         },
+        onTimeTask() {
+            const date = new Date();
+            this.currentTime.hour = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();;
+            this.currentTime.minute = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+            this.currentTime.second = date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds();;
+        },
+        reserveMeeting(meetingID, startTimeHour) {
+            this.control.reserveModal = true;
+            console.log('预订的会议室ID -> ', meetingID);
+            console.log('会议室开始时间 -> ', startTimeHour);
+        }
     },
     created() {
         if (this.role !== 'user') {
@@ -556,6 +691,10 @@ export default {
         this.initDate();
         // 2. 获取各种选项
         this.initOptions();
+        // 3. 每秒钟执行更新时间任务
+        setInterval(() => {
+            this.onTimeTask();
+        }, 1000);
     }
 };
 </script>

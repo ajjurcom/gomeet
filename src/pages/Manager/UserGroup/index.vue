@@ -225,11 +225,6 @@ export default {
             }
         }
     },
-    watch: {
-        'search.members'(value) {
-            console.log('改变了，新值 -> ', value, '最后 -> ', this.search.members);
-        }
-    },
     methods: {
         getDataList() {
             this.$service.MainAPI.getGroupsByPage(this.getMeetingsParams).then((res) => {
@@ -340,9 +335,9 @@ export default {
             if (query.trim() !== "") {
                 if (!this.search.loading) {
                     // 实现input连续输入，只发一次请求
+                    this.search.loading = true;
                     clearTimeout(this.timeout);
                     this.timeout = setTimeout(() => {
-                        this.search.loading = true;
                         this.search.params.keyword = query;
                         this.$service.MainAPI.searchUsers(this.search.params).then(res => {
                             this.search.results = res.userList || [];
