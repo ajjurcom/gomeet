@@ -24,6 +24,7 @@ func InitRouter() *gin.Engine {
 	meetingController := controller.NewMeetingController()
 	scheduleController := controller.NewScheduleController()
 	groupController := controller.NewGroupController()
+	appointmentController := controller.NewAppointmentController()
 
 	api := r.Group(relativePath)
 	{
@@ -40,7 +41,8 @@ func InitRouter() *gin.Engine {
 		/*
 		 * 用户组
 		 */
-		api.GET("/user_group/:onePageCount/:page", groupController.GetMeetingsByPage)
+		api.GET("/user_group/:onePageCount/:page", groupController.GetGroupsByPage)
+		api.GET("/user_groups/:creator", groupController.GetAllGroups)
 		/*
 		 * 校区所需API
 		 */
@@ -69,6 +71,11 @@ func InitRouter() *gin.Engine {
 	apiUser := r.Group(relativePath)
 	apiUser.Use(VerifyPower("user"))
 	{
+		/*
+		 * 会议
+		 */
+		apiUser.POST("/appointment", appointmentController.Post)
+		apiUser.DELETE("/appointment", appointmentController.Delete)
 		/*
 		 * 用户
 		 */

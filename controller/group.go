@@ -18,7 +18,8 @@ type IGroupController interface {
 	Delete(c *gin.Context)
 	PutName(c *gin.Context)
 	PutMember(c *gin.Context)
-	GetMeetingsByPage(c *gin.Context)
+	GetGroupsByPage(c *gin.Context)
+	GetAllGroups(c *gin.Context)
 }
 
 func NewGroupController() IGroupController {
@@ -122,7 +123,7 @@ func (gc *GroupController) PutMember(c *gin.Context) {
 }
 
 // 分页获取创建者的分组
-func (gc *GroupController) GetMeetingsByPage(c *gin.Context) {
+func (gc *GroupController) GetGroupsByPage(c *gin.Context) {
 	result := map[string]interface{}{
 		"groupList": []model.Group{},
 		"count": 0,
@@ -160,6 +161,26 @@ func (gc *GroupController) GetMeetingsByPage(c *gin.Context) {
 	}
 
 	result["count"] = count
+	result["groupList"] = groupList
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+// 获取creator的所有分组
+func (gc *GroupController) GetAllGroups(c *gin.Context) {
+	result := map[string]interface{}{
+	}
+	creator, err := strconv.Atoi(c.Param("creator"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "creator参数必须为数字")
+		return
+	}
+	// 操作数据库
+	groupList, err := gc.GroupService.GetAllGroupsByCreator(creator)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Record("获取用户组错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
 	result["groupList"] = groupList
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }

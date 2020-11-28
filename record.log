@@ -108,3 +108,11 @@ err: [Error 1064: You have an error in your SQL syntax; check the manual that co
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'desc' at line 1]
 2020-11-26T12:18:01.530+0800	ERROR	logger/init.go:31	新建用户错误
 err: [Error 1062: Duplicate entry '20170310124' for key 'user.uidx_name']
+2020-11-26T16:39:33.948+0800	ERROR	logger/init.go:31	获取用户组成员信息出错
+err: [missing destination name member_list in *model.Group]
+2020-11-26T16:44:32.457+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1054: Unknown column 'member_list' in 'field list']
+2020-11-26T16:45:44.533+0800	ERROR	logger/init.go:31	修改成员组成员出错
+err: [Error 1054: Unknown column 'member_list' in 'field list']
+2020-11-28T21:34:19.780+0800	ERROR	logger/init.go:31	删除会议错误
+err: [Error 1054: Unknown column 'appointment' in 'field list']

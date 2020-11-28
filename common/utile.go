@@ -38,6 +38,19 @@ func MemberStrToList(idStr string) []string {
 	return strings.Split(str, ",")
 }
 
+// RemoveDuplicateEle 删除字符串slice中的重复项
+func RemoveDuplicateEle(l []string) []string {
+	m := make(map[string]struct{})
+	result := make([]string, 0, len(l))
+	for _, v := range l {
+		if _, ok := m[v]; !ok {
+			m[v] = struct{}{}
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
 /* DiffMember 计算出idList、idList2的差异元素
  * 1. deleteList: idList中有，idList2中没有的
  * 2. newList: idList2中有，idList中没有的

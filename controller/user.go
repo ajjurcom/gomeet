@@ -450,8 +450,8 @@ func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 		return
 	}
 	// 2.2 获取用户组用户信息
-	group.MemberList = strings.Trim(group.MemberList, ",")
-	userList, err := uc.UserService.GetAllUsersByIDs(group.MemberList)
+	group.Members = strings.Trim(group.Members, ",")
+	userList, err := uc.UserService.GetAllUsersByIDs(group.Members)
 	if err != nil {
 		logger.Record("获取用户组成员信息出错", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, result)
@@ -459,7 +459,7 @@ func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 	}
 
 	// 转化 ID字符串 -> 整数类型列表
-	idStrList := common.MemberStrToList(group.MemberList)
+	idStrList := common.MemberStrToList(group.Members)
 	idList := make([]int, len(idStrList))
 	for i := 0; i < len(idStrList); i++ {
 		idList[i], _ = strconv.Atoi(idStrList[i])

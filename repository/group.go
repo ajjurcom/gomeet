@@ -18,6 +18,7 @@ type IGroupRepository interface {
 	SelectGroupByID(id int) (group model.Group, err error)
 	SelectGroupsByCreator(creator int, pageAndOnePageCount ...int) ([]model.Group, error)
 	SelectGroupCountByCreator(creator int) (int, error)
+	SelectMembersByGroups(ids string) ([]model.Group, error)
 }
 
 type GroupRepository struct {
@@ -48,8 +49,8 @@ func (gr *GroupRepository) Conn() error {
 
 func (gr *GroupRepository) Add(group model.Group) error {
 	/*
-	 * 1. 将memberList转为字符串保存到member_list
-	 * 2. 获取新组的ID，添加到member_list每个user的group_list中
+	 * 1. group保存到数据库
+	 * 2. 获取新组的ID，添加到members每个user的group_list中
 	 */
 	if err := gr.Conn(); err != nil {
 		return err
@@ -61,9 +62,9 @@ func (gr *GroupRepository) Add(group model.Group) error {
 	}
 
 	var id int64 = -1
-	// 1. 将memberList转为字符串保存到member_list
-	sqlStr := "insert into " + gr.groupTable + "(creator, group_name, member_list) values (?, ?, ?)"
-	result, err := tx.Exec(sqlStr, group.Creator, group.GroupName, group.MemberList)
+	// 1. 将memberList转为字符串保存到members
+	sqlStr := "insert into " + gr.groupTable + "(creator, group_name, members) values (?, ?, ?)"
+	result, err := tx.Exec(sqlStr, group.Creator, group.GroupName, group.Members)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -73,15 +74,15 @@ func (gr *GroupRepository) Add(group model.Group) error {
 		tx.Rollback()
 		return err
 	}
-	// 2. 将新组的ID添加到member_list每个user的group_list中
-	sqlStr = "update " + gr.userTable + " set group_list=concat(group_list, '," + strconv.Itoa(int(id)) + "') where id in (" + group.MemberList + ")"
+	// 2. 将新组的ID添加到members每个user的group_list中
+	sqlStr = "update " + gr.userTable + " set group_list=concat(group_list, '," + strconv.Itoa(int(id)) + "') where id in (" + group.Members + ")"
 	result, err = tx.Exec(sqlStr)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 	aff, _ := result.RowsAffected()
-	if int(aff) < len(common.MemberStrToList(group.MemberList)) {
+	if int(aff) < len(common.MemberStrToList(group.Members)) {
 		tx.Rollback()
 		return errors.New("some ID don't exist")
 	}
@@ -101,7 +102,7 @@ func (gr *GroupRepository) Delete(id int) error {
 	}
 	// 1. 查询用户组中的所有成员
 	memberList := ""
-	sqlStr := "select member_list from user_group where id = ?"
+	sqlStr := "select members from user_group where id = ?"
 	err := gr.mysqlConn.QueryRow(sqlStr, id).Scan(&memberList)
 	if err != nil {
 		return err
@@ -111,7 +112,7 @@ func (gr *GroupRepository) Delete(id int) error {
 	}
 	// 2. 查询所有成员的group_list
 	var userList []model.User
-	sqlStr = "select id, group_list from user where id in (" + memberList + ")"
+	sqlStr = "select id, group_list from " + gr.userTable + " where id in (" + memberList + ")"
 	if err = gr.mysqlConn.Select(&userList, sqlStr); err != nil {
 		return err
 	}
@@ -133,11 +134,11 @@ func (gr *GroupRepository) Delete(id int) error {
 		index := common.StrIndexOf(tmpList, idStr)
 		if index != -1 {
 			tmpList = append(tmpList[:index], tmpList[index+1:]...)
-		}
-		_, err := tx.Exec(sqlStr, common.MemberListToStr(tmpList), user.ID)
-		if err != nil {
-			tx.Rollback()
-			return err
+			_, err := tx.Exec(sqlStr, common.MemberListToStr(tmpList), user.ID)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 	}
 	tx.Commit()
@@ -156,10 +157,10 @@ func (gr *GroupRepository) PutName(group model.Group) error {
 
 func (gr *GroupRepository) PutMember(newGroup model.Group) error {
 	/*
-	 * 1. 获取旧的member_list
+	 * 1. 获取旧的members
 	 * 2. 计算新旧list的差异: deleteList, newList
 	 * 3. 查询deleteList所有成员信息
-	 * 5. 更新member_list到group
+	 * 5. 更新members到group
 	 * 6. 将deleteUserList中的每个成员删除该ID
 	 * 7. 向addUserList中的每个成员添加该ID
 	 */
@@ -167,14 +168,14 @@ func (gr *GroupRepository) PutMember(newGroup model.Group) error {
 		return err
 	}
 
-	// 1. 获取旧的member_list
+	// 1. 获取旧的members
 	oldGroup, err := gr.SelectGroupByID(newGroup.ID)
 	if err != nil {
 		return err
 	}
 
 	// 2. 计算新旧list的差异: deleteList, addList
-	deleteList, addList := common.DiffMember(common.MemberStrToList(oldGroup.MemberList), common.MemberStrToList(newGroup.MemberList))
+	deleteList, addList := common.DiffMember(common.MemberStrToList(oldGroup.Members), common.MemberStrToList(newGroup.Members))
 
 	// 3. 查询deleteList所有成员信息
 	var deleteUserList []model.User
@@ -185,14 +186,14 @@ func (gr *GroupRepository) PutMember(newGroup model.Group) error {
 		}
 	}
 
-	// 5. 更新member_list到group
+	// 5. 更新members到group
 	tx, err := gr.mysqlConn.Begin()
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	sqlStr := "update " + gr.groupTable + " set member_list=? where id=?"
-	if _, err := tx.Exec(sqlStr, newGroup.MemberList, oldGroup.ID); err != nil {
+	sqlStr := "update " + gr.groupTable + " set members=? where id=?"
+	if _, err := tx.Exec(sqlStr, newGroup.Members, oldGroup.ID); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -273,5 +274,19 @@ func (gr *GroupRepository) SelectGroupCountByCreator(creator int) (count int, er
 
 	sqlStr := "select count(*) from " + gr.groupTable + " where creator = ?"
 	err = gr.mysqlConn.QueryRow(sqlStr, creator).Scan(&count)
+	return
+}
+
+func (gr *GroupRepository) SelectMembersByGroups(ids string) (groups []model.Group, err error) {
+	if ids == "" {
+		return
+	}
+
+	if err = gr.Conn(); err != nil {
+		return
+	}
+
+	sqlStr := "select members from " + gr.groupTable + " where id in (" + ids + ")"
+	err = gr.mysqlConn.Select(&groups, sqlStr)
 	return
 }
