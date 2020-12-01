@@ -15,6 +15,8 @@ import (
 type IAppointmentController interface {
 	Post(c *gin.Context)
 	Delete(c *gin.Context)
+	Put(c *gin.Context)
+	GetReverse(c *gin.Context)
 }
 
 func NewAppointmentController() IAppointmentController {
@@ -49,8 +51,8 @@ func (ac *AppointmentController) Post(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "开始时间不能等于或晚于结束时间")
 		return
 	}
-	// 2. 查看会议是否已占用, isConflict 会议是否冲突
-	isConflict, err := ac.AppointmentService.IsAppointmentConflict(appointment)
+	// 2. 查看会议是否冲突, isConflict 会议是否冲突
+	isConflict, err := ac.AppointmentService.IsAppointmentConflict(appointment, "post")
 	if err != nil {
 		logger.Record("检查会议是否冲突错误", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, nil)
@@ -121,4 +123,101 @@ func (ac *AppointmentController) Delete(c *gin.Context) {
 	}
 
 	common.ResolveResult(c, true, e.SUCCESS, nil)
+}
+
+func (ac *AppointmentController) Put(c *gin.Context) {
+	/*
+	 * 1. 解析请求
+	 * 2. 查看新会议时间是否冲突
+	 * 3. 查询旧成员
+	 * 4. 将groups中的组成员查询出来加入到members中组成新成员
+	 * 5. 计算新成员和删除成员, 所有成员
+	 * 6. 操作数据库添加会议室
+	 */
+	// 1. 解析请求
+	appointment := model.Appointment{}
+	if err := c.ShouldBindJSON(&appointment); err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
+		return
+	}
+	if appointment.StartTime >= appointment.EndTime {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "开始时间不能等于或晚于结束时间")
+		return
+	}
+	// 2. 查看会议是否冲突, isConflict 会议是否冲突
+	isConflict, err := ac.AppointmentService.IsAppointmentConflict(appointment, "put")
+	if err != nil {
+		logger.Record("检查会议是否冲突错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		return
+	}
+	if isConflict {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议时间冲突")
+		return
+	}
+	// 3. 查询旧成员
+	members, _, err := ac.AppointmentService.GetAllMembersAndCreatorIDByID(appointment.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议不存在")
+		} else {
+			logger.Record("获取全部成员出错", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		}
+		return
+	}
+	oldMembers := common.MemberStrToList(members)
+
+	// 4. 将groups中的组成员查询出来加入到members中组成新成员
+	members = appointment.Members
+	if strings.Trim(appointment.Groups, ",") != "" {
+		groups, err := ac.GroupService.GetMembersByGroups(appointment.Groups)
+		if err != nil {
+			logger.Record("查询组的所有用户ID出错", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, nil)
+			return
+		}
+		for i := 0; i < len(groups); i++ {
+			members += "," + groups[i].Members
+		}
+	}
+	newMembers := common.RemoveDuplicateEle(common.MemberStrToList(strings.Trim(members, ",")))
+
+	// 5. 计算新成员和删除成员, 所有成员
+	appointment.AllMembers = common.MemberListToStr(newMembers)
+	deleteMembers, addMembers := common.DiffMember(oldMembers, newMembers)
+
+	// 6. 添加会议室
+	if err := ac.AppointmentService.PutAppointment(appointment,
+		common.MemberListToStr(addMembers),
+		common.MemberListToStr(deleteMembers)); err != nil {
+		logger.Record("更新会议错误", err)
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "请检查输入值")
+		return
+	}
+	common.ResolveResult(c, true, e.SUCCESS, nil)
+}
+
+// api/v1/all_creator?day=11/30/2020&meeting_id[]=...
+func (ac *AppointmentController) GetReverse(c *gin.Context) {
+	result := map[string]interface{}{
+		"appointments": []model.Appointment{},
+	}
+
+	day := c.Query("day")
+	startTime := c.Query("start_time")
+	meetingID := c.QueryArray("meeting_id[]")
+	if day == "" || len(meetingID) == 0 {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	appointments, err := ac.AppointmentService.GetAllReserve(day, startTime, common.MemberListToStr(meetingID))
+	if err != nil {
+		logger.Record("查询预定情况错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+
+	result["appointments"] = appointments
+	common.ResolveResult(c, true, e.SUCCESS, result)
 }

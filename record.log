@@ -116,3 +116,15 @@ err: [Error 1054: Unknown column 'member_list' in 'field list']
 err: [Error 1054: Unknown column 'member_list' in 'field list']
 2020-11-28T21:34:19.780+0800	ERROR	logger/init.go:31	删除会议错误
 err: [Error 1054: Unknown column 'appointment' in 'field list']
+2020-11-29T18:37:29.704+0800	ERROR	logger/init.go:31	更新会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-29T18:40:17.656+0800	ERROR	logger/init.go:31	更新会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-29T18:40:51.529+0800	ERROR	logger/init.go:31	更新会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-29T18:44:01.917+0800	ERROR	logger/init.go:31	更新会议错误
+err: [sql: expected 9 arguments, got 8]
+2020-11-29T20:45:24.944+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-11-30T15:26:34.216+0800	ERROR	logger/init.go:31	查询预定情况错误
+err: [missing destination name creator_name in *[]model.Appointment]

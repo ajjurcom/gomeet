@@ -3,7 +3,7 @@ package model
 type Appointment struct {
 	ID         int    `json:"id" db:"id"`
 	CreatorID  int    `json:"creator_id" db:"creator_id"`
-	CreateName string `json:"creator_name" db:"create_name"`
+	CreatorName string `json:"creator_name" db:"creator_name"`
 	MeetingID  int    `json:"meeting_id" db:"meeting_id"`
 	Day        string `json:"day" db:"day"`
 	StartTime  string `json:"start_time" db:"start_time"`
