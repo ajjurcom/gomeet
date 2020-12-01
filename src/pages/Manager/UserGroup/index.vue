@@ -204,7 +204,7 @@ export default {
                 id: -1,
                 creator: -1,
                 group_name: -1,
-                member_list: ""
+                members: ""
             },
             search: {
                 id: "",
@@ -297,7 +297,7 @@ export default {
             this.loading = true;
             const obj = {
                 'id': this.search.id,
-                'member_list': intArrayToStr(this.search.members) || ""
+                'members': intArrayToStr(this.search.members) || ""
             };
             this.$service.MainAPI.putGroupMember(obj).then(res => {
                 this.modal.show = false;
@@ -311,7 +311,7 @@ export default {
             const obj = {
                 'creator': this.getMeetingsParams.creator || -1,
                 'group_name': this.search.group_name || "",
-                'member_list': intArrayToStr(this.search.members) || ""
+                'members': intArrayToStr(this.search.members) || ""
             };
             // 检查输入值
             if (obj.creator === -1) {

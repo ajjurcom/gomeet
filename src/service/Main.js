@@ -2,6 +2,15 @@ import {WebHttp as http} from './index.js';
 
 export default class Main {
     /*
+     * 会议预约
+     */
+    static addAppointment(data) {
+        return http.post('/appointment', data);
+    }
+    static getReverse(params) {
+        return http.get('/reverse', {params})
+    }
+    /*
      * 用户API
      */
     static login(data) {
@@ -57,6 +66,9 @@ export default class Main {
     }
     static getGroupsByPage(obj) {
         return http.get(`/user_group/${obj.onePageNum}/${obj.page}?creator=${obj.creator}`);
+    }
+    static getAllGroupsByCreator(creator) {
+        return http.get(`/user_groups/${creator}`);
     }
     /*
      * 校区API

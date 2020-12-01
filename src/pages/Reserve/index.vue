@@ -76,26 +76,133 @@
             </div>
         </div>
         <Modal
-            class="search-box"
+            class="reserve-box"
             v-model="control.reserveModal"
-            title="预定"
+            :loading="control.loading"
+            :title="reserveParams.meetingName"
             @on-ok="confirmReserve">
+            <div class="reserve-item">
+                <div class="reserve-title">会议日期：</div>
+                <div class="reserve-select">
+                    <Select v-model="reserveParams.day" style="width:120px">
+                        <Option
+                            v-for="item in options.dateList"
+                            :key="item.index"
+                            :value="item.date">
+                            {{item.title}}
+                        </Option>
+                    </Select>
+                </div>
+            </div>
+            <div class="reserve-item">
+                <div class="reserve-title">会议时间：</div>
+                <div class="reserve-select">
+                    <Select v-model="reserveParams.startTime" style="width:70px">
+                        <Option
+                            v-for="item in reserveOptions.startTimeList"
+                            :key="item"
+                            :value="item">
+                            {{item}}:00
+                        </Option>
+                    </Select>
+                    <div class="reserve-select-space">-</div>
+                    <Select v-model="reserveParams.endTime" style="width:70px">
+                        <Option
+                            v-for="item in reserveOptions.endTimeList"
+                            :key="item"
+                            :value="item">
+                            {{item}}:00
+                        </Option>
+                    </Select>
+                </div>
+            </div>
+            <div class="reserve-item">
+                <div class="reserve-title">搜索方式：</div>
+                <RadioGroup class="reserve-select" @on-change="changeSearchWay" v-model="search.params.searchWay">
+                    <Radio
+                        v-for="item in search.searchWays"
+                        :key="item"
+                        :label="item">
+                        {{search.paramsMap[item]}}
+                    </Radio>
+                </RadioGroup>
+            </div>
+            <div class="reserve-item">
+                <div class="reserve-title">会议主题：</div>
+                <div class="reserve-select">
+                    <Input
+                        v-model="reserveParams.theme"
+                        maxlength="100"
+                        show-word-limit
+                        clearable
+                        placeholder="会议主题"
+                        style="width: 400px" />
+                </div>
+            </div>
+            <div class="reserve-item">
+                <div class="reserve-title">内容简介：</div>
+                <div class="reserve-select">
+                    <Input
+                        type="textarea"
+                        :rows="4"
+                        v-model="reserveParams.content"
+                        maxlength="255"
+                        show-word-limit
+                        clearable
+                        placeholder="会议内容简介"
+                        style="width: 400px" />
+                </div>
+            </div>
+            <div class="reserve-item">
+                <div class="reserve-title">参会成员：</div>
+                <div class="reserve-select">
+                    <Row>
+                        <Col span="12" style="width:400px">
+                            <Select
+                                ref="searchInput"
+                                v-model="search.members"
+                                multiple
+                                filterable
+                                placeholder="输入关键字搜索用户"
+                                :remote-method="searchUsers"
+                                :loading="search.loading">
+                                <Option v-for="user in search.results" :value="user.id" :key="user.id">
+                                    {{user.username}}({{user.val}})
+                                </Option>
+                            </Select>
+                        </Col>
+                    </Row>
+                </div>
+            </div>
+            <div class="reserve-item">
+                <div class="reserve-title">参会组：</div>
+                <div class="reserve-select">
+                    <Select v-model="reserveParams.groupsList" multiple style="width:400px">
+                        <Option
+                            v-for="item in options.groupsList"
+                            :key="item.id"
+                            :value="item.id">
+                            {{item.group_name}}
+                        </Option>
+                    </Select>
+                </div>
+            </div>
         </Modal>
         <div class="main">
             <div class="dates">
                 <div
                     class="date"
-                    :class="{'date-active': item.index === currentTime.dayIndex}"
+                    :class="{'date-active': item.date === currentTime.dateStr}"
                     v-for="item in options.dateList"
                     :key="item.index"
-                    @click="changeDate(item.index)">
+                    @click="changeDate(item.date, item.index)">
                     <div>{{item.title}}</div>
                     <div v-if="item.index === 0" class="date-today">（今天）</div>
                 </div>
             </div>
             <div class="date-timeline">
                 <div class="timeline-info">
-                    {{currentTime.hour}}:{{currentTime.minute}}:{{currentTime.second}}
+                    <!-- {{currentTime.hour}}:{{currentTime.minute}}:{{currentTime.second}} -->
                 </div>
                 <div class="timeline-reserves">
                     <div
@@ -127,18 +234,24 @@
                         :class="{
                             'meeting-reserve-first': index === 1,
                             'expire': (currentTime.dayIndex === 0) && (index + options.startTime <= currentTime.hour),
-                            'normal': (currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)
+                            'normal': ((currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)) && !reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)],
+                            'reserve': reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)]
                         }"
                         :key="index">
                         <div
                             class="resereve-time"
-                            v-if="(currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)">
+                            v-if="(currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour) && !reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)]">
                             {{index-1+options.startTime}}:00
                         </div>
                         <div
+                            class="resereve-time"
+                            v-if="reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)]">
+                            {{reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)]}}
+                        </div>
+                        <div
                             class="reserve-text"
-                            v-if="(currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)"
-                            @click="reserveMeeting(item.id, index-1+options.startTime)">
+                            v-if="((currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)) && !reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)]"
+                            @click="reserveMeeting(item.id, item.meeting_name, index-1+options.startTime)">
                             <div>{{index-1+options.startTime}}:00</div>
                             <div>预订</div>
                         </div>
@@ -478,6 +591,7 @@
                     background-color: #2d8cf0;
                 }
                 .reserve {
+                    color: #fff;
                     background-color: rgb(92, 173, 255);
                 }
             }
@@ -499,26 +613,49 @@
 .select-item select {
     border: red;
 }
+/* .reserve-box {
+} */
+.reserve-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 10px 0;
+}
+.reserve-select {
+    display: flex;
+    flex-direction: row;
+}
+.reserve-select-space {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 10px;
+}
+.reserve-title {
+    width: 80px;
+    text-align: right;
+}
 </style>
 
 <script>
-import {GetDateObj, ShowDateFormat, GetNumFromScale} from '@/Utils';
+import {intArrayToStr, GetDateObj, ReverseFormat, GetNumFromScale, GetNumberArr, DateFormat} from '@/Utils';
 export default {
     name: "Reserve",
     data () {
         return {
-            role : this.$store.getters['App/getCurrentRole'],
+            reserveMap: {},
             currentTime: {
                 dayIndex: 0,
+                dateStr: '',
                 hour: new Date().getHours(),
-                minute: new Date().getMinutes(),
-                second: new Date().getSeconds(),
+                // minute: new Date().getMinutes(),
+                // second: new Date().getSeconds(),
             },
             control: {
                 checkAllScales: false,
                 checkAllTypes: false,
                 meetingLoading: false,
                 reserveModal: false,
+                loading: true,
             },
             params: {   // 已选择的参数
                 campusID: -1,
@@ -526,6 +663,35 @@ export default {
                 meetingTypes: [],
                 meetingScales: [],
                 layer: 0       // 0表示全部楼层
+            },
+            reserveParams: {
+                meetingID: 0,
+                meetingName: '会议室名字',
+                day: '',
+                startTime: 8,
+                endTime: 22,
+                groupsList: [],
+                theme: '',
+                content: ''
+            },
+            reserveOptions: {
+                startTimeList: [],
+                endTimeList: []
+            },
+            search: {
+                searchWays: ["username", "sno", "phone"],
+                paramsMap: {
+                    'sno': '学号',
+                    'phone': '手机号',
+                    'username': '姓名'
+                },
+                params: {
+                    searchWay: 'username',
+                    keyword: ''
+                },
+                members: [],
+                loading: false,
+                results: []
             },
             options: {
                 dateList: [],   // 日期
@@ -536,7 +702,8 @@ export default {
                 meetingsTypesList: [], // 类型
                 layer: 0,
                 startTime: 8,      // 可以预定最早几点
-                endTime: 22
+                endTime: 22,
+                groupsList: [],
             },
             divClass: {
                 moreParamsDiv: {
@@ -546,11 +713,45 @@ export default {
             },
         };
     },
-    computed: {
-    },
     methods: {
         confirmReserve() {
-            this.$Message.info('预定成功');
+            this.control.loading = true;
+            // 1. 检查参数
+            const obj = {
+                creator_id: this.$store.getters['App/getUserID'],
+                creator_name: this.$store.getters['App/getUserName'],
+                meeting_id: this.reserveParams.meetingID,
+                day: this.reserveParams.day,
+                start_time: this.reserveParams.startTime < 10 ? '0' + this.reserveParams.startTime + ':00' : this.reserveParams.startTime + ':00',
+                end_time: this.reserveParams.endTime < 10 ? '0' + this.reserveParams.endTime + ':00' : this.reserveParams.endTime + ':00',
+                theme: this.reserveParams.theme,
+                content: this.reserveParams.content,
+                groups: intArrayToStr(this.reserveParams.groupsList),
+                members: intArrayToStr(this.search.members),
+            };
+            let passConfirm = true;
+            let msg = "";
+            if (obj.groups === "" && obj.members === "") {
+                passConfirm = false;
+                msg = "参会人员和组必须选择有一个";
+            }
+            if (obj.theme === "") {
+                passConfirm = false;
+                msg = "会议主题不能为空";
+            }
+            if (!passConfirm) {
+                this.$Message.error(msg);
+                this.control.loading = false;
+                return;
+            }
+            // 2. 发起请求
+            this.$service.MainAPI.addAppointment(obj).then(res => {
+                this.$Message.info('预定成功');
+                this.control.reserveModal = false;
+                this.initReserve();
+            }).finally(() => {
+                this.control.loading = false;
+            });
         },
         initOptions() {
             this.$service.MainAPI.getScheduleOptions().then(res => {
@@ -570,7 +771,7 @@ export default {
                 this.options.layer = this.options.buildingList[0].layer;
                 this.params.buildingID = this.options.buildingList[0].id;
                 this.options.meetingList = res.meetingList || [];
-                console.log(this.options.meetingList);
+                this.initReserve();
             });
         },
         updateOptions(way) {
@@ -601,6 +802,9 @@ export default {
                     this.$Message.info('会议室已更新');
                 }
                 this.control.meetingLoading = false;
+                if (way === 'campus' || way === 'building') {
+                    this.initReserve();
+                }
             });
         },
         showMoreParams() {
@@ -623,25 +827,25 @@ export default {
         changeParams() {
             this.updateOptions('meetingType');
         },
-        changeDate(dayIndex) {
-            if (this.currentTime.dayIndex === dayIndex) {
+        changeDate(dateStr, dayIndex) {
+            if (this.currentTime.dateStr === dateStr) {
                 return;
             }
             this.currentTime.dayIndex = dayIndex;
-            this.$nextTick(() => {
-                console.log('dateIndex -> ', this.currentTime.dayIndex);
-            });
+            this.currentTime.dateStr = dateStr;
+            this.initReserve();
         },
         initDate() {
             for (let i = 0; i <= 6; i++) {
+                let date = GetDateObj(i);
                 const obj = {
                     'index': i,
-                    'title': '',
-                    'date': GetDateObj(i)
+                    'title': ReverseFormat(date),
+                    'date': DateFormat(date)
                 };
-                obj.title = ShowDateFormat(obj.date);
                 this.options.dateList[i] = obj;
             }
+            this.currentTime.dateStr = this.options.dateList[0].date;
         },
         GetNumFromScale(str) {
             return GetNumFromScale(str);
@@ -671,17 +875,87 @@ export default {
         onTimeTask() {
             const date = new Date();
             this.currentTime.hour = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();;
-            this.currentTime.minute = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
-            this.currentTime.second = date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds();;
+            // this.currentTime.minute = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+            // this.currentTime.second = date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds();;
         },
-        reserveMeeting(meetingID, startTimeHour) {
+        reserveMeeting(meetingID, meetingName, startTimeHour) {
+            this.reserveParams.meetingID = meetingID;
+            this.reserveParams.meetingName = meetingName;
+            this.reserveParams.startTime = startTimeHour;
+            this.reserveParams.endTime = startTimeHour+1;
+            this.reserveParams.day = this.currentTime.dateStr;
+            this.reserveOptions.startTimeList = GetNumberArr(startTimeHour, this.options.endTime-1);
+            this.reserveOptions.endTimeList = GetNumberArr(startTimeHour+1, this.options.endTime);
             this.control.reserveModal = true;
-            console.log('预订的会议室ID -> ', meetingID);
-            console.log('会议室开始时间 -> ', startTimeHour);
+            // 获取分组选项
+            if (this.options.groupsList.length === 0) {
+                this.$service.MainAPI.getAllGroupsByCreator(this.$store.getters['App/getUserID']).then(res => {
+                    this.options.groupsList = res.groupList;
+                })
+            }
+        },
+        replaceShowVal(way) {
+            if (way === 'phone') {
+                for (let user of this.search.results) {
+                    user.val = user.phone;
+                }
+                return
+            }
+            for (let user of this.search.results) {
+                user.val = user.sno;
+            }
+        },
+        searchUsers(query) {
+            if (query.trim() !== "") {
+                if (!this.search.loading) {
+                    // 实现input连续输入，只发一次请求
+                    this.search.loading = true;
+                    clearTimeout(this.timeout);
+                    this.timeout = setTimeout(() => {
+                        this.search.params.keyword = query;
+                        this.$service.MainAPI.searchUsers(this.search.params).then(res => {
+                            this.search.results = res.userList || [];
+                            // 根据查询方式将手机或者学号赋值给val
+                            this.replaceShowVal(this.search.params.searchWay);
+                        }).finally(() => {
+                            this.search.loading = false;
+                        });
+                    }, 300);
+                }
+            } else {
+                this.search.results = [];
+            }
+        },
+        changeSearchWay() {
+            this.$refs.searchInput.setQuery('');
+        },
+        initReserve() {
+            let meetingList = this.options.meetingList.map(item => {
+                return item.id;
+            });
+            const obj = {
+                'day': this.currentTime.dateStr,
+                'start_time': this.currentTime.hour < 10 ? '0'+this.currentTime.hour+':00' : this.currentTime.hour+':00',
+                'meeting_id': meetingList,
+            }
+            this.$service.MainAPI.getReverse(obj).then(res => {
+                // 存入reserveMap字典中
+                this.reserveMap = {};
+                if (res.appointments) {
+                    for (let item of res.appointments) {
+                        const start = item.start_time.substr(0,1) === '0' ? Number(item.start_time.substr(1,2)) : Number(item.start_time.substr(0,2));
+                        const end = item.end_time.substr(0,1) === '0' ? Number(item.end_time.substr(1,2)) : Number(item.end_time.substr(0,2));
+                        for (let i = start; i < end; i++) {
+                            this.reserveMap[item.day+'-'+item.meeting_id+'-'+i] = item.creator_name;
+                        }
+                    }
+                }
+            });
+            
         }
     },
     created() {
-        if (this.role !== 'user') {
+        if (this.$store.getters['App/getCurrentRole'] !== 'user') {
             this.$Message.info('请先登录');
             this.$router.push({
                 name: "Login"
@@ -689,12 +963,12 @@ export default {
         }
         // 1. 初始化日期
         this.initDate();
-        // 2. 获取各种选项
+        // 2. 获取各种选项, then -> 获取显示的会议室预约情况 this.initReserve();
         this.initOptions();
-        // 3. 每秒钟执行更新时间任务
+        // 4. 每秒钟执行更新时间任务
         setInterval(() => {
             this.onTimeTask();
-        }, 1000);
+        }, 60000);
     }
 };
 </script>

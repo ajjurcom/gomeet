@@ -1,5 +1,33 @@
 import { Message } from 'view-design';
 
+// 给Date加格式化方法
+Date.prototype.format = function (fmt) {
+    var o = {
+      "M+": this.getMonth() + 1, //月份
+      "d+": this.getDate(), //日
+      "h+": this.getHours(), //小时
+      "m+": this.getMinutes(), //分
+      "s+": this.getSeconds(), //秒
+      "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+      S: this.getMilliseconds(), //毫秒
+    };
+    if (/(y+)/.test(fmt)) {
+      fmt = fmt.replace(
+        RegExp.$1,
+        (this.getFullYear() + "").substr(4 - RegExp.$1.length)
+      );
+    }
+    for (var k in o) {
+      if (new RegExp("(" + k + ")").test(fmt)) {
+        fmt = fmt.replace(
+          RegExp.$1,
+          RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length)
+        );
+      }
+    }
+    return fmt;
+  };
+
 /**
  * showMessage 全局显示提示消息
  * @params {*} type
@@ -61,21 +89,27 @@ export const intArrayToStr = (intList) => {
  * @params {*} afterDay
  */
 export const GetDateObj = (afterDay) => {
-    var dd = new Date();
+    let dd = new Date();
     dd.setDate(dd.getDate() + afterDay);
     return dd;
 }
 
 /**
- * ShowDateFormat
+ * ReverseFormat 预定表展示的时间, 包含周几，不包含年
  * @params {*} date
  * @returns "10/27 周二" 
  */
-export const ShowDateFormat = (date) => {
-    const month = (date.getMonth() + 1) < 10 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1); //获取当前月份的日期，不足10补0
-    const d = date.getDate() < 10 ? "0" + date.getDate() : date.getDate(); //获取当前几号，不足10补0
-    const day = "周" + "日一二三四五六".charAt(date.getDay());
-    return month + "/" + d + " " + day;
+export const ReverseFormat = (date) => {
+    return date.format('MM/dd') + " " + "周" + "日一二三四五六".charAt(date.getDay());
+}
+
+/**
+ * DateFormat 提交的日期格式, 包含年月日
+ * @params {*} date
+ * @returns "10/27/2020" 
+ */
+export const DateFormat = (date) => {
+    return date.format('MM/dd/yyyy');
 }
 
 /**
@@ -85,6 +119,17 @@ export const ShowDateFormat = (date) => {
  */
 export const GetNumFromScale = (str) => {
     return str.replace(/[^0-9]/ig, "") || 0;
+}
+
+
+/**
+ * GetNumberArr
+ * @params {*} a    a < b
+ * @params {*} b
+ * @returns list
+ */
+export const GetNumberArr = (a, b) => {
+    return Array.from(Array( b - a + 1 )).map(( e, i ) => a + i);
 }
 
 
