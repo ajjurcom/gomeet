@@ -935,7 +935,7 @@ export default {
             });
             const obj = {
                 'day': this.currentTime.dateStr,
-                'start_time': this.currentTime.hour < 10 ? '0'+this.currentTime.hour+':00' : this.currentTime.hour+':00',
+                'start_time': this.currentTime.dayIndex !== 0 ? '00:00' : this.currentTime.hour < 10 ? '0'+this.currentTime.hour+':00' : this.currentTime.hour+':00',
                 'meeting_id': meetingList,
             }
             this.$service.MainAPI.getReverse(obj).then(res => {
@@ -943,8 +943,8 @@ export default {
                 this.reserveMap = {};
                 if (res.appointments) {
                     for (let item of res.appointments) {
-                        const start = item.start_time.substr(0,1) === '0' ? Number(item.start_time.substr(1,2)) : Number(item.start_time.substr(0,2));
-                        const end = item.end_time.substr(0,1) === '0' ? Number(item.end_time.substr(1,2)) : Number(item.end_time.substr(0,2));
+                        const start = item.start_time.substr(0,1) === '0' ? Number(item.start_time.substr(1,1)) : Number(item.start_time.substr(0,2));
+                        const end = item.end_time.substr(0,1) === '0' ? Number(item.end_time.substr(1,1)) : Number(item.end_time.substr(0,2));
                         for (let i = start; i < end; i++) {
                             this.reserveMap[item.day+'-'+item.meeting_id+'-'+i] = item.creator_name;
                         }
