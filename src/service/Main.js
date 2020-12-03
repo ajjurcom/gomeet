@@ -13,7 +13,6 @@ export default class Main {
     static putAppointment(data) {
         return http.put('/appointment', data);
     }
-
     static getReserve(params) {
         return http.get('/reserve', {params})
     }
@@ -22,6 +21,15 @@ export default class Main {
     }
     static getAppointment(id) {
         return http.get(`/appointment/${id}`);
+    }
+    static getAppointmentByPage(obj) {
+        return http.get(`/appointments/${obj.onePageNum}/${obj.page}?state=${obj.state}`);
+    }
+    static getAppointmentStates() {
+        return http.get('/appointment_states');
+    }
+    static putAppointmentState(data) {
+        return http.put('/appointment_state', data);
     }
     /*
      * 用户API

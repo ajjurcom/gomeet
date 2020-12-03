@@ -27,8 +27,7 @@
                             <Option 
                                 v-for="state in stateList"
                                 :value="state"
-                                :key="state"
-                                >
+                                :key="state">
                                 {{stateMap[state]}}
                             </Option>
                         </Select>

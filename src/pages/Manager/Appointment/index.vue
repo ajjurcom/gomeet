@@ -30,101 +30,41 @@
                     <div class="appointment-title">内容：</div>
                     <div class="appointment-content">{{appointment.content}}</div>
                 </div>
-            </Modal>
-            <Modal
-                class="invitation-modal"
-                v-model="control.editModal"
-                title="修改会议信息"
-                @on-ok="editAppointment">
-                <div class="appointment-item">
-                    <span class="appointment-title">主题：</span>
-                    <div class="appointment-content">
-                        <Input
-                            v-model="updateAppointment.theme"
-                            maxlength="100"
-                            show-word-limit
-                            clearable
-                            placeholder="会议主题"
-                            style="width: 400px" />
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-title">内容：</div>
-                    <div class="appointment-content">
-                        <Input
-                            type="textarea"
-                            :rows="4"
-                            v-model="updateAppointment.content"
-                            maxlength="255"
-                            show-word-limit
-                            clearable
-                            placeholder="会议内容简介"
-                            style="width: 400px" />
-                    </div>
-                </div>
                 <div class="appointment-item">
                     <div class="appointment-title">参会成员：</div>
                     <div class="appointment-content">
                         <Row>
                             <Col span="12" style="width:400px">
                                 <Select
-                                    ref="searchInput"
+                                    disabled
                                     v-model="search.members"
                                     multiple
-                                    filterable
-                                    placeholder="输入关键字搜索用户"
-                                    :remote-method="searchUsers"
-                                    :loading="search.loading">
+                                    placeholder="输入关键字搜索用户">
                                     <Option v-for="user in search.results" :value="user.id" :key="user.id">
-                                        {{user.username}}({{user.val}})
+                                        {{user.username}}({{user.sno}})
                                     </Option>
                                 </Select>
                             </Col>
                         </Row>
                     </div>
                 </div>
-                <div class="appointment-item">
-                    <div class="appointment-title"></div>
-                    <div class="appointment-content">
-                        <RadioGroup @on-change="changeSearchWay" v-model="search.params.searchWay">
-                            <Radio
-                                v-for="item in search.searchWays"
-                                :key="item"
-                                :label="item">
-                                {{search.paramsMap[item]}}
-                            </Radio>
-                        </RadioGroup>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-title">参会组：</div>
-                    <div class="appointment-content">
-                        <Select v-model="updateAppointment.groupsList" multiple style="width:400px">
-                            <Option
-                                v-for="item in options.group_list"
-                                :key="item.id"
-                                :value="item.id">
-                                {{item.group_name}}
-                            </Option>
-                        </Select>
-                    </div>
-                </div>
             </Modal>
-            <!-- <Modal
-                class="invitation-modal"
-                v-model="control.invitationModal"
-                title="发送会议邀请">
-            
-            </Modal> -->
+            <div class="select-items">
+                <Select class="select-item" v-model="requestListParams.state" placeholder="会议状态" @on-change="changeState">
+                    <Option 
+                        v-for="state in options.states"
+                        :value="state"
+                        :key="state"
+                        >
+                        {{stateMap[state]}}
+                    </Option>
+                </Select>
+            </div>
             <div class="reserves">
-                <div class="title">
-                    您有个<span style="color: #2d8cf0">{{myReserve.length}}</span>预定记录
-                </div>
                 <div
                     class="reserve"
-                    v-for="(item, index) in myReserve"
-                    :key="item.id"
-                    @click="showAppointment(item.id)">
+                    v-for="item in itemList"
+                    :key="item.id">
                     <div class="info">
                         <Icon type="md-time" color="#2d8cf0" size="20"/>
                         <div class="day-time">
@@ -135,63 +75,33 @@
                         <div class="theme">
                             {{item.theme | truncateStr}}
                         </div>
-                        <div class="item-division"></div>
-                        <div class="state" :class="{'state-pass': item.state === 'adopt'}">
-                            {{stateMap[item.state]}}
-                        </div>
                     </div>
                     <div class="buttons">
-                        <Button
-                            :disabled="item.state === 'adopt'"
-                            class="button"
-                            type="primary"
-                            @click.stop="showEditModal(item.id)">
-                            管理
-                        </Button>
-                        <!-- <Button
-                            :disabled="item.state !== 'adopt'"
-                            class="button"
-                            type="primary"
-                            @click.stop="showInvitationModal">
-                            发会邀
-                        </Button> -->
-                        <Poptip
-                            confirm
-                            title="退订将无法恢复"
-                            @click.native.stop=""
-                            @on-ok="deleteAppointment(item.id, index)">
-                            <Button class="button" type="error" ghost>退订</Button>
-                        </Poptip>
+                        <Select :disabled="control.puting" class="button" v-model="item.state" placeholder="状态" @on-change="putState(item.id, item.state)">
+                            <Option 
+                                v-for="state in options.states"
+                                :value="state"
+                                :key="state"
+                                >
+                                {{stateMap[state]}}
+                            </Option>
+                        </Select>
+                        <Button class="button" type="primary" @click="showAppointment(item.id)">详情</Button>
                     </div>
                 </div>
             </div>
-            <div class="reserves">
-                <div class="title">
-                    其他<span style="color: #2d8cf0">{{otherReserve.length}}</span>个邀约会议
-                </div>
-                <div
-                    class="reserve"
-                    v-for="item in otherReserve"
-                    :key="item.id"
-                    @click="showAppointment(item.id)">
-                    <div class="info">
-                        <Icon type="md-time" color="#2d8cf0" size="20"/>
-                        <div class="day-time">
-                            <div class="day">{{item.day | dateFormate}}</div>
-                            <div class="time">{{item.start_time}} - {{item.end_time}}</div>
-                        </div>
-                        <div class="item-division"></div>
-                        <div class="theme">
-                            {{item.theme}}
-                        </div>
-                        <div class="item-division"></div>
-                        <div class="state" :class="{'state-pass': item.state === 'adopt'}">
-                            {{stateMap[item.state]}}
-                        </div>
-                    </div>
-                    <div class="buttons">
-                    </div>
-                </div>
+            <div class="list-page">
+                <Page
+                    :total="totalCount"
+                    :page="requestListParams.page"
+                    :page-size="requestListParams.onePageNum"
+                    show-elevator
+                    show-sizer
+                    show-total
+                    @on-change="changePage"
+                    @on-page-size-change="changeSize"
+                    transfer
+                />
             </div>
         </div>
     </div>
@@ -202,11 +112,21 @@
     width: 100%;
     min-width: 1200px;
     background-color: #f8f8f9;
+    min-height: 800px;
     .container {
         width: 80%;
         min-width: 1024px;
         margin: 0 auto;
         padding: 20px 0;
+        .select-items {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: 20px;
+            .select-item {
+                width: 300px;
+                margin-right: 20px;
+            }
+        }
         .reserves {
             margin: 20px 0;
             .title {
@@ -261,6 +181,12 @@
                 box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
             }
         }
+        .list-page {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            margin: 20px;
+        }
     }
 }
 </style>
@@ -275,7 +201,7 @@
 .appointment-item {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     margin: 10px 0;
 }
 .appointment-title {
@@ -295,46 +221,67 @@ export default {
     data() {
         return {
             control: {
-                deleteLoading: false,
-                editModal: false,
                 appointmentModal: false,
                 appointmentClickAble: true,
-                invitationModal: false
+                puting: false,
             },
             stateMap: {
-                'verify': '审核中',
-                'adopt': '审核通过'
+                'verify': '等待审核',
+                'adopt': '通过审核'
             },
             appointment: {},
-            updateAppointment: {},
-            myReserve: [],
-            otherReserve: [],
             options: {
                 group_list: [],
+                states: [],
             },
             search: {
-                searchWays: ["username", "sno", "phone"],
-                paramsMap: {
-                    'sno': '学号',
-                    'phone': '手机号',
-                    'username': '姓名'
-                },
-                params: {
-                    searchWay: 'username',
-                    keyword: ''
-                },
                 members: [],
-                loading: false,
-                results: []
+                results: [],
+            },
+            members: [],
+            itemList: [],
+            totalCount: 0,
+            requestListParams: {
+                page: 1,
+                onePageNum: 10,
+                state: this.$route.query.state || ''
             },
         }
     },
     methods: {
-        getMyReserve() {
-            this.$service.MainAPI.getMyReserve(this.$store.getters['App/getUserID']).then(res => {
-                this.myReserve = res.myReserve || [];
-                this.otherReserve = res.otherReserve || [];
+        test() {
+            console.log('test...');
+        },
+        getDataList() {
+            this.$service.MainAPI.getAppointmentByPage(this.requestListParams).then((res) => {
+                this.totalCount = res.count || 0;
+                this.itemList = res.appointments || [];
             });
+        },
+        changeState() {
+            this.$service.MainAPI.getAppointmentByPage(this.requestListParams).then((res) => {
+                this.totalCount = res.count || 0;
+                this.itemList = res.appointments || [];
+                this.$router.replace({
+                    query: {'state': this.requestListParams.state}
+                });
+            });
+        },
+        changePage(val) {
+            this.requestListParams.page = val;
+            if (this.requestListParams.state === "") {
+                this.$Message.info('请先选择状态');
+                return;
+            }
+            this.getDataList();
+        },
+        changeSize(val) {
+            this.requestListParams.onePageNum = val;
+            if (this.requestListParams.state === "") {
+                this.$Message.info('请先选择状态');
+                return;
+            }
+            this.getDataList();
         },
         showAppointment(id) {
             if (!this.control.appointmentClickAble) {
@@ -352,86 +299,31 @@ export default {
             }).finally(() => {
                 this.control.appointmentClickAble = true;
             });
-        },
-        showInvitationModal() {
-            this.control.invitationModal = true;
-        },
-        showEditModal(id) {
-            this.updateAppointment = {};
-            this.search.params.searchWay = "username";
-            this.$refs.searchInput.setQuery('');
-            this.control.editModal = true;
-            // 1. 获取参会人员、参会组
-            // 2. 将userIDList赋值给this.search.members
-            this.$service.MainAPI.getGroupMembers(id, 'appointment').then(res => {
-                this.updateAppointment = res.appointment;
+            this.$service.MainAPI.getGroupMembers(id, 'members').then(res => {
+                console.log('res -> ', res);
                 this.search.members = res.idList || [];
                 this.search.results = res.userList || [];
-                this.updateAppointment.groupsList = res.groups;
-                this.replaceShowVal('sno');
             });
-            if (!this.options.group_list || this.options.group_list.length === 0) {
-                this.$service.MainAPI.getAllGroupsByCreator(this.$store.getters['App/getUserID']).then(res => {
-                    this.options.group_list = res.groupList || [];
-                });
+        },
+        putState(id, state) {
+            if (this.control.puting) {
+                return;
             }
-        },
-        editAppointment() {
-            this.updateAppointment['group_list'] = intArrayToStr(this.updateAppointment.groupsList);
-            this.updateAppointment['members'] = intArrayToStr(this.search.members);
-            this.$service.MainAPI.putAppointment(this.updateAppointment).then(res => {
-                this.$Message.info('修改成功');
-                this.getMyReserve();
-            });
-        },
-        deleteAppointment(id, index) {
-            this.control.deleteLoading = true;
-            this.$service.MainAPI.deleteAppointment(id, this.$store.getters['App/getUserID']).then(() => {
-                this.$Message.info('删除成功');
-                this.myReserve = this.myReserve.slice(0, index).concat(this.myReserve.slice(index+1));
+            this.control.puting = true;
+            const obj = {
+                'id': id,
+                'state': state
+            }
+            this.$service.MainAPI.putAppointmentState(obj).then(() => {
+                this.$Message.info("修改成功");
             }).finally(() => {
-                this.control.deleteLoading = false;
+                this.control.puting = false;
             });
-        },
-        changeSearchWay() {
-            this.$refs.searchInput.setQuery('');
-        },
-        replaceShowVal(way) {
-            if (way === 'phone') {
-                for (let user of this.search.results) {
-                    user.val = user.phone;
-                }
-                return
-            }
-            for (let user of this.search.results) {
-                user.val = user.sno;
-            }
-        },
-        searchUsers(query) {
-            if (query.trim() !== "") {
-                if (!this.search.loading) {
-                    // 实现input连续输入，只发一次请求
-                    this.search.loading = true;
-                    clearTimeout(this.timeout);
-                    this.timeout = setTimeout(() => {
-                        this.search.params.keyword = query;
-                        this.$service.MainAPI.searchUsers(this.search.params).then(res => {
-                            this.search.results = res.userList || [];
-                            // 根据查询方式将手机或者学号赋值给val
-                            this.replaceShowVal(this.search.params.searchWay);
-                        }).finally(() => {
-                            this.search.loading = false;
-                        });
-                    }, 300);
-                }
-            } else {
-                this.search.results = [];
-            }
-        },
+        }
     },
     filters: {
         truncateStr(value) {
-            const maxLength = 10;
+            const maxLength = 20;
             if (value.length > maxLength) {
                 return value.substr(0, maxLength) + '...';
             }
@@ -444,7 +336,18 @@ export default {
         }
     },
     created() {
-        this.getMyReserve();
+        // 获取选项
+        this.$service.MainAPI.getAppointmentStates().then(res => {
+            this.options.states = res.states || [];
+            // 获取会议列表
+            if (this.requestListParams.state === "" && this.options.states.length > 0) {
+                this.requestListParams.state = this.options.states[0];
+                this.$router.replace({
+                    query: {'state': this.requestListParams.state}
+                });
+            }
+            this.getDataList();
+        });
     }
 }
 </script>
