@@ -16,3 +16,19 @@ type Appointment struct {
 	AllMembers  string `json:"all_members" db:"all_members"`
 	Locate		string `json:"locate" db:"locate"`
 }
+
+const (
+	AppointmentVerify = "verify"
+	AppointmentAdopt = "adopt"
+)
+
+func AppointmentStates() []string {
+	return []string{AppointmentVerify, AppointmentAdopt}
+}
+
+func IsAppointmentState(state string) bool {
+	if state == AppointmentAdopt || state == AppointmentVerify {
+		return true
+	}
+	return false
+}

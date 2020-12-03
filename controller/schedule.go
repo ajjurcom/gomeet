@@ -7,7 +7,6 @@ import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
@@ -107,16 +106,9 @@ func (sc *ScheduleController) UpdateOptions(c *gin.Context) {
 	meetingScales, _ = c.GetQueryArray("meetingScales[]")
 	way = c.Query("way")
 	if err1 != nil || err2 != nil || err3 != nil {
-		fmt.Println("err: ", err1, err2, err3)
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "校区、建筑、楼层ID需为数字")
 		return
 	}
-	fmt.Println("campusID: ", campusID)
-	fmt.Println("buildingID: ", buildingID)
-	fmt.Println("layer: ", layer)
-	fmt.Println("meetingTypes: ", meetingTypes)
-	fmt.Println("meetingScales: ", meetingScales)
-	fmt.Println("way: ", way)
 	// 3. 根据不同参数修改不同变量
 	if way == "campus" {	// 更新建筑
 		buildings, err := sc.BuildingService.GetAllBuildingsByCampus(campusID)

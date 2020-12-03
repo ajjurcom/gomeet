@@ -4,7 +4,6 @@ import (
 	"com/mittacy/gomeet/database"
 	"com/mittacy/gomeet/model"
 	"errors"
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"strconv"
 )
@@ -193,7 +192,6 @@ func (mr *MeetingRepository) SelectAllMeetingsByParams(buildingID int, layer int
 		}
 		sqlStr += " and scale in (" + str + ")"
 	}
-	fmt.Println(sqlStr)
 	//err = mr.mysqlConn.Select(&meetings, sqlStr, buildingID)
 	err = mr.mysqlConn.Select(&meetings, sqlStr)
 	return

@@ -4,6 +4,7 @@ import (
 	"com/mittacy/gomeet/common"
 	"com/mittacy/gomeet/database"
 	"com/mittacy/gomeet/model"
+	"errors"
 	"github.com/jmoiron/sqlx"
 	"strconv"
 	"strings"
@@ -14,11 +15,14 @@ type IAppointmentRepository interface {
 	Add(appointment model.Appointment, members string) error
 	Delete(id int, members string) error
 	Put(appointment model.Appointment, addMembers, deleteMembers string) error
+	PutState(id int, state string) error
 	SelectConflictAppointments(appointment model.Appointment, limit int, attrNames ...string) ([]model.Appointment, error)
 	SelectOneByCondition(conditionName, conditionVal string, attrNames ...string) (model.Appointment, error)
 	SelectCreator(day, startTime, meetingID string) ([]model.Appointment, error)
 	SelectAppointmentsByCondition(conditionName, conditionVal string) ([]model.Appointment, error)
 	SelectAppointmentsByID(ids string) ([]model.Appointment, error)
+	SelectAppointmentsByPage(page, onePageCount int, state string) ([]model.Appointment, error)
+	SelectCountByState(state string) (int, error)
 }
 
 func NewAppointmentRepository(appointmentTable, userTable string) IAppointmentRepository {
@@ -192,6 +196,30 @@ func (ar *AppointmentRepository) Put(appointment model.Appointment, addMembers, 
 	return nil
 }
 
+func (ar *AppointmentRepository) PutState(id int, state string) error {
+	if err := ar.Conn(); err != nil {
+		return err
+	}
+
+	sql := "update " + ar.appointmentTable + " set state=? where id=?"
+	stmt, err := ar.mysqlConn.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(state, id)
+	if err != nil {
+		return err
+	}
+
+	num, _ := result.RowsAffected()
+	if num == 0 {
+		return errors.New("no exists")
+	}
+	return nil
+}
+
 func (ar *AppointmentRepository) SelectConflictAppointments(appointment model.Appointment, limit int, attrNames ...string) (appointments []model.Appointment, err error) {
 	if err = ar.Conn(); err != nil {
 		return
@@ -274,5 +302,28 @@ func (ar *AppointmentRepository) SelectAppointmentsByID(ids string) (appointment
 	sql := "select id, meeting_id, day, start_time, end_time, state, theme, content " +
 		"from " + ar.appointmentTable + " where id in (" + ids + ")"
 	err = ar.mysqlConn.Select(&appointments, sql)
+	return
+}
+
+func (ar *AppointmentRepository) SelectAppointmentsByPage(page, onePageCount int, state string) (appointments []model.Appointment, err error) {
+	if err = ar.Conn(); err != nil {
+		return
+	}
+
+	page -= 1
+	startIndex := strconv.Itoa(page * onePageCount)
+	sql := "select id, day, start_time, end_time, state, theme from " + ar.appointmentTable + " where " +
+		"state = ? order by id desc limit " + startIndex + "," + strconv.Itoa(onePageCount)
+	err = ar.mysqlConn.Select(&appointments, sql, state)
+	return
+}
+
+func (ar *AppointmentRepository) SelectCountByState(state string) (count int, err error) {
+	if err = ar.Conn(); err != nil {
+		return
+	}
+
+	sql := "select count(*) from " + ar.appointmentTable + " where state=?"
+	err = ar.mysqlConn.QueryRow(sql, state).Scan(&count)
 	return
 }

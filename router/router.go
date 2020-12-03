@@ -34,6 +34,8 @@ func InitRouter() *gin.Engine {
 		api.GET("/reserve", appointmentController.GetAllReserve)
 		api.GET("/my_reserve", appointmentController.GetMyAppointments)
 		api.GET("/appointment/:id", appointmentController.GetAppointment)
+		api.GET("/appointments/:onePageCount/:page", appointmentController.GetAppointmentByPage)
+		api.GET("/appointment_states", appointmentController.GetAppointmentStates)
 		/*
 		 * 用户
 		 */
@@ -101,6 +103,10 @@ func InitRouter() *gin.Engine {
 	apiAdmin := r.Group(relativePath)
 	apiAdmin.Use(VerifyPower("admin"))
 	{
+		/*
+		 * 会议API
+		 */
+		apiAdmin.PUT("/appointment_state", appointmentController.PutState)
 		/*
 		 * 管理用户API
 		 */

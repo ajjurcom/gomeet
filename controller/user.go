@@ -479,6 +479,18 @@ func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 		}
 		result["appointment"] = appointment
 		result["groups"] = idList
+	} else if way == "members" {
+		appointment, err = uc.AppointmentService.GetAppointmentById(id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户组不存在")
+			} else {
+				logger.Record("获取用户组成员信息出错", err)
+				common.ResolveResult(c, false, e.BACK_ERROR, result)
+			}
+			return
+		}
+		ids = strings.Trim(appointment.AllMembers, ",")
 	} else {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "way参数错误")
 		return

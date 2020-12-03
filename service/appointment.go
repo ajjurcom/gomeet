@@ -10,12 +10,15 @@ type IAppointmentService interface {
 	CreateAppointment(appointment model.Appointment, members string) error
 	DeleteAppointment(id int, members string) error
 	PutAppointment(appointment model.Appointment, addMembers, deleteMembers string) error
+	PutState(id int, state string) error
 	IsAppointmentConflict(appointment model.Appointment, way string) (bool, error)
 	GetAllMembersAndCreatorIDByID(id int) (string, int, error)
 	GetAllReserve(day, startTime, meetingID string) ([]model.Appointment, error)
 	GetMyAllReserve(creatorID int) ([]model.Appointment, error)
 	GetAppointmentsByID(ids string) ([]model.Appointment, error)
 	GetAppointmentById(id int) (model.Appointment, error)
+	GetAppointmentsByPage(page, onePageCount int, state string) ([]model.Appointment, error)
+	GetCountByState(state string) (int, error)
 }
 
 func NewAppointmentService(repository repository.IAppointmentRepository) IAppointmentService {
@@ -36,6 +39,10 @@ func (as *AppointmentService) DeleteAppointment(id int, members string) error {
 
 func (as *AppointmentService) PutAppointment(appointment model.Appointment, addMembers, deleteMembers string) error {
 	return as.AppointmentRepository.Put(appointment, addMembers, deleteMembers)
+}
+
+func (as *AppointmentService) PutState(id int, state string) error {
+	return as.AppointmentRepository.PutState(id, state)
 }
 
 // way: post 添加会议/ put 修改会议
@@ -91,4 +98,12 @@ func (as *AppointmentService) GetAppointmentsByID(ids string) ([]model.Appointme
 
 func (as *AppointmentService) GetAppointmentById(id int) (model.Appointment, error) {
 	return as.AppointmentRepository.SelectOneByCondition("id", strconv.Itoa(id))
+}
+
+func (as *AppointmentService) GetAppointmentsByPage(page, onePageCount int, state string) ([]model.Appointment, error) {
+	return as.AppointmentRepository.SelectAppointmentsByPage(page, onePageCount, state)
+}
+
+func (as *AppointmentService) GetCountByState(state string) (int, error) {
+	return as.AppointmentRepository.SelectCountByState(state)
 }

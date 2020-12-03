@@ -8,7 +8,6 @@ import (
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
 	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
@@ -18,9 +17,12 @@ type IAppointmentController interface {
 	Post(c *gin.Context)
 	Delete(c *gin.Context)
 	Put(c *gin.Context)
+	PutState(c *gin.Context)
 	GetAllReserve(c *gin.Context)
 	GetMyAppointments(c *gin.Context)
 	GetAppointment(c *gin.Context)
+	GetAppointmentByPage(c *gin.Context)
+	GetAppointmentStates(c *gin.Context)
 }
 
 func NewAppointmentController() IAppointmentController {
@@ -230,6 +232,34 @@ func (ac *AppointmentController) Put(c *gin.Context) {
 	common.ResolveResult(c, true, e.SUCCESS, nil)
 }
 
+func (ac *AppointmentController) PutState(c *gin.Context) {
+	// 1. 解析请求
+	appointment := model.Appointment{}
+	if err := c.ShouldBindJSON(&appointment); err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
+		return
+	}
+
+	if !model.IsAppointmentState(appointment.State) {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "状态参数错误")
+		return
+	}
+
+	// 2. 操作数据库
+	err := ac.AppointmentService.PutState(appointment.ID, appointment.State)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议不存在")
+		} else {
+			logger.Record("修改会议状态错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		}
+		return
+	}
+
+	common.ResolveResult(c, true, e.SUCCESS, nil)
+}
+
 // api/v1/all_creator?day=11/30/2020&meeting_id[]=...
 func (ac *AppointmentController) GetAllReserve(c *gin.Context) {
 	result := map[string]interface{}{
@@ -290,9 +320,7 @@ func (ac *AppointmentController) GetMyAppointments(c *gin.Context) {
 	for _, item := range myReserve {
 		myAppointments = append(myAppointments, strconv.Itoa(item.ID))
 	}
-	fmt.Println("myAppointments: ", myAppointments)
 	otherAppointments = common.RemoveSameEle(otherAppointments, myAppointments)
-	fmt.Println("otherAppointments: ", otherAppointments)
 	otherReserve, err := ac.AppointmentService.GetAppointmentsByID(common.MemberListToStr(otherAppointments))
 	if err != nil {
 		logger.Record("根据多个id字符串获取appointments错误", err)
@@ -369,5 +397,57 @@ func (ac *AppointmentController) GetAppointment(c *gin.Context) {
 
 	appointment.Locate = campus.CampusName + " - " + building.BuildingName + " - F" + strconv.Itoa(meeting.Layer) + "-" + meeting.RoomNumber + "（" + meeting.MeetingName + "）"
 	result["appointment"] = appointment
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+func (ac *AppointmentController) GetAppointmentByPage(c *gin.Context) {
+	result := map[string]interface{}{
+		"appointments": []model.Appointment{},
+		"count": 0,
+	}
+	// 1. 解析请求
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	onePageCount, err := strconv.Atoi(c.Param("onePageCount"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	state := c.Query("state")
+	if !model.IsAppointmentState(state) {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+
+	/*
+	 * 1. 获取count
+	 * 2. 获取分页数据
+	 */
+	count, err := ac.AppointmentService.GetCountByState(state)
+	if err != nil {
+		logger.Record("获取会议室数量错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+
+	appointments, err := ac.AppointmentService.GetAppointmentsByPage(page, onePageCount, state)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Record("分页获取会议错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+
+	result["count"] = count
+	result["appointments"] = appointments
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+func (ac *AppointmentController) GetAppointmentStates(c *gin.Context) {
+	result := map[string][]string {
+		"states": model.AppointmentStates(),
+	}
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
