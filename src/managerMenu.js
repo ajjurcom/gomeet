@@ -6,6 +6,14 @@
 const getManagerMenu = context => {
     const menu = [
         {
+            title: '预约管理',
+            name: 'appointmentmanager',
+            icon: 'md-time',
+            to: {
+                name: 'AppointmentManager'
+            }
+        },
+        {
             title: '用户管理',
             name: "usermanager",
             icon: 'logo-octocat',

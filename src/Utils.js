@@ -95,11 +95,11 @@ export const GetDateObj = (afterDay) => {
 }
 
 /**
- * ReverseFormat 预定表展示的时间, 包含周几，不包含年
+ * ReserveFormat 预定表展示的时间, 包含周几，不包含年
  * @params {*} date
  * @returns "10/27 周二" 
  */
-export const ReverseFormat = (date) => {
+export const ReserveFormat = (date) => {
     return date.format('MM/dd') + " " + "周" + "日一二三四五六".charAt(date.getDay());
 }
 

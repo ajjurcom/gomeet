@@ -202,10 +202,7 @@ export default {
                         // 保存store到localStroge
                         setLocalStorage("store", JSON.stringify(this.$store.state));
                         this.$router.push({
-                            name: "UserManager",
-                            query: {
-                                state: 'verify_user'
-                            }
+                            name: "AppointmentManager"
                         });
                     } else {
                         // 跳转到会议室预定界面

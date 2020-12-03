@@ -15,9 +15,9 @@ const getUserMenu = context => {
         },
         {
             title: '我的会议',
-            name: 'mymeeting',
+            name: 'reservemanager',
             to: {
-                name: 'ReserveMeeting'
+                name: 'ReserveManager'
             }
         },
         {

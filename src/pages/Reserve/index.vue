@@ -117,17 +117,6 @@
                 </div>
             </div>
             <div class="reserve-item">
-                <div class="reserve-title">搜索方式：</div>
-                <RadioGroup class="reserve-select" @on-change="changeSearchWay" v-model="search.params.searchWay">
-                    <Radio
-                        v-for="item in search.searchWays"
-                        :key="item"
-                        :label="item">
-                        {{search.paramsMap[item]}}
-                    </Radio>
-                </RadioGroup>
-            </div>
-            <div class="reserve-item">
                 <div class="reserve-title">会议主题：</div>
                 <div class="reserve-select">
                     <Input
@@ -173,6 +162,17 @@
                         </Col>
                     </Row>
                 </div>
+            </div>
+            <div class="reserve-item">
+                <div class="reserve-title"></div>
+                <RadioGroup class="reserve-select" @on-change="changeSearchWay" v-model="search.params.searchWay">
+                    <Radio
+                        v-for="item in search.searchWays"
+                        :key="item"
+                        :label="item">
+                        {{search.paramsMap[item]}}
+                    </Radio>
+                </RadioGroup>
             </div>
             <div class="reserve-item">
                 <div class="reserve-title">参会组：</div>
@@ -240,7 +240,7 @@
                         :key="index">
                         <div
                             class="resereve-time"
-                            v-if="(currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour) && !reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)]">
+                            v-if="((currentTime.dayIndex !== 0) || (index + options.startTime > currentTime.hour)) && !reserveMap[currentTime.dateStr + '-' + item.id + '-' + (index-1+options.startTime)]">
                             {{index-1+options.startTime}}:00
                         </div>
                         <div
@@ -258,7 +258,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="main-layer">
                 <div
                     :class="{'active-layer': params.layer === 0}"
@@ -637,7 +636,7 @@
 </style>
 
 <script>
-import {intArrayToStr, GetDateObj, ReverseFormat, GetNumFromScale, GetNumberArr, DateFormat} from '@/Utils';
+import {intArrayToStr, GetDateObj, ReserveFormat, GetNumFromScale, GetNumberArr, DateFormat} from '@/Utils';
 export default {
     name: "Reserve",
     data () {
@@ -840,7 +839,7 @@ export default {
                 let date = GetDateObj(i);
                 const obj = {
                     'index': i,
-                    'title': ReverseFormat(date),
+                    'title': ReserveFormat(date),
                     'date': DateFormat(date)
                 };
                 this.options.dateList[i] = obj;
@@ -938,7 +937,7 @@ export default {
                 'start_time': this.currentTime.dayIndex !== 0 ? '00:00' : this.currentTime.hour < 10 ? '0'+this.currentTime.hour+':00' : this.currentTime.hour+':00',
                 'meeting_id': meetingList,
             }
-            this.$service.MainAPI.getReverse(obj).then(res => {
+            this.$service.MainAPI.getReserve(obj).then(res => {
                 // 存入reserveMap字典中
                 this.reserveMap = {};
                 if (res.appointments) {

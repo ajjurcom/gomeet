@@ -22,6 +22,8 @@ import UserEditPwd from 'pages/User/EditPwd';
 import UserManager from 'pages/Manager/User/List';
 import UserGroup from 'pages/Manager/UserGroup';
 import Reserve from 'pages/Reserve';
+import ReserveManager from 'pages/ReserveManager';
+import AppointmentManager from 'pages/Manager/Appointment';
 
 Vue.use(Router);
 Vue.use(viewDesign);
@@ -141,6 +143,14 @@ const routes = [
         menuName: 'user'
     },
     {
+        name: 'AppointmentManager',
+        path: '/back/reserve',
+        meta: {
+            roles: ['admin', 'root']
+        },
+        component: AppointmentManager
+    },
+    {
         name: 'UserGroup',
         path: '/group',
         meta: {
@@ -156,6 +166,14 @@ const routes = [
             roles: ['user', 'admin', 'root']
         },
         component: Reserve
+    },
+    {
+        name: 'ReserveManager',
+        path: '/my_meeting',
+        meta: {
+            roles: ['user', 'admin', 'root']
+        },
+        component: ReserveManager
     }
 ];
 

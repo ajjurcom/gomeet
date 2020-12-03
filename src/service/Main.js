@@ -7,8 +7,21 @@ export default class Main {
     static addAppointment(data) {
         return http.post('/appointment', data);
     }
-    static getReverse(params) {
-        return http.get('/reverse', {params})
+    static deleteAppointment(id, creator_id) {
+        return http.delete(`/appointment/${id}?creator_id=${creator_id}`);
+    }
+    static putAppointment(data) {
+        return http.put('/appointment', data);
+    }
+
+    static getReserve(params) {
+        return http.get('/reserve', {params})
+    }
+    static getMyReserve(creator_id) {
+        return http.get(`/my_reserve?creator_id=${creator_id}`);
+    }
+    static getAppointment(id) {
+        return http.get(`/appointment/${id}`);
     }
     /*
      * 用户API
@@ -46,8 +59,8 @@ export default class Main {
     static searchUsers(obj) {
         return http.get(`/users?searchWay=${obj.searchWay}&keyword=${obj.keyword}`)
     }
-    static getGroupMembers(id) {
-        return http.get(`/members/${id}`);
+    static getGroupMembers(id, way) {
+        return http.get(`/members/${id}?way=${way}`);
     }
     /*
      * 用户组API

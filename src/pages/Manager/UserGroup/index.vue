@@ -266,7 +266,7 @@ export default {
                 this.modal.title = "修改分组成员"
                 // 1. 获取组成员ID
                 // 2. 将userIDList赋值给this.search.members
-                this.$service.MainAPI.getGroupMembers(id).then(res => {
+                this.$service.MainAPI.getGroupMembers(id, 'user_group').then(res => {
                     this.search.members = res.idList || [];
                     this.search.results = res.userList || [];
                     this.replaceShowVal('sno');
