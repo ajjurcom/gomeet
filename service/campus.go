@@ -13,6 +13,7 @@ type ICampusService interface {
 	GetCampusCount() (int, error)
 	GetAllCampus() ([]model.Campus, error)
 	IsCampusExists(id int) (bool, error)
+	GetCampusByID(id int) (model.Campus, error)
 }
 
 func NewCampusService(repository repository.ICampusRepository) ICampusService {
@@ -49,4 +50,8 @@ func (cs *CampusService) GetAllCampus() ([]model.Campus, error) {
 
 func (cs *CampusService)  IsCampusExists(id int) (bool, error) {
 	return cs.CampusRepository.IsCampusExists(id)
+}
+
+func (cs *CampusService)  GetCampusByID(id int) (model.Campus, error) {
+	return cs.CampusRepository.SelectCampusByID(id)
 }

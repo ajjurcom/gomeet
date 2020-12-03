@@ -28,11 +28,12 @@ func InitRouter() *gin.Engine {
 
 	api := r.Group(relativePath)
 	{
-		api.POST("/appointment", appointmentController.Post)
-		api.DELETE("/appointment", appointmentController.Delete)
-		api.PUT("/appointment", appointmentController.Put)
-		api.GET("/reverse", appointmentController.GetReverse)
-
+		/*
+		 * 会议
+		 */
+		api.GET("/reserve", appointmentController.GetAllReserve)
+		api.GET("/my_reserve", appointmentController.GetMyAppointments)
+		api.GET("/appointment/:id", appointmentController.GetAppointment)
 		/*
 		 * 用户
 		 */
@@ -79,8 +80,9 @@ func InitRouter() *gin.Engine {
 		/*
 		 * 会议
 		 */
-		//apiUser.POST("/appointment", appointmentController.Post)
-		//apiUser.DELETE("/appointment", appointmentController.Delete)
+		apiUser.POST("/appointment", appointmentController.Post)
+		apiUser.DELETE("/appointment/:id", appointmentController.Delete)
+		apiUser.PUT("/appointment", appointmentController.Put)
 		/*
 		 * 用户
 		 */

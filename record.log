@@ -128,3 +128,15 @@ err: [sql: expected 9 arguments, got 8]
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
 2020-11-30T15:26:34.216+0800	ERROR	logger/init.go:31	查询预定情况错误
 err: [missing destination name creator_name in *[]model.Appointment]
+2020-12-01T23:01:27.705+0800	ERROR	logger/init.go:31	获取我的所有会议错误
+err: [missing destination name state in *[]model.Appointment]
+2020-12-02T10:31:14.554+0800	ERROR	logger/init.go:31	获取user的appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'from user where id=? limit 1' at line 1]
+2020-12-02T10:32:31.956+0800	ERROR	logger/init.go:31	获取user的appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'from user where id=? limit 1' at line 1]
+2020-12-02T10:32:59.593+0800	ERROR	logger/init.go:31	获取user的appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'from user where id=? limit 1' at line 1]
+2020-12-02T17:01:03.142+0800	ERROR	logger/init.go:31	获取会议详细信息错误
+err: [missing destination name group_list in *model.Appointment]
+2020-12-02T17:47:10.827+0800	ERROR	logger/init.go:31	获取会议所在校区详细信息错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'campus where id=? limit 1' at line 1]

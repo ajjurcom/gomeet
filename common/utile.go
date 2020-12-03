@@ -51,6 +51,22 @@ func RemoveDuplicateEle(l []string) []string {
 	return result
 }
 
+// RemoveList 移除l2在l1中的相同元素
+func RemoveSameEle(l1 []string, l2 []string) []string {
+	m := make(map[string]struct{})
+	for _, v := range l2 {
+		m[v] = struct{}{}
+	}
+
+	result := make([]string, 0, len(l1))
+	for _, v := range l1 {
+		if _, ok := m[v]; !ok {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
 /* DiffMember 计算出idList、idList2的差异元素
  * 1. deleteList: idList中有，idList2中没有的
  * 2. newList: idList2中有，idList中没有的

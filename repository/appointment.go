@@ -17,6 +17,8 @@ type IAppointmentRepository interface {
 	SelectConflictAppointments(appointment model.Appointment, limit int, attrNames ...string) ([]model.Appointment, error)
 	SelectOneByCondition(conditionName, conditionVal string, attrNames ...string) (model.Appointment, error)
 	SelectCreator(day, startTime, meetingID string) ([]model.Appointment, error)
+	SelectAppointmentsByCondition(conditionName, conditionVal string) ([]model.Appointment, error)
+	SelectAppointmentsByID(ids string) ([]model.Appointment, error)
 }
 
 func NewAppointmentRepository(appointmentTable, userTable string) IAppointmentRepository {
@@ -248,6 +250,29 @@ func (ar *AppointmentRepository) SelectCreator(day, startTime, meetingID string)
 	if meetingID != "" {
 		sql += " and meeting_id in (" + meetingID + ")"
 	}
+
 	err = ar.mysqlConn.Select(&appointments, sql, day, startTime)
+	return
+}
+
+func (ar *AppointmentRepository) SelectAppointmentsByCondition(conditionName, conditionVal string) (appointments []model.Appointment, err error) {
+	if err = ar.Conn(); err != nil {
+		return
+	}
+
+	sql := "select id, meeting_id, day, start_time, end_time, state, theme, content " +
+		"from " + ar.appointmentTable + " where " + conditionName + " = ?"
+	err = ar.mysqlConn.Select(&appointments, sql, conditionVal)
+	return
+}
+
+func (ar *AppointmentRepository) SelectAppointmentsByID(ids string) (appointments []model.Appointment, err error) {
+	if err = ar.Conn(); err != nil {
+		return
+	}
+
+	sql := "select id, meeting_id, day, start_time, end_time, state, theme, content " +
+		"from " + ar.appointmentTable + " where id in (" + ids + ")"
+	err = ar.mysqlConn.Select(&appointments, sql)
 	return
 }

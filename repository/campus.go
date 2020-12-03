@@ -16,6 +16,7 @@ type ICampusRepository interface {
 	SelectCount() (int, error)
 	SelectAllCampus() ([]model.Campus, error)
 	SelectCampusByPage(page, onePageCount int) ([]model.Campus, error)
+	SelectCampusByID(id int) (model.Campus, error)
 	IsCampusExists(id int) (bool, error)
 }
 
@@ -142,6 +143,16 @@ func (cmr *CampusManagerRepository) SelectAllCampus() (campus []model.Campus, er
 	sqlStr := "select id, campus_name from " + cmr.table
 
 	err = cmr.mysqlConn.Select(&campus, sqlStr)
+	return
+}
+
+func (cmr *CampusManagerRepository) SelectCampusByID(id int) (campus model.Campus, err error) {
+	if err = cmr.Conn(); err != nil {
+		return
+	}
+
+	sql := "select campus_name from " + cmr.table + " where id=? limit 1"
+	err = cmr.mysqlConn.Get(&campus, sql, id)
 	return
 }
 

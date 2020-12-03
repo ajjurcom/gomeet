@@ -13,6 +13,9 @@ type IAppointmentService interface {
 	IsAppointmentConflict(appointment model.Appointment, way string) (bool, error)
 	GetAllMembersAndCreatorIDByID(id int) (string, int, error)
 	GetAllReserve(day, startTime, meetingID string) ([]model.Appointment, error)
+	GetMyAllReserve(creatorID int) ([]model.Appointment, error)
+	GetAppointmentsByID(ids string) ([]model.Appointment, error)
+	GetAppointmentById(id int) (model.Appointment, error)
 }
 
 func NewAppointmentService(repository repository.IAppointmentRepository) IAppointmentService {
@@ -76,4 +79,16 @@ func (as *AppointmentService) GetAllMembersAndCreatorIDByID(id int) (string, int
 
 func (as *AppointmentService) GetAllReserve(day, startTime, meetingID string) ([]model.Appointment, error) {
 	return as.AppointmentRepository.SelectCreator(day, startTime, meetingID)
+}
+
+func (as *AppointmentService) GetMyAllReserve(creatorID int) ([]model.Appointment, error) {
+	return as.AppointmentRepository.SelectAppointmentsByCondition("creator_id", strconv.Itoa(creatorID))
+}
+
+func (as *AppointmentService) GetAppointmentsByID(ids string) ([]model.Appointment, error) {
+	return as.AppointmentRepository.SelectAppointmentsByID(ids)
+}
+
+func (as *AppointmentService) GetAppointmentById(id int) (model.Appointment, error) {
+	return as.AppointmentRepository.SelectOneByCondition("id", strconv.Itoa(id))
 }

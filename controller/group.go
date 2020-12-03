@@ -168,6 +168,7 @@ func (gc *GroupController) GetGroupsByPage(c *gin.Context) {
 // 获取creator的所有分组
 func (gc *GroupController) GetAllGroups(c *gin.Context) {
 	result := map[string]interface{}{
+		"groupList": []model.Group{},
 	}
 	creator, err := strconv.Atoi(c.Param("creator"))
 	if err != nil {

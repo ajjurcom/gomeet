@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"strconv"
+	"strings"
 )
 
 type IUserRepository interface {
@@ -23,6 +24,7 @@ type IUserRepository interface {
 	SelectIDNameByAtr(attrName, attrVal string) (int, string, error)
 	SearchUsersByAttr(attrName, attrVal string) ([]model.User, error)
 	SelectAllUsersByIDs(ids string) ([]model.User, error)
+	SelectOneByCondition(conditionName, conditionVal string, attrNames ...string) (model.User, error)
 }
 
 func NewUserRepository(table string) IUserRepository {
@@ -229,5 +231,22 @@ func (umr *UserManagerRepository) SelectAllUsersByIDs(ids string) (userList []mo
 
 	sqlStr := "select id, sno, username from " + umr.table + " where id in (" + ids + ")"
 	err = umr.mysqlConn.Select(&userList, sqlStr)
+	return
+}
+
+func (umr *UserManagerRepository) SelectOneByCondition(conditionName, conditionVal string, attrNames ...string) (user model.User, err error) {
+	if err = umr.Conn(); err != nil {
+		return
+	}
+
+	attrs := ""
+	if len(attrNames) == 0 {
+		attrs = "*"
+	} else {
+		attrs = strings.Join(attrNames, ",")
+	}
+
+	sql := "select " + attrs + " from " + umr.table + " where " + conditionName + "=? limit 1"
+	err = umr.mysqlConn.Get(&user, sql, conditionVal)
 	return
 }

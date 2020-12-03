@@ -38,13 +38,18 @@ func NewUserController() IUserController {
 
 	repoGroup := repository.NewGroupRepository("user_group", "user")
 	groupService := service.NewGroupService(repoGroup)
-	return &UserController{userService, campusService, groupService}
+
+	appointmentRepo := repository.NewAppointmentRepository("appointment", "user")
+	appointmentService := service.NewAppointmentService(appointmentRepo)
+
+	return &UserController{userService, campusService, groupService, appointmentService}
 }
 
 type UserController struct {
 	UserService service.IUserService
 	CampusService service.ICampusService
 	GroupService service.IGroupService
+	AppointmentService service.IAppointmentService
 }
 
 // 注册用户
@@ -437,21 +442,49 @@ func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户id必须为数字")
 		return
 	}
+	way := c.Query("way")
 	// 2. 数据库查询
 	// 2.1 获取用户组id列表
-	group, err := uc.GroupService.GetGroupByID(id)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户组不存在")
-		} else {
-			logger.Record("获取用户组成员信息出错", err)
-			common.ResolveResult(c, false, e.BACK_ERROR, result)
+	var group model.Group
+	var appointment model.Appointment
+	var ids string
+	if way == "user_group" {
+		group, err = uc.GroupService.GetGroupByID(id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户组不存在")
+			} else {
+				logger.Record("获取用户组成员信息出错", err)
+				common.ResolveResult(c, false, e.BACK_ERROR, result)
+			}
+			return
 		}
+		ids = strings.Trim(group.Members, ",")
+	} else if way == "appointment" {
+		appointment, err = uc.AppointmentService.GetAppointmentById(id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户组不存在")
+			} else {
+				logger.Record("获取用户组成员信息出错", err)
+				common.ResolveResult(c, false, e.BACK_ERROR, result)
+			}
+			return
+		}
+		ids = strings.Trim(appointment.Members, ",")
+		idStrList := common.MemberStrToList(strings.Trim(appointment.Groups, ","))
+		idList := make([]int, len(idStrList))
+		for i := 0; i < len(idStrList); i++ {
+			idList[i], _ = strconv.Atoi(idStrList[i])
+		}
+		result["appointment"] = appointment
+		result["groups"] = idList
+	} else {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "way参数错误")
 		return
 	}
 	// 2.2 获取用户组用户信息
-	group.Members = strings.Trim(group.Members, ",")
-	userList, err := uc.UserService.GetAllUsersByIDs(group.Members)
+	userList, err := uc.UserService.GetAllUsersByIDs(ids)
 	if err != nil {
 		logger.Record("获取用户组成员信息出错", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, result)
@@ -459,7 +492,7 @@ func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 	}
 
 	// 转化 ID字符串 -> 整数类型列表
-	idStrList := common.MemberStrToList(group.Members)
+	idStrList := common.MemberStrToList(ids)
 	idList := make([]int, len(idStrList))
 	for i := 0; i < len(idStrList); i++ {
 		idList[i], _ = strconv.Atoi(idStrList[i])

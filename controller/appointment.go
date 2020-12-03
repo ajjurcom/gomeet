@@ -8,7 +8,9 @@ import (
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"strings"
 )
 
@@ -16,7 +18,9 @@ type IAppointmentController interface {
 	Post(c *gin.Context)
 	Delete(c *gin.Context)
 	Put(c *gin.Context)
-	GetReverse(c *gin.Context)
+	GetAllReserve(c *gin.Context)
+	GetMyAppointments(c *gin.Context)
+	GetAppointment(c *gin.Context)
 }
 
 func NewAppointmentController() IAppointmentController {
@@ -26,12 +30,35 @@ func NewAppointmentController() IAppointmentController {
 	appointmentRepo := repository.NewAppointmentRepository("appointment", "user")
 	appointmentService := service.NewAppointmentService(appointmentRepo)
 
-	return &AppointmentController{appointmentService,groupService}
+	userRepo := repository.NewUserRepository("user")
+	userService := service.NewUserService(userRepo)
+
+	meetingRepo := repository.NewMeetingRepository("meeting")
+	meetingService := service.NewMeetingService(meetingRepo)
+
+	buildingRepo := repository.NewBuildingRepository("building")
+	buildingService := service.NewBuildingService(buildingRepo)
+
+	campusRepo := repository.NewCampusRepository("campus")
+	campusService := service.NewCampusService(campusRepo)
+
+	return &AppointmentController{
+		AppointmentService: appointmentService,
+		GroupService: groupService,
+		UserService: userService,
+		MeetingService: meetingService,
+		BuildingService: buildingService,
+		CampusService: campusService,
+	}
 }
 
 type AppointmentController struct {
 	AppointmentService service.IAppointmentService
 	GroupService service.IGroupService
+	UserService service.IUserService
+	MeetingService service.IMeetingService
+	BuildingService service.IBuildingService
+	CampusService service.ICampusService
 }
 
 func (ac *AppointmentController) Post(c *gin.Context) {
@@ -93,15 +120,20 @@ func (ac *AppointmentController) Delete(c *gin.Context) {
 	 * 3. 将会议中的所有成员查询出来
 	 * 4. 删除会议
 	 */
-	appointment := model.Appointment{}
-	if err := c.ShouldBindJSON(&appointment); err != nil || appointment.ID == 0 || appointment.CreatorID == 0 {
-		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "id无效")
+		return
+	}
+	queryCreatorID, err := strconv.Atoi(c.Query("creator_id"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "creator_id无效")
 		return
 	}
 
 	// 2. 检查删除的会议是否为该用户创建
 	// 3. 将会议中的所有成员查询出来
-	members, creatorID, err := ac.AppointmentService.GetAllMembersAndCreatorIDByID(appointment.ID)
+	members, creatorID, err := ac.AppointmentService.GetAllMembersAndCreatorIDByID(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议不存在")
@@ -111,12 +143,12 @@ func (ac *AppointmentController) Delete(c *gin.Context) {
 		}
 		return
 	}
-	if appointment.CreatorID != creatorID {
+	if queryCreatorID != creatorID {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "不能删除其他用户创建的会议")
 		return
 	}
 	// 4. 删除会议
-	if err := ac.AppointmentService.DeleteAppointment(appointment.ID, members); err != nil {
+	if err := ac.AppointmentService.DeleteAppointment(id, members); err != nil {
 		logger.Record("删除会议错误", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, nil)
 		return
@@ -187,7 +219,7 @@ func (ac *AppointmentController) Put(c *gin.Context) {
 	appointment.AllMembers = common.MemberListToStr(newMembers)
 	deleteMembers, addMembers := common.DiffMember(oldMembers, newMembers)
 
-	// 6. 添加会议室
+	// 6. 修改会议信息
 	if err := ac.AppointmentService.PutAppointment(appointment,
 		common.MemberListToStr(addMembers),
 		common.MemberListToStr(deleteMembers)); err != nil {
@@ -199,7 +231,7 @@ func (ac *AppointmentController) Put(c *gin.Context) {
 }
 
 // api/v1/all_creator?day=11/30/2020&meeting_id[]=...
-func (ac *AppointmentController) GetReverse(c *gin.Context) {
+func (ac *AppointmentController) GetAllReserve(c *gin.Context) {
 	result := map[string]interface{}{
 		"appointments": []model.Appointment{},
 	}
@@ -219,5 +251,123 @@ func (ac *AppointmentController) GetReverse(c *gin.Context) {
 	}
 
 	result["appointments"] = appointments
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+func (ac *AppointmentController) GetMyAppointments(c *gin.Context) {
+	result := map[string]interface{}{
+		"myReserve": []model.Appointment{},
+		"otherReserve": []model.Appointment{},
+	}
+
+	id, err := strconv.Atoi(c.Query("creator_id"))
+	if err != nil || id == 0 {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+
+	// 获取我预定的会议
+	myReserve, err := ac.AppointmentService.GetMyAllReserve(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		} else {
+			logger.Record("获取我的所有会议错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, result)
+		}
+		return
+	}
+
+	// 获取受邀的会议
+	s, err := ac.UserService.GetMyAppointmentsID(id)
+	if err != nil {
+		logger.Record("获取user的appointments错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+	otherAppointments := common.RemoveDuplicateEle(common.MemberStrToList(s))
+	var myAppointments []string
+	for _, item := range myReserve {
+		myAppointments = append(myAppointments, strconv.Itoa(item.ID))
+	}
+	fmt.Println("myAppointments: ", myAppointments)
+	otherAppointments = common.RemoveSameEle(otherAppointments, myAppointments)
+	fmt.Println("otherAppointments: ", otherAppointments)
+	otherReserve, err := ac.AppointmentService.GetAppointmentsByID(common.MemberListToStr(otherAppointments))
+	if err != nil {
+		logger.Record("根据多个id字符串获取appointments错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+
+
+	result["myReserve"] = myReserve
+	result["otherReserve"] = otherReserve
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+func (ac *AppointmentController) GetAppointment(c *gin.Context) {
+	result := map[string]interface{}{
+		"appointment": model.Appointment{},
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id == 0 {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+
+	appointment, err := ac.AppointmentService.GetAppointmentById(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议不存在")
+		} else {
+			logger.Record("获取会议详细信息错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, result)
+		}
+		return
+	}
+
+	/*
+	 * 1. 根据 会议室id 获取 会议室楼层、名字、建筑id、name
+	 * 2. 根据 建筑id 获取 校区name
+	 * 3. 组成 locate
+	 */
+
+	meeting, err := ac.MeetingService.GetMeetingByID(appointment.MeetingID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议的会议室不存在")
+		} else {
+			logger.Record("获取会议所在会议室详细信息错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, result)
+		}
+		return
+	}
+
+	building, err := ac.BuildingService.GetBuildingByID(meeting.BuildingID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议的建筑不存在")
+		} else {
+			logger.Record("获取会议所在建筑详细信息错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, result)
+		}
+		return
+	}
+
+	campus, err := ac.CampusService.GetCampusByID(building.CampusID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议的校区不存在")
+		} else {
+			logger.Record("获取会议所在校区详细信息错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, result)
+		}
+		return
+	}
+
+	appointment.Locate = campus.CampusName + " - " + building.BuildingName + " - F" + strconv.Itoa(meeting.Layer) + "-" + meeting.RoomNumber + "（" + meeting.MeetingName + "）"
+	result["appointment"] = appointment
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }

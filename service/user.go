@@ -3,6 +3,7 @@ package service
 import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
+	"strconv"
 )
 
 type IUserService interface {
@@ -20,6 +21,7 @@ type IUserService interface {
 	GetIDNameByAttr(attrName, attrVal string) (int, string, error)
 	SearchUsersByAttr(attrName, attrVal string) ([]model.User, error)
 	GetAllUsersByIDs(ids string) ([]model.User, error)
+	GetMyAppointmentsID(id int) (string, error)
 }
 
 func NewUserService(repository repository.IUserRepository) IUserService {
@@ -84,4 +86,10 @@ func (us *UserService) SearchUsersByAttr(attrName, attrVal string) ([]model.User
 
 func (us *UserService) GetAllUsersByIDs(ids string) ([]model.User, error) {
 	return us.UserRepository.SelectAllUsersByIDs(ids)
+}
+
+func (us *UserService) GetMyAppointmentsID(id int) (string, error) {
+	user, err := us.UserRepository.SelectOneByCondition("id",
+		strconv.Itoa(id), "appointments")
+	return user.Appointments, err
 }
