@@ -12,7 +12,7 @@
                     </Option>
                 </Select>
             </div>
-            <div class="list-items">
+            <div v-if="totalCount !== 0" class="list-items">
                 <div
                     class="list-item"
                     v-for="item in itemList"
@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div class="list-page">
+            <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
                     :page="getMeetingsParams.page"
@@ -54,6 +54,7 @@
                     transfer
                 />
             </div>
+            <no-data v-if="totalCount === 0" title="该选项暂无用户"></no-data>
         </div>
     </div>
 </template>
@@ -121,8 +122,12 @@
 </style>
 
 <script>
+import NoData from "@/components/NoData";
 export default {
     name: 'UserManager',
+    components: {
+        NoData,
+    },
     data() {
         return {
             isRoot: this.$store.getters['App/getUserIsRoot'],

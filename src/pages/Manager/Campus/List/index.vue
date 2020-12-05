@@ -1,7 +1,7 @@
 <template>
     <div class="container-wrap">
         <div class="container">
-            <div class="list-items">
+            <div v-if="totalCount !== 0" class="list-items">
                 <div
                     class="list-item"
                     v-for="item in itemList"
@@ -18,7 +18,7 @@
                     </div>
                 </div>
             </div>
-            <div class="list-page">
+            <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
                     :page="requestObj.page"
@@ -31,6 +31,7 @@
                     transfer
                 />
             </div>
+            <no-data v-if="totalCount === 0" title="您还没有创建校区"></no-data>
         </div>
     </div>
 </template>
@@ -83,8 +84,12 @@
 </style>
 
 <script>
+import NoData from "@/components/NoData";
 export default {
     name: 'CampusManager',
+    components: {
+        NoData,
+    },
     data() {
         return {
             totalCount: 0,

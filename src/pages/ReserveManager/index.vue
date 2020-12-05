@@ -110,13 +110,9 @@
                     </div>
                 </div>
             </Modal>
-            <!-- <Modal
-                class="invitation-modal"
-                v-model="control.invitationModal"
-                title="发送会议邀请">
-            
-            </Modal> -->
-            <div class="reserves">
+            <div
+                v-if="myReserve.length !== 0"
+                class="reserves">
                 <div class="title">
                     您有个<span style="color: #2d8cf0">{{myReserve.length}}</span>预定记录
                 </div>
@@ -165,7 +161,9 @@
                     </div>
                 </div>
             </div>
-            <div class="reserves">
+            <div
+                v-if="otherReserve.length !== 0"
+                class="reserves">
                 <div class="title">
                     其他<span style="color: #2d8cf0">{{otherReserve.length}}</span>个邀约会议
                 </div>
@@ -193,6 +191,7 @@
                     </div>
                 </div>
             </div>
+            <no-data v-if="myReserve.length === 0 && otherReserve.length === 0" title="您暂时没有预定会议"></no-data>
         </div>
     </div>
 </template>
@@ -290,11 +289,16 @@
 </style>
 
 <script>
+import NoData from "@/components/NoData";
 import {intArrayToStr} from '@/Utils';
 export default {
     name: 'ReserveManager',
+    components: {
+        NoData,
+    },
     data() {
         return {
+            marginLeft: 10,
             control: {
                 deleteLoading: false,
                 editModal: false,

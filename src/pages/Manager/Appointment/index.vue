@@ -18,7 +18,6 @@
                 <div class="appointment-item">
                     <div class="appointment-title">地点：</div>
                     <div class="appointment-content">
-                        <!-- 仙溪校区 - 博学楼 - F5-502 高雅阁会议室 -->
                         {{appointment.locate}}
                     </div>
                 </div>
@@ -60,7 +59,7 @@
                     </Option>
                 </Select>
             </div>
-            <div class="reserves">
+            <div v-if="totalCount !== 0" class="reserves">
                 <div
                     class="reserve"
                     v-for="item in itemList"
@@ -90,7 +89,7 @@
                     </div>
                 </div>
             </div>
-            <div class="list-page">
+            <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
                     :page="requestListParams.page"
@@ -103,6 +102,7 @@
                     transfer
                 />
             </div>
+            <no-data v-if="totalCount === 0" title="该选项暂无会议"></no-data>
         </div>
     </div>
 </template>
@@ -111,7 +111,6 @@
 .container-wrap {
     width: 100%;
     min-width: 1200px;
-    background-color: #f8f8f9;
     min-height: 800px;
     .container {
         width: 80%;
@@ -215,9 +214,13 @@
 </style>
 
 <script>
+import NoData from "@/components/NoData";
 import {intArrayToStr} from '@/Utils';
 export default {
     name: 'AppointmentManager',
+    components: {
+        NoData,
+    },
     data() {
         return {
             control: {
@@ -249,9 +252,6 @@ export default {
         }
     },
     methods: {
-        test() {
-            console.log('test...');
-        },
         getDataList() {
             this.$service.MainAPI.getAppointmentByPage(this.requestListParams).then((res) => {
                 this.totalCount = res.count || 0;

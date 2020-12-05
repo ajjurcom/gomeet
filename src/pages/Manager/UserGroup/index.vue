@@ -51,7 +51,7 @@
                     新名字：<Input v-model="currentGroup.group_name" placeholder="分组名字" style="width: 300px" />
                 </Modal>
             </div>
-            <div class="list-items">
+            <div v-if="totalCount !== 0" class="list-items">
                 <div
                     class="list-item"
                     v-for="item in itemList"
@@ -74,7 +74,7 @@
                     </div>
                 </div>
             </div>
-            <div class="list-page">
+            <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
                     :page="getMeetingsParams.page"
@@ -87,6 +87,7 @@
                     transfer
                 />
             </div>
+            <no-data v-if="totalCount === 0" title="您暂时没有创建分组"></no-data>
         </div>
     </div>
 </template>
@@ -180,9 +181,13 @@
 </style>
 
 <script>
+import NoData from "@/components/NoData";
 import {intArrayToStr} from '@/Utils';
 export default {
     name: 'UserGroup',
+    components: {
+        NoData,
+    },
     data() {
         return {
             loading: true,

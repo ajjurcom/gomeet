@@ -6,7 +6,7 @@
                     <Option v-for="item in campusList" :value="item.id" :key="item.campus_name">{{ item.campus_name }}</Option>
                 </Select>
             </div>
-            <div class="list-items">
+            <div v-if="totalCount !== 0" class="list-items">
                 <div
                     class="list-item"
                     v-for="item in itemList"
@@ -23,7 +23,7 @@
                     </div>
                 </div>
             </div>
-            <div class="list-page">
+            <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
                     :page="requestObj.page"
@@ -36,6 +36,7 @@
                     transfer
                 />
             </div>
+            <no-data v-if="totalCount === 0" title="该校区下暂无建筑"></no-data>
         </div>
     </div>
 </template>
@@ -91,8 +92,12 @@
 </style>
 
 <script>
+import NoData from "@/components/NoData";
 export default {
     name: 'BuildingManager',
+    components: {
+        NoData,
+    },
     data() {
         return {
             campusList: [],

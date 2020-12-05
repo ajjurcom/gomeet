@@ -21,7 +21,7 @@
                     </Option>
                 </Select>
             </div>
-            <div class="list-items">
+            <div v-if="totalCount !== 0 && buildingList.length !== 0" class="list-items">
                 <div
                     class="list-item"
                     v-for="item in itemList"
@@ -45,7 +45,7 @@
                     </div>
                 </div>
             </div>
-            <div class="list-page">
+            <div v-if="totalCount !== 0 && buildingList.length !== 0" class="list-page">
                 <Page
                     :total="totalCount"
                     :page="getMeetingsParams.page"
@@ -58,6 +58,7 @@
                     transfer
                 />
             </div>
+            <no-data v-if="totalCount === 0 || buildingList.length === 0" title="该选项暂无会议室"></no-data>
         </div>
     </div>
 </template>
@@ -130,8 +131,12 @@
 </style>
 
 <script>
+import NoData from "@/components/NoData";
 export default {
     name: 'MeetingManager',
+    components: {
+        NoData,
+    },
     data() {
         return {
             campusList: [],
@@ -156,6 +161,8 @@ export default {
         },
         changeCampus(value) {
             this.itemList = [];
+            this.totalCount = 0;
+            this.getMeetingsParams.buildingID = -1;
             this.$service.MainAPI.getAllBuildingsByCampus(value).then((res) => {
                 this.buildingList = res.buildings || [];
                 this.$router.replace({
