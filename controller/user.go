@@ -431,6 +431,10 @@ func (uc *UserController) SearchUsers(c *gin.Context) {
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
 
+/* 获取多个成员
+ * way: 1. user_group
+ * 		2. appointment
+ */
 func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 	result := map[string]interface{}{
 		"idList": []int{},
@@ -472,25 +476,6 @@ func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 			return
 		}
 		ids = strings.Trim(appointment.Members, ",")
-		idStrList := common.MemberStrToList(strings.Trim(appointment.Groups, ","))
-		idList := make([]int, len(idStrList))
-		for i := 0; i < len(idStrList); i++ {
-			idList[i], _ = strconv.Atoi(idStrList[i])
-		}
-		result["appointment"] = appointment
-		result["groups"] = idList
-	} else if way == "members" {
-		appointment, err = uc.AppointmentService.GetAppointmentById(id)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				common.ResolveResult(c, false, e.INVALID_PARAMS, result, "用户组不存在")
-			} else {
-				logger.Record("获取用户组成员信息出错", err)
-				common.ResolveResult(c, false, e.BACK_ERROR, result)
-			}
-			return
-		}
-		ids = strings.Trim(appointment.AllMembers, ",")
 	} else {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "way参数错误")
 		return

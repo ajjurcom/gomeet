@@ -140,3 +140,31 @@ err: [Error 1064: You have an error in your SQL syntax; check the manual that co
 err: [missing destination name group_list in *model.Appointment]
 2020-12-02T17:47:10.827+0800	ERROR	logger/init.go:31	获取会议所在校区详细信息错误
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'campus where id=? limit 1' at line 1]
+2020-12-03T15:16:58.224+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-03T15:18:33.410+0800	ERROR	logger/init.go:31	根据多个id字符串获取appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-03T15:18:36.039+0800	ERROR	logger/init.go:31	根据多个id字符串获取appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-03T15:18:38.251+0800	ERROR	logger/init.go:31	根据多个id字符串获取appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-03T22:32:08.725+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-03T22:32:08.771+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-03T22:32:15.405+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-05T11:17:22.225+0800	ERROR	logger/init.go:31	根据多个id字符串获取appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-05T11:23:18.383+0800	ERROR	logger/init.go:31	根据多个id字符串获取appointments错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-05T22:54:14.132+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-06T11:36:19.344+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-06T11:37:39.295+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-06T11:39:48.300+0800	ERROR	logger/init.go:31	添加会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-06T12:11:04.181+0800	ERROR	logger/init.go:31	删除会议错误
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]

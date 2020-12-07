@@ -8,9 +8,9 @@ import (
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
-	"strings"
 )
 
 type IAppointmentController interface {
@@ -67,7 +67,7 @@ func (ac *AppointmentController) Post(c *gin.Context) {
 	/*
 	 * 1. 解析请求
 	 * 2. 查看会议时间是否冲突
-	 * 3. 将groups中的组成员查询出来加入到members中
+	 * 3. 对members中的成员去重
 	 * 4. 添加会议
 	 */
 	// 1. 解析请求
@@ -76,6 +76,7 @@ func (ac *AppointmentController) Post(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
 		return
 	}
+	fmt.Println("appointment", appointment)
 	if appointment.StartTime >= appointment.EndTime {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "开始时间不能等于或晚于结束时间")
 		return
@@ -91,23 +92,10 @@ func (ac *AppointmentController) Post(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议时间冲突")
 		return
 	}
-	// 3. 将groups中的组成员查询出来加入到members中, 并去除相同用户ID
-	members := appointment.Members
-	if strings.Trim(appointment.Groups, ",") != "" {
-		groups, err := ac.GroupService.GetMembersByGroups(appointment.Groups)
-		if err != nil {
-			logger.Record("查询组的所有用户ID出错", err)
-			common.ResolveResult(c, false, e.BACK_ERROR, nil)
-			return
-		}
-		for i := 0; i < len(groups); i++ {
-			members += "," + groups[i].Members
-		}
-	}
-	tempMembers := common.RemoveDuplicateEle(common.MemberStrToList(strings.Trim(members, ",")))
-	members = common.MemberListToStr(tempMembers)
+	// 3. 对members中的成员去重
+	appointment.Members = common.MemberListToStr(common.RemoveDuplicateEle(common.MemberStrToList(appointment.Members)))
 	// 4. 添加会议室
-	if err := ac.AppointmentService.CreateAppointment(appointment, members); err != nil {
+	if err := ac.AppointmentService.CreateAppointment(appointment); err != nil {
 		logger.Record("添加会议错误", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, nil)
 		return
@@ -164,9 +152,8 @@ func (ac *AppointmentController) Put(c *gin.Context) {
 	 * 1. 解析请求
 	 * 2. 查看新会议时间是否冲突
 	 * 3. 查询旧成员
-	 * 4. 将groups中的组成员查询出来加入到members中组成新成员
-	 * 5. 计算新成员和删除成员, 所有成员
-	 * 6. 操作数据库添加会议室
+	 * 4. 比较得出计算新增加成员和删除成员
+	 * 5. 操作数据库添加会议室
 	 */
 	// 1. 解析请求
 	appointment := model.Appointment{}
@@ -174,21 +161,21 @@ func (ac *AppointmentController) Put(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
 		return
 	}
-	if appointment.StartTime >= appointment.EndTime {
-		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "开始时间不能等于或晚于结束时间")
-		return
-	}
+	//if appointment.StartTime >= appointment.EndTime {
+	//	common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "开始时间不能等于或晚于结束时间")
+	//	return
+	//}
 	// 2. 查看会议是否冲突, isConflict 会议是否冲突
-	isConflict, err := ac.AppointmentService.IsAppointmentConflict(appointment, "put")
-	if err != nil {
-		logger.Record("检查会议是否冲突错误", err)
-		common.ResolveResult(c, false, e.BACK_ERROR, nil)
-		return
-	}
-	if isConflict {
-		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议时间冲突")
-		return
-	}
+	//isConflict, err := ac.AppointmentService.IsAppointmentConflict(appointment, "put")
+	//if err != nil {
+	//	logger.Record("检查会议是否冲突错误", err)
+	//	common.ResolveResult(c, false, e.BACK_ERROR, nil)
+	//	return
+	//}
+	//if isConflict {
+	//	common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议时间冲突")
+	//	return
+	//}
 	// 3. 查询旧成员
 	members, _, err := ac.AppointmentService.GetAllMembersAndCreatorIDByID(appointment.ID)
 	if err != nil {
@@ -201,24 +188,10 @@ func (ac *AppointmentController) Put(c *gin.Context) {
 		return
 	}
 	oldMembers := common.MemberStrToList(members)
-
-	// 4. 将groups中的组成员查询出来加入到members中组成新成员
-	members = appointment.Members
-	if strings.Trim(appointment.Groups, ",") != "" {
-		groups, err := ac.GroupService.GetMembersByGroups(appointment.Groups)
-		if err != nil {
-			logger.Record("查询组的所有用户ID出错", err)
-			common.ResolveResult(c, false, e.BACK_ERROR, nil)
-			return
-		}
-		for i := 0; i < len(groups); i++ {
-			members += "," + groups[i].Members
-		}
-	}
-	newMembers := common.RemoveDuplicateEle(common.MemberStrToList(strings.Trim(members, ",")))
+	newMembers := common.RemoveDuplicateEle(common.MemberStrToList(appointment.Members))
+	appointment.Members = common.MemberListToStr(newMembers)
 
 	// 5. 计算新成员和删除成员, 所有成员
-	appointment.AllMembers = common.MemberListToStr(newMembers)
 	deleteMembers, addMembers := common.DiffMember(oldMembers, newMembers)
 
 	// 6. 修改会议信息

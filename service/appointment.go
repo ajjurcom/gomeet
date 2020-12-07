@@ -7,7 +7,7 @@ import (
 )
 
 type IAppointmentService interface {
-	CreateAppointment(appointment model.Appointment, members string) error
+	CreateAppointment(appointment model.Appointment) error
 	DeleteAppointment(id int, members string) error
 	PutAppointment(appointment model.Appointment, addMembers, deleteMembers string) error
 	PutState(id int, state string) error
@@ -29,8 +29,8 @@ type AppointmentService struct {
 	AppointmentRepository repository.IAppointmentRepository
 }
 
-func (as *AppointmentService) CreateAppointment(appointment model.Appointment, members string) error {
-	return as.AppointmentRepository.Add(appointment, members)
+func (as *AppointmentService) CreateAppointment(appointment model.Appointment) error {
+	return as.AppointmentRepository.Add(appointment)
 }
 
 func (as *AppointmentService) DeleteAppointment(id int, members string) error {
@@ -80,8 +80,8 @@ func (as *AppointmentService) IsAppointmentConflict(appointment model.Appointmen
 }
 
 func (as *AppointmentService) GetAllMembersAndCreatorIDByID(id int) (string, int, error) {
-	appointment, err := as.AppointmentRepository.SelectOneByCondition("id", strconv.Itoa(id), "creator_id, all_members")
-	return appointment.AllMembers, appointment.CreatorID, err
+	appointment, err := as.AppointmentRepository.SelectOneByCondition("id", strconv.Itoa(id), "creator_id", "members")
+	return appointment.Members, appointment.CreatorID, err
 }
 
 func (as *AppointmentService) GetAllReserve(day, startTime, meetingID string) ([]model.Appointment, error) {

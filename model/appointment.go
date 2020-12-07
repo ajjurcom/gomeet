@@ -11,9 +11,7 @@ type Appointment struct {
 	State       string `json:"state" db:"state"`
 	Theme       string `json:"theme" db:"theme"`
 	Content     string `json:"content" db:"content"`
-	Groups      string `json:"group_list" db:"group_list"`
 	Members     string `json:"members" db:"members"`
-	AllMembers  string `json:"all_members" db:"all_members"`
 	Locate		string `json:"locate" db:"locate"`
 }
 

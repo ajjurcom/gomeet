@@ -37,8 +37,6 @@ func GenerateToken(session *model.Session) (string, error) {
 	return tokenClaims.SignedString(jwtSecret)
 }
 
-// DeleteToken 删除token
-
 // ParseToken 解析token返回保存信息
 func ParseToken(token string) (*model.Session, error) {
 	jwtSecret := []byte(config.Cfg.Section("jwt").Key("secret").String())

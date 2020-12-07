@@ -12,7 +12,7 @@ import (
 
 type IAppointmentRepository interface {
 	Conn() error
-	Add(appointment model.Appointment, members string) error
+	Add(appointment model.Appointment) error
 	Delete(id int, members string) error
 	Put(appointment model.Appointment, addMembers, deleteMembers string) error
 	PutState(id int, state string) error
@@ -51,7 +51,7 @@ func (ar *AppointmentRepository) Conn() error {
 	return nil
 }
 
-func (ar *AppointmentRepository) Add(appointment model.Appointment, members string) error {
+func (ar *AppointmentRepository) Add(appointment model.Appointment) error {
 	/*
 	 * 1. 创建新会议，获得新会议id号
 	 * 2. 将新会议id号添加到members每个user的appointments中
@@ -68,10 +68,10 @@ func (ar *AppointmentRepository) Add(appointment model.Appointment, members stri
 	// 1. 创建新会议，获得新会议id号
 	var id int64 = -1
 	sqlStr := "insert into " + ar.appointmentTable + "(creator_id, creator_name, meeting_id, day, start_time, " +
-		"end_time, theme, content, group_list, members, all_members) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		"end_time, theme, content, members) values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	result, err := tx.Exec(sqlStr, appointment.CreatorID, appointment.CreatorName, appointment.MeetingID, appointment.Day,
 		appointment.StartTime, appointment.EndTime, appointment.Theme, appointment.Content,
-		appointment.Groups, appointment.Members, members)
+		appointment.Members)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -82,11 +82,15 @@ func (ar *AppointmentRepository) Add(appointment model.Appointment, members stri
 		return err
 	}
 	// 2. 将新会议id号添加到members每个user的appointments中
-	sqlStr = "update " + ar.userTable + " set appointments=concat(appointments, '," + strconv.Itoa(int(id)) + "') where id in (" + members + ")"
-	_, err = tx.Exec(sqlStr)
-	if err != nil {
-		tx.Rollback()
-		return err
+	if appointment.Members != "" {
+		sqlStr = "update " + ar.userTable + " " +
+			"set appointments=concat(appointments, '," + strconv.Itoa(int(id)) + "') " +
+			"where id in (" + appointment.Members + ")"
+		_, err = tx.Exec(sqlStr)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 	tx.Commit()
 	return nil
@@ -103,10 +107,13 @@ func (ar *AppointmentRepository) Delete(id int, members string) error {
 	}
 
 	// 1. 查询所有成员的group_list
-	sql := "select id, appointments from " + ar.userTable + " where id in (" + members + ")"
 	var users []model.User
-	if err := ar.mysqlConn.Select(&users, sql); err != nil {
-		return err
+	sql := ""
+	if members != "" {
+		sql = "select id, appointments from " + ar.userTable + " where id in (" + members + ")"
+		if err := ar.mysqlConn.Select(&users, sql); err != nil {
+			return err
+		}
 	}
 
 	// 2. 删除该会议室
@@ -119,18 +126,21 @@ func (ar *AppointmentRepository) Delete(id int, members string) error {
 		tx.Rollback()
 		return err
 	}
+
 	// 3. 从所有成员中删除该会议
-	idStr := strconv.Itoa(id)
-	sql = "update " + ar.userTable + " set appointments=? where id=?"
-	for _, user := range users {
-		tmp := common.MemberStrToList(user.Appointments)
-		index := common.StrIndexOf(tmp, idStr)
-		if index != -1 {
-			tmp = append(tmp[:index], tmp[index+1:]...)
-			_, err := tx.Exec(sql, common.MemberListToStr(tmp), user.ID)
-			if err != nil {
-				tx.Rollback()
-				return err
+	if members != "" {
+		idStr := strconv.Itoa(id)
+		sql = "update " + ar.userTable + " set appointments=? where id=?"
+		for _, user := range users {
+			tmp := common.MemberStrToList(user.Appointments)
+			index := common.StrIndexOf(tmp, idStr)
+			if index != -1 {
+				tmp = append(tmp[:index], tmp[index+1:]...)
+				_, err := tx.Exec(sql, common.MemberListToStr(tmp), user.ID)
+				if err != nil {
+					tx.Rollback()
+					return err
+				}
 			}
 		}
 	}
@@ -185,10 +195,11 @@ func (ar *AppointmentRepository) Put(appointment model.Appointment, addMembers, 
 	}
 
 	// 3. 更新会议
-	sql = "update " + ar.appointmentTable + " set day=?, start_time=?, " +
-		"end_time=?, theme=?, content=?, group_list=?, members=?, all_members=? where id =?"
-	if _, err = tx.Exec(sql, appointment.Day, appointment.StartTime, appointment.EndTime, appointment.Theme,
-		appointment.Content, appointment.Groups, appointment.Members, appointment.AllMembers, appointment.ID); err != nil {
+	//sql = "update " + ar.appointmentTable + " set day=?, start_time=?, " +
+	//	"end_time=?, theme=?, content=?, members=? where id =?"
+	sql = "update " + ar.appointmentTable + " set theme=?, content=?, members=? where id =?"
+	if _, err = tx.Exec(sql, appointment.Theme, appointment.Content, appointment.Members,
+		appointment.ID); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -295,6 +306,9 @@ func (ar *AppointmentRepository) SelectAppointmentsByCondition(conditionName, co
 }
 
 func (ar *AppointmentRepository) SelectAppointmentsByID(ids string) (appointments []model.Appointment, err error) {
+	if ids == "" {
+		return
+	}
 	if err = ar.Conn(); err != nil {
 		return
 	}
