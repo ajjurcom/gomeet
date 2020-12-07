@@ -132,6 +132,53 @@ export const GetNumberArr = (a, b) => {
     return Array.from(Array( b - a + 1 )).map(( e, i ) => a + i);
 }
 
+/**
+ * FindDeleteIndex  l2是l1删除某个元素后的新数组，找出l1被删除的元素的位置，没有返回-1
+ * @params {*} l1
+ * @params {*} l2
+ * @returns index
+ */
+export const FindDeleteIndex = (l1, l2) => {
+  let i = 0;
+  while (i < l1.length && i < l2.length) {
+    if (l1[i] !== l2[i]) {
+      return i;
+    }
+    i++;
+  }
+  return i < l1.length ? i : -1;
+}
+
+
+/**
+ * NoContainEle 找出了l2中l1不存在的元素
+ * @params {*} l1
+ * @params {*} l2
+ * @returns list
+ */
+export const NoContainEle = (l1, l2) => {
+  let obj = {};
+  let l = [];
+  for (let item of l1) {
+    obj[item] = true;
+  }
+  for (let item of l2) {
+    if (!obj[item]) {
+      l.push(item);
+    }
+  }
+  return l;
+}
+
+/**
+ * DeleteElements 将l2的元素从l1中删除
+ * @params {*} l1
+ * @params {*} l2
+ * @returns list
+ */
+export const DeleteElements = (l1, l2) => {
+  return l1.filter(item => l2.indexOf(item) === -1);
+}
 
 /**
  * GetNumFromScale

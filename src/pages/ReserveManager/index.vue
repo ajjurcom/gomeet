@@ -99,9 +99,15 @@
                 <div class="appointment-item">
                     <div class="appointment-title">参会组：</div>
                     <div class="appointment-content">
-                        <Select v-model="updateAppointment.groupsList" multiple style="width:400px">
+                        <Select
+                            ref="groups"
+                            v-model="updateAppointment.groupsList"
+                            multiple
+                            style="width:400px"
+                            @on-change="changeMember">
                             <Option
                                 v-for="item in options.group_list"
+                                :disabled="control.groupLoding"
                                 :key="item.id"
                                 :value="item.id">
                                 {{item.group_name}}
@@ -141,16 +147,9 @@
                             :disabled="item.state === 'adopt'"
                             class="button"
                             type="primary"
-                            @click.stop="showEditModal(item.id)">
+                            @click.stop="showEditModal(item)">
                             管理
                         </Button>
-                        <!-- <Button
-                            :disabled="item.state !== 'adopt'"
-                            class="button"
-                            type="primary"
-                            @click.stop="showInvitationModal">
-                            发会邀
-                        </Button> -->
                         <Poptip
                             confirm
                             title="退订将无法恢复"
@@ -290,7 +289,7 @@
 
 <script>
 import NoData from "@/components/NoData";
-import {intArrayToStr} from '@/Utils';
+import {intArrayToStr, FindDeleteIndex, NoContainEle, DeleteElements} from '@/Utils';
 export default {
     name: 'ReserveManager',
     components: {
@@ -298,13 +297,15 @@ export default {
     },
     data() {
         return {
+            groupUsers: [],
             marginLeft: 10,
             control: {
                 deleteLoading: false,
                 editModal: false,
                 appointmentModal: false,
                 appointmentClickAble: true,
-                invitationModal: false
+                invitationModal: false,
+                groupLoding: false
             },
             stateMap: {
                 'verify': '审核中',
@@ -335,6 +336,48 @@ export default {
         }
     },
     methods: {
+        changeMember(value) {
+            // 1. 计算是新增组还是删除组
+            const oldGroups = this.$refs.groups.value;
+            let changeGroup = -1;
+            let isAdd = true;
+            if (oldGroups.length < value.length) { // 新增
+                changeGroup = value[value.length-1];
+            } else {    // 删除某个数组
+                isAdd = false;
+                changeGroup = oldGroups[FindDeleteIndex(oldGroups, value)];
+            }
+            // 2. 请求组中成员数据
+            if (isAdd) {
+                if (!this.groupUsers[changeGroup]) {
+                    this.control.groupLoding = true;
+                    this.$service.MainAPI.getUsersByID(changeGroup, 'user_group').then(res => {
+                        this.groupUsers[changeGroup] = {};
+                        this.groupUsers[changeGroup].idList = res.idList || [];
+                        this.groupUsers[changeGroup].userList = res.userList || [];
+                        // 3. 添加到参会成员中/从参会成员中删除
+                        let addMembersID = NoContainEle(this.search.members, this.groupUsers[changeGroup].idList);
+                        this.search.members = this.search.members.concat(addMembersID);
+                        this.search.results = this.search.results.concat(
+                            this.groupUsers[changeGroup].userList.filter(item => addMembersID.indexOf(item.id) !== -1)
+                        );
+                        this.replaceShowVal('username');
+                    }).finally(() => {
+                        this.control.groupLoding = false;
+                    });
+                } else {
+                    let addMembersID = NoContainEle(this.search.members, this.groupUsers[changeGroup].idList);
+                    this.search.members = this.search.members.concat(addMembersID);
+                    this.search.results = this.search.results.concat(
+                        this.groupUsers[changeGroup].userList.filter(item => addMembersID.indexOf(item.id) !== -1)
+                    );
+                    this.replaceShowVal('username');
+                }
+            }
+            if (this.groupUsers[changeGroup] && !isAdd) {
+                this.search.members = DeleteElements(this.search.members, this.groupUsers[changeGroup].idList);
+            }
+        },
         getMyReserve() {
             this.$service.MainAPI.getMyReserve(this.$store.getters['App/getUserID']).then(res => {
                 this.myReserve = res.myReserve || [];
@@ -361,20 +404,21 @@ export default {
         showInvitationModal() {
             this.control.invitationModal = true;
         },
-        showEditModal(id) {
-            this.updateAppointment = {};
+        showEditModal(obj) {
+            this.updateAppointment.id = obj.id;
+            this.updateAppointment.theme = obj.theme;
+            this.updateAppointment.content = obj.content;
             this.search.params.searchWay = "username";
             this.$refs.searchInput.setQuery('');
             this.control.editModal = true;
             // 1. 获取参会人员、参会组
             // 2. 将userIDList赋值给this.search.members
-            this.$service.MainAPI.getGroupMembers(id, 'appointment').then(res => {
-                this.updateAppointment = res.appointment;
+            this.$service.MainAPI.getUsersByID(obj.id, 'appointment').then(res => {
                 this.search.members = res.idList || [];
                 this.search.results = res.userList || [];
-                this.updateAppointment.groupsList = res.groups;
                 this.replaceShowVal('sno');
             });
+            // 获取用户组选项
             if (!this.options.group_list || this.options.group_list.length === 0) {
                 this.$service.MainAPI.getAllGroupsByCreator(this.$store.getters['App/getUserID']).then(res => {
                     this.options.group_list = res.groupList || [];
@@ -382,7 +426,6 @@ export default {
             }
         },
         editAppointment() {
-            this.updateAppointment['group_list'] = intArrayToStr(this.updateAppointment.groupsList);
             this.updateAppointment['members'] = intArrayToStr(this.search.members);
             this.$service.MainAPI.putAppointment(this.updateAppointment).then(res => {
                 this.$Message.info('修改成功');

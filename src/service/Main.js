@@ -67,7 +67,7 @@ export default class Main {
     static searchUsers(obj) {
         return http.get(`/users?searchWay=${obj.searchWay}&keyword=${obj.keyword}`)
     }
-    static getGroupMembers(id, way) {
+    static getUsersByID(id, way) {
         return http.get(`/members/${id}?way=${way}`);
     }
     /*

@@ -155,7 +155,7 @@
                                 placeholder="输入关键字搜索用户"
                                 :remote-method="searchUsers"
                                 :loading="search.loading">
-                                <Option v-for="user in search.results" :value="user.id" :key="user.id">
+                                <Option v-for="(user, index) in search.results" :value="user.id" :key="index">
                                     {{user.username}}({{user.val}})
                                 </Option>
                             </Select>
@@ -177,9 +177,14 @@
             <div class="reserve-item">
                 <div class="reserve-title">参会组：</div>
                 <div class="reserve-select">
-                    <Select v-model="reserveParams.groupsList" multiple style="width:400px">
+                    <Select
+                        ref="groups"
+                        v-model="reserveParams.groupsList"
+                        multiple style="width:400px"
+                        @on-change="changeMember">
                         <Option
                             v-for="item in options.groupsList"
+                            :disabled="control.groupLoding"
                             :key="item.id"
                             :value="item.id">
                             {{item.group_name}}
@@ -636,7 +641,7 @@
 </style>
 
 <script>
-import {intArrayToStr, GetDateObj, ReserveFormat, GetNumFromScale, GetNumberArr, DateFormat} from '@/Utils';
+import {intArrayToStr, GetDateObj, ReserveFormat, GetNumFromScale, GetNumberArr, DateFormat, FindDeleteIndex, NoContainEle, DeleteElements} from '@/Utils';
 export default {
     name: "Reserve",
     data () {
@@ -655,6 +660,7 @@ export default {
                 meetingLoading: false,
                 reserveModal: false,
                 loading: true,
+                groupLoding: false
             },
             params: {   // 已选择的参数
                 campusID: -1,
@@ -710,10 +716,63 @@ export default {
                     opacity: 0
                 },
             },
+            groupUsers: [],  // 存储组成员 id列表和各个成员信息
         };
     },
     methods: {
+        changeMember(value) {
+            // 1. 计算是新增组还是删除组
+            const oldGroups = this.$refs.groups.value;
+            let changeGroup = -1;
+            let isAdd = true;
+            if (oldGroups.length < value.length) { // 新增
+                changeGroup = value[value.length-1];
+            } else {    // 删除某个数组
+                isAdd = false;
+                changeGroup = oldGroups[FindDeleteIndex(oldGroups, value)];
+            }
+            // 2. 请求组中成员数据
+            if (isAdd) {
+                if (!this.groupUsers[changeGroup]) {
+                    this.control.groupLoding = true;
+                    this.$service.MainAPI.getUsersByID(changeGroup, 'user_group').then(res => {
+                        this.groupUsers[changeGroup] = {};
+                        this.groupUsers[changeGroup].idList = res.idList || [];
+                        this.groupUsers[changeGroup].userList = res.userList || [];
+                        // 3. 添加到参会成员中/从参会成员中删除
+                        let addMembersID = NoContainEle(this.search.members, this.groupUsers[changeGroup].idList);
+                        this.search.members = this.search.members.concat(addMembersID);
+                        this.search.results = this.search.results.concat(
+                            this.groupUsers[changeGroup].userList.filter(item => addMembersID.indexOf(item.id) !== -1)
+                        );
+                        this.replaceShowVal('username');
+                    }).finally(() => {
+                        this.control.groupLoding = false;
+                    });
+                } else {
+                    let addMembersID = NoContainEle(this.search.members, this.groupUsers[changeGroup].idList);
+                    this.search.members = this.search.members.concat(addMembersID);
+                    this.search.results = this.search.results.concat(
+                        this.groupUsers[changeGroup].userList.filter(item => addMembersID.indexOf(item.id) !== -1)
+                    );
+                    this.replaceShowVal('username');
+                }
+            }
+            if (this.groupUsers[changeGroup] && !isAdd) {
+                this.search.members = DeleteElements(this.search.members, this.groupUsers[changeGroup].idList);
+            }
+        },
         confirmReserve() {
+            if (this.reserveParams.theme === "") {
+                this.$Message.error("会议主题不能为空");
+                this.control.loading = false;
+                return;
+            }
+            if (this.search.members.length === 0) {
+                this.$Message.error("参会人员不能为空");
+                this.control.loading = false;
+                return;
+            }
             this.control.loading = true;
             // 1. 检查参数
             const obj = {
@@ -725,24 +784,8 @@ export default {
                 end_time: this.reserveParams.endTime < 10 ? '0' + this.reserveParams.endTime + ':00' : this.reserveParams.endTime + ':00',
                 theme: this.reserveParams.theme,
                 content: this.reserveParams.content,
-                groups: intArrayToStr(this.reserveParams.groupsList),
                 members: intArrayToStr(this.search.members),
             };
-            let passConfirm = true;
-            let msg = "";
-            if (obj.groups === "" && obj.members === "") {
-                passConfirm = false;
-                msg = "参会人员和组必须选择有一个";
-            }
-            if (obj.theme === "") {
-                passConfirm = false;
-                msg = "会议主题不能为空";
-            }
-            if (!passConfirm) {
-                this.$Message.error(msg);
-                this.control.loading = false;
-                return;
-            }
             // 2. 发起请求
             this.$service.MainAPI.addAppointment(obj).then(res => {
                 this.$Message.info('预定成功');
@@ -877,7 +920,16 @@ export default {
             // this.currentTime.minute = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
             // this.currentTime.second = date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds();;
         },
+        clearModalValue() {
+            this.search.members = [];
+            this.reserveParams.groupsList = [];
+            this.reserveParams.theme = '';
+            this.reserveParams.content = '';
+            this.$refs.searchInput.setQuery('');
+        },
         reserveMeeting(meetingID, meetingName, startTimeHour) {
+            this.clearModalValue();
+            // 会议信息赋值
             this.reserveParams.meetingID = meetingID;
             this.reserveParams.meetingName = meetingName;
             this.reserveParams.startTime = startTimeHour;
