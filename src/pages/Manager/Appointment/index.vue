@@ -48,22 +48,12 @@
                     </div>
                 </div>
             </Modal>
-            <div class="select-items">
-                <Select class="select-item" v-model="requestListParams.state" placeholder="会议状态" @on-change="changeState">
-                    <Option 
-                        v-for="state in options.states"
-                        :value="state"
-                        :key="state"
-                        >
-                        {{stateMap[state]}}
-                    </Option>
-                </Select>
-            </div>
             <div v-if="totalCount !== 0" class="reserves">
                 <div
                     class="reserve"
                     v-for="item in itemList"
-                    :key="item.id">
+                    :key="item.id"
+                    @click="showAppointment(item.id)">
                     <div class="info">
                         <Icon type="md-time" color="#2d8cf0" size="20"/>
                         <div class="day-time">
@@ -76,16 +66,20 @@
                         </div>
                     </div>
                     <div class="buttons">
-                        <Select :disabled="control.puting" class="button" v-model="item.state" placeholder="状态" @on-change="putState(item.id, item.state)">
-                            <Option 
-                                v-for="state in options.states"
-                                :value="state"
-                                :key="state"
-                                >
-                                {{stateMap[state]}}
-                            </Option>
-                        </Select>
-                        <Button class="button" type="primary" @click="showAppointment(item.id)">详情</Button>
+                        <Poptip
+                            confirm
+                            title="通过该会议后将无法恢复"
+                            @click.native.stop=""
+                            @on-ok="putState(item.id, 'adopt')">
+                            <Button class="button" type="primary">通过</Button>
+                        </Poptip>
+                        <Poptip
+                            confirm
+                            title="拒绝该会议后将无法恢复"
+                            @click.native.stop=""
+                            @on-ok="putState(item.id, 'refuse')">
+                            <Button class="button" type="error">拒绝</Button>
+                        </Poptip>
                     </div>
                 </div>
             </div>
@@ -230,7 +224,8 @@ export default {
             },
             stateMap: {
                 'verify': '等待审核',
-                'adopt': '通过审核'
+                'adopt': '通过审核',
+                'refuse': '拒绝'
             },
             appointment: {},
             options: {
@@ -316,6 +311,7 @@ export default {
             }
             this.$service.MainAPI.putAppointmentState(obj).then(() => {
                 this.$Message.info("修改成功");
+                this.getDataList();
             }).finally(() => {
                 this.control.puting = false;
             });

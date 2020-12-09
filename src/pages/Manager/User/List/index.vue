@@ -16,27 +16,61 @@
                 <div
                     class="list-item"
                     v-for="item in itemList"
-                    :key="item.id">
+                    :key="item.id"
+                    @click="showUserInfo(item.id)">
                     <div class="list-item-content">
                         <div class="list-item-text">
                             {{item.sno}} - {{item.username}}
                         </div>
                     </div>
                     <div class="list-item-buttons">
-                        <Select class="list-item-buttons-state" v-model="item.state" placeholder="状态" @on-change="putUserState(item.id, item.state)">
-                            <Option 
-                                v-for="state in stateList"
-                                :value="state"
-                                :key="state">
-                                {{stateMap[state]}}
-                            </Option>
-                        </Select>
-                        <Button class="list-item-button" type="success" :loading="detailsLoading" @click="showUserInfo(item.id)">详情</Button>
                         <Poptip
+                            v-if="getMeetingsParams.state === 'verify_user'"
                             confirm
-                            title="删除将无法恢复"
+                            title="通过用户后将无法恢复"
+                            @click.native.stop=""
+                            @on-ok="putUserState(item.id, 'normal_user')">
+                            <Button class="list-item-button" :loading="loading" type="primary">通过</Button>
+                        </Poptip>
+                        <Poptip
+                            v-if="getMeetingsParams.state === 'verify_user'"
+                            confirm
+                            title="拒绝用户后将无法恢复"
+                            @click.native.stop=""
+                            @on-ok="putUserState(item.id, 'refuse_user')">
+                            <Button class="list-item-button" :loading="loading" type="error">拒绝</Button>
+                        </Poptip>
+                        <Poptip
+                            v-if="getMeetingsParams.state === 'verify_admin'"
+                            confirm
+                            title="通过用户后将无法恢复"
+                            @click.native.stop=""
+                            @on-ok="putUserState(item.id, 'normal_admin')">
+                            <Button class="list-item-button" :loading="loading" type="primary">通过</Button>
+                        </Poptip>
+                        <Poptip
+                            v-if="getMeetingsParams.state === 'verify_admin'"
+                            confirm
+                            title="拒绝用户后将无法恢复"
+                            @click.native.stop=""
+                            @on-ok="putUserState(item.id, 'normal_user')">
+                            <Button class="list-item-button" :loading="loading" type="error">拒绝</Button>
+                        </Poptip>
+                        <Poptip
+                            v-if="getMeetingsParams.state === 'normal_admin'"
+                            confirm
+                            title="确定退回普通用户?"
+                            @click.native.stop=""
+                            @on-ok="putUserState(item.id, 'normal_user')">
+                            <Button class="list-item-button" :loading="loading" type="error">取消管理员身份</Button>
+                        </Poptip>
+                        <Poptip
+                            v-if="getMeetingsParams.state === 'normal_user'"
+                            confirm
+                            title="删除用户后将无法恢复"
+                            @click.native.stop=""
                             @on-ok="deleteUser(item.id)">
-                            <Button class="list-item-button" :loading="deleteLoading" type="error">删除</Button>
+                            <Button class="list-item-button" :loading="loading" type="error">删除</Button>
                         </Poptip>
                     </div>
                 </div>
@@ -149,7 +183,7 @@ export default {
             },
             userInfo: {},
             itemList: [],
-            deleteLoading: false,
+            loading: false,
             detailsLoading: false,
         }
     },
@@ -186,20 +220,27 @@ export default {
             this.getDataList();
         },
         deleteUser(id) {
-            this.deleteLoading = true;
+            this.loading = true;
             this.$service.MainAPI.deleteUser(id).then(res => {
                 this.$Message.info('删除成功');
                 this.getDataList();
             }).finally(() => {
-                this.deleteLoading = false;
+                this.loading = false;
             });
         },
         putUserState(id, state) {
+            this.loading = true;
             this.$service.MainAPI.putUserState(id, state).then(res => {
                 this.$Message.success("修改成功");
+                this.getDataList();
+            }).finally(() => {
+                this.loading = false;
             });
         },
         showUserInfo(id) {
+            if (this.detailsLoading) {
+                return
+            }
             this.detailsLoading = true;
             this.$service.MainAPI.getUserInfo(id).then(res => {
                 this.userInfo = res.user || {};
