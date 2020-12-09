@@ -40,6 +40,9 @@ export default class Main {
     static addUser(data) {
         return http.post('/user', data);
     }
+    static applyAdmin(id) {
+        return http.put(`/apply_admin/${id}`)
+    }
     static putUser(data) {
         return http.put('/user', data);
     }

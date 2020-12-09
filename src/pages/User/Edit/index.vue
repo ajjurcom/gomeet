@@ -16,9 +16,16 @@
                 </FormItem>
                 <FormItem>
                     <Button type="primary" :loading="loading" @click="handleSubmit('formValidate')">修改</Button>
-                    <Button @click="handleReset('formValidate')" style="margin-left: 8px">Reset</Button>
+                    <Button type="error" ghost  @click="handleReset('formValidate')" style="margin-left: 8px">Reset</Button>
+                    <Poptip
+                        confirm
+                        :loading="upgradeLoading"
+                        style="margin-left: 8px"
+                        title="确定发起申请升级管理员?"
+                        @on-ok="upgradeAdmin">
+                        <Button class="info" :disabled="upgradeAdminAble" type="primary">申请升级管理员</Button>
+                    </Poptip>
                 </FormItem>
-                <FormItem></FormItem>
             </Form>
         </div>
     </div>
@@ -43,6 +50,7 @@ export default {
     data () {
         return {
             loading: false,
+            upgradeLoading: false,
             formValidate: {
                 id: Number(this.$route.params.id) || -1,
                 sno: '',
@@ -70,6 +78,11 @@ export default {
             }
         };
     },
+    computed: {
+        upgradeAdminAble() {
+            return this.$store.getters["App/getUserState"] !== "normal_user";
+        }
+    },
     methods: {
         handleSubmit (name) {
             this.loading = true;
@@ -89,6 +102,15 @@ export default {
         },
         handleReset (name) {
             this.$refs[name].resetFields();
+        },
+        upgradeAdmin() {
+            this.upgradeLoading = true;
+            this.$service.MainAPI.applyAdmin(this.$store.getters['App/getUserID']).then(() => {
+                this.$store.commit('App/setUserState', 'verify_admin');
+                this.$Message.info('已发起申请, 等待管理员审核');
+            }).finally(() => {
+                this.upgradeLoading = false;
+            })
         }
     },
     created() {

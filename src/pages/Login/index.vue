@@ -195,6 +195,7 @@ export default {
                     this.$store.commit('App/setUserID', res.id || -1);
                     this.$store.commit('App/setUserName', res.username || 'Guest');
                     this.$store.commit('App/setUserIsRoot', res.isRoot);
+                    this.$store.commit('App/setUserState', res['state']);
                     // 登录成功跳转
                     showMessage('info', '登录成功');
                     if (this.currentRole === 'admin') {

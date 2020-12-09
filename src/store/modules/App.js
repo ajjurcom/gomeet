@@ -15,12 +15,14 @@ export default {
          */
         currentRole: 'guest',
         isRoot: false,
+        userState: 'verify_user',
     },
     getters: {
         getUserID: state => state.userID,
         getUserName: state => state.userName,
         getUserIsRoot: state => state.isRoot,
-        getCurrentRole: state => state.currentRole
+        getCurrentRole: state => state.currentRole,
+        getUserState: state => state.userState
     },
     mutations: {
         setUserID(state, value) {
@@ -34,6 +36,9 @@ export default {
         },
         setCurrentRole(state, value) {
             state.currentRole = value;
+        },
+        setUserState(state, value) {
+            state.userState = value;
         }
     },
     actions: {},

@@ -145,7 +145,7 @@
         },
         data() {
             return {
-                currentActiveName: this.$route.name.toLowerCase()
+                currentActiveName: this.$route.name ? this.$route.name.toLowerCase() : ''
             };
         },
         watch: {
@@ -181,7 +181,7 @@
             },
             onRouteChange(route) {
                 this.$nextTick(() => {
-                    this.currentActiveName = this.$route.name.toLowerCase();
+                    this.currentActiveName = this.$route.name ? this.$route.name.toLowerCase() : '';
                     this.$refs.menu.updateActiveName();
                 });
             }
