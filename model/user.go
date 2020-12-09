@@ -6,7 +6,6 @@ type User struct {
 	Phone        string `json:"phone" db:"phone" binding:"required"`
 	Password     string `json:"password" db:"password"`
 	State        string `json:"state" db:"state"`
-	Ban          string `json:"ban" db:"ban"`
 	Username     string `json:"username" db:"username" binding:"required"`
 	GroupList    string `json:"group_list" db:"group_list"`
 	Appointments string `json:"appointments" db:"appointments"`

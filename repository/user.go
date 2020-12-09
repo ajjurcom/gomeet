@@ -178,7 +178,7 @@ func (umr *UserManagerRepository) SelectUsersByPage(page, onePageCount int, stat
 
 	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
-	sqlStr := "select id, sno, state, ban, username from " + umr.table + " where state = ? order by id desc limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	sqlStr := "select id, sno, state, username from " + umr.table + " where state = ? order by id desc limit " + startIndex + ", " + strconv.Itoa(onePageCount)
 	err = umr.mysqlConn.Select(&userList, sqlStr, state)
 	return
 }
@@ -187,7 +187,7 @@ func (umr *UserManagerRepository) SelectUserByID(id int) (user model.User, err e
 	if err = umr.Conn(); err != nil {
 		return
 	}
-	sqlStr := "select id, sno, phone, state, ban, username, email from " + umr.table + " where id = ?"
+	sqlStr := "select id, sno, phone, state, username, email from " + umr.table + " where id = ?"
 	err = umr.mysqlConn.Get(&user, sqlStr, id)
 	return
 }
