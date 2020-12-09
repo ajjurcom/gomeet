@@ -27,9 +27,9 @@ const (
 // 1. 管理员可以管理普通用户
 // 2. 只有root才可以管理管理员
 func StateOptions(role string) []string {
-	state := []string{"verify_user", "normal_user", "refuse_user", "blacklist"}
+	state := []string{VerifyUser, NormalUser}
 	if role == "root" {
-		state = append(state, "verify_admin", "normal_admin")
+		state = append(state, VerifyAdmin, NormalAdmin)
 	}
 	return state
 }

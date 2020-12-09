@@ -8,7 +8,6 @@ import (
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
 	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
@@ -76,7 +75,6 @@ func (ac *AppointmentController) Post(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
 		return
 	}
-	fmt.Println("appointment", appointment)
 	if appointment.StartTime >= appointment.EndTime {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "开始时间不能等于或晚于结束时间")
 		return
@@ -137,7 +135,12 @@ func (ac *AppointmentController) Delete(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "不能删除其他用户创建的会议")
 		return
 	}
-	// 4. 删除会议
+	// 4. 删除会议前先保存会议
+	appointment, err := ac.AppointmentService.GetAppointmentById(id)
+	if err != nil {
+		logger.Record("会议通过审核，获取会议详情失败", err)
+		return
+	}
 	if err := ac.AppointmentService.DeleteAppointment(id, members); err != nil {
 		logger.Record("删除会议错误", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, nil)
@@ -145,6 +148,29 @@ func (ac *AppointmentController) Delete(c *gin.Context) {
 	}
 
 	common.ResolveResult(c, true, e.SUCCESS, nil)
+	// 只有会议通过审核才发送退订通知
+	if appointment.State == model.AppointmentAdopt {
+		go func() {
+			if appointment.Locate, err = ac.getLocate(appointment.MeetingID); err != nil {
+				logger.Record("获取会议室的位置错误", err)
+				return
+			}
+			users, err := ac.UserService.GetUsersEmailByID(members)
+			if err != nil {
+				logger.Record("通知会议参会成员时查询参会人员出错")
+				return
+			}
+			email := NewEmail("notifyMembers", users, appointment)
+			if email == nil {
+				logger.Record("获取邮件接口错误")
+				return
+			}
+			if err = email.SendEmail(false); err != nil {
+				logger.Record("通知会议参会成员失败", err)
+				return
+			}
+		}()
+	}
 }
 
 func (ac *AppointmentController) Put(c *gin.Context) {
@@ -231,6 +257,63 @@ func (ac *AppointmentController) PutState(c *gin.Context) {
 	}
 
 	common.ResolveResult(c, true, e.SUCCESS, nil)
+	// 发送邮件通知创建者会议审核结果
+	go func() {
+		// 查询必要信息
+		if appointment, err = ac.AppointmentService.GetAppointmentById(appointment.ID); err != nil {
+			logger.Record("会议通过审核，获取会议详情失败", err)
+			return
+		}
+		var user model.User
+		if user, err = ac.UserService.GetUserByID(appointment.CreatorID); err != nil {
+			logger.Record("获取会议创建者失败", err)
+			return
+		}
+		isPass := true
+		if appointment.State == model.AppointmentAdopt {
+			if appointment.Locate, err = ac.getLocate(appointment.MeetingID); err != nil {
+				logger.Record("获取会议室的位置错误", err)
+				return
+			}
+		}
+		if appointment.State == model.AppointmentRefuse {
+			isPass = false
+			// 删除会议
+			members, _, err := ac.AppointmentService.GetAllMembersAndCreatorIDByID(appointment.ID)
+			if err != nil {
+				logger.Record("管理员拒绝会议通过，删除会议失败", err)
+			} else {
+				if err = ac.AppointmentService.DeleteAppointment(appointment.ID, members); err != nil {
+					logger.Record("管理员拒绝会议通过，删除会议失败", err)
+				}
+			}
+		}
+		email := NewEmail("appointmentVerify", user, appointment)
+		if email == nil {
+			logger.Record("获取邮件接口错误")
+			return
+		}
+		if err = email.SendEmail(isPass); err != nil {
+			logger.Record("发送会议审核邮件失败", err)
+			return
+		}
+		// 如果是通过会议，需要通知所有参会成员
+		if appointment.State == model.AppointmentAdopt {
+			users, err := ac.UserService.GetUsersEmailByID(appointment.Members)
+			if err != nil {
+				logger.Record("通知会议参会成员时查询参会人员出错")
+				return
+			}
+			if email = NewEmail("notifyMembers", users, appointment); email == nil {
+				logger.Record("获取邮件接口错误")
+				return
+			}
+			if err = email.SendEmail(true); err != nil {
+				logger.Record("通知会议参会成员失败", err)
+				return
+			}
+		}
+	}()
 }
 
 // api/v1/all_creator?day=11/30/2020&meeting_id[]=...
@@ -329,46 +412,16 @@ func (ac *AppointmentController) GetAppointment(c *gin.Context) {
 		return
 	}
 
-	/*
-	 * 1. 根据 会议室id 获取 会议室楼层、名字、建筑id、name
-	 * 2. 根据 建筑id 获取 校区name
-	 * 3. 组成 locate
-	 */
-
-	meeting, err := ac.MeetingService.GetMeetingByID(appointment.MeetingID)
-	if err != nil {
+	if appointment.Locate, err = ac.getLocate(appointment.MeetingID); err != nil {
 		if err == sql.ErrNoRows {
-			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议的会议室不存在")
+			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议不存在")
 		} else {
-			logger.Record("获取会议所在会议室详细信息错误", err)
+			logger.Record("获取会议室的位置错误", err)
 			common.ResolveResult(c, false, e.BACK_ERROR, result)
 		}
 		return
 	}
 
-	building, err := ac.BuildingService.GetBuildingByID(meeting.BuildingID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议的建筑不存在")
-		} else {
-			logger.Record("获取会议所在建筑详细信息错误", err)
-			common.ResolveResult(c, false, e.BACK_ERROR, result)
-		}
-		return
-	}
-
-	campus, err := ac.CampusService.GetCampusByID(building.CampusID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议的校区不存在")
-		} else {
-			logger.Record("获取会议所在校区详细信息错误", err)
-			common.ResolveResult(c, false, e.BACK_ERROR, result)
-		}
-		return
-	}
-
-	appointment.Locate = campus.CampusName + " - " + building.BuildingName + " - F" + strconv.Itoa(meeting.Layer) + "-" + meeting.RoomNumber + "（" + meeting.MeetingName + "）"
 	result["appointment"] = appointment
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
@@ -423,4 +476,30 @@ func (ac *AppointmentController) GetAppointmentStates(c *gin.Context) {
 		"states": model.AppointmentStates(),
 	}
 	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+func (ac *AppointmentController) getLocate(meetingID int) (string, error) {
+	/*
+	 * 1. 根据 会议室id 获取 会议室楼层、名字、建筑id、name
+	 * 2. 根据 建筑id 获取 校区name
+	 * 3. 组成 locate
+	 */
+	locate := ""
+	meeting, err := ac.MeetingService.GetMeetingByID(meetingID)
+	if err != nil {
+		return locate, err
+	}
+
+	building, err := ac.BuildingService.GetBuildingByID(meeting.BuildingID)
+	if err != nil {
+		return locate, err
+	}
+
+	campus, err := ac.CampusService.GetCampusByID(building.CampusID)
+	if err != nil {
+		return locate, err
+	}
+
+	locate = campus.CampusName + " - " + building.BuildingName + " - F" + strconv.Itoa(meeting.Layer) + "-" + meeting.RoomNumber + "（" + meeting.MeetingName + "）"
+	return locate, nil
 }

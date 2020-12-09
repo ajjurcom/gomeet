@@ -22,6 +22,7 @@ type IUserService interface {
 	SearchUsersByAttr(attrName, attrVal string) ([]model.User, error)
 	GetAllUsersByIDs(ids string) ([]model.User, error)
 	GetMyAppointmentsID(id int) (string, error)
+	GetUsersEmailByID(ids string) ([]model.User, error)
 }
 
 func NewUserService(repository repository.IUserRepository) IUserService {
@@ -92,4 +93,8 @@ func (us *UserService) GetMyAppointmentsID(id int) (string, error) {
 	user, err := us.UserRepository.SelectOneByCondition("id",
 		strconv.Itoa(id), "appointments")
 	return user.Appointments, err
+}
+
+func (us *UserService) GetUsersEmailByID(ids string) ([]model.User, error) {
+	return us.UserRepository.SelectUsersEmailByID(ids)
 }

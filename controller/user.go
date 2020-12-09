@@ -298,6 +298,16 @@ func (uc *UserController) PutState(c *gin.Context) {
 		return
 	}
 	// 3. 修改到数据库
+	oldState, err := uc.UserService.GetStateByAttr("id", strconv.Itoa(id))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "no exists")
+		} else {
+			logger.Record("更新用户状态出错", err)
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
+		}
+		return
+	}
 	if err := uc.UserService.PutUserState(id, newState); err != nil {
 		if strings.Contains(err.Error(), "Data truncated for column 'state'") {
 			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "状态参数错误")
@@ -309,6 +319,55 @@ func (uc *UserController) PutState(c *gin.Context) {
 	}
 	// 4. 返回结果
 	common.ResolveResult(c, true, e.SUCCESS, nil)
+	// 5. 如果是审核通过用户，发送邮件通知
+	go func() {
+		if oldState == model.VerifyUser {
+			// 查询user信息
+			user, err := uc.UserService.GetUserByID(id)
+			if err != nil {
+				logger.Record("用户通过审核，获取用户信息失败", err)
+				return
+			}
+			email := NewEmail("userVerify", user)
+			if email == nil {
+				logger.Record("获取邮件接口错误")
+				return
+			}
+
+			isPass := true
+			if newState == model.RefuseUser {
+				isPass = false
+				if err = uc.UserService.DeleteUser(id); err != nil {
+					logger.Record("拒绝用户申请后，删除用户失败", err)
+				}
+			}
+			if err = email.SendEmail(isPass); err != nil {
+				logger.Record("发送用户审核邮件失败", err)
+				return
+			}
+		} else if oldState == model.VerifyAdmin {
+			// 查询user信息
+			user, err := uc.UserService.GetUserByID(id)
+			if err != nil {
+				logger.Record("管理员审核中，获取用户信息失败", err)
+				return
+			}
+			email := NewEmail("adminVerify", user)
+			if email == nil {
+				logger.Record("获取邮件接口错误")
+				return
+			}
+
+			isPass := true
+			if newState == model.NormalUser {
+				isPass = false
+			}
+			if err = email.SendEmail(isPass); err != nil {
+				logger.Record("发送管理员审核邮件失败", err)
+				return
+			}
+		}
+	}()
 }
 
 // GetUsersByPage 获取用户

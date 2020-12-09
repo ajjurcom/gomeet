@@ -168,3 +168,17 @@ err: [Error 1064: You have an error in your SQL syntax; check the manual that co
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
 2020-12-06T12:11:04.181+0800	ERROR	logger/init.go:31	删除会议错误
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+2020-12-08T22:15:26.327+0800	ERROR	logger/init.go:31	获取会议室的位置错误
+err: [sql: no rows in result set]
+2020-12-08T22:16:14.952+0800	ERROR	logger/init.go:31	获取会议室的位置错误
+err: [sql: no rows in result set]
+2020-12-08T22:16:50.514+0800	ERROR	logger/init.go:31	获取会议室的位置错误
+err: [sql: no rows in result set]
+2020-12-08T23:17:01.482+0800	ERROR	logger/init.go:31	修改会议状态错误
+err: [Error 1265: Data truncated for column 'state' at row 1]
+2020-12-09T11:13:00.427+0800	ERROR	logger/init.go:31	发送用户审核邮件失败
+err: [dial tcp 183.3.225.42:465: i/o timeout]
+2020-12-09T15:21:22.241+0800	ERROR	logger/init.go:31	发送用户审核邮件失败
+err: [dial tcp 183.3.225.42:465: i/o timeout]
+2020-12-09T19:54:19.062+0800	ERROR	logger/init.go:31	通知会议参会成员失败
+err: [sql: no rows in result set]

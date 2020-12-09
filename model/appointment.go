@@ -12,20 +12,21 @@ type Appointment struct {
 	Theme       string `json:"theme" db:"theme"`
 	Content     string `json:"content" db:"content"`
 	Members     string `json:"members" db:"members"`
-	Locate		string `json:"locate" db:"locate"`
+	Locate      string `json:"locate" db:"locate"`
 }
 
 const (
 	AppointmentVerify = "verify"
-	AppointmentAdopt = "adopt"
+	AppointmentAdopt  = "adopt"
+	AppointmentRefuse = "refuse"
 )
 
 func AppointmentStates() []string {
-	return []string{AppointmentVerify, AppointmentAdopt}
+	return []string{AppointmentVerify, AppointmentAdopt, AppointmentRefuse}
 }
 
 func IsAppointmentState(state string) bool {
-	if state == AppointmentAdopt || state == AppointmentVerify {
+	if state == AppointmentAdopt || state == AppointmentVerify || state == AppointmentRefuse {
 		return true
 	}
 	return false

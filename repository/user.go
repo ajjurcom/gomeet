@@ -25,6 +25,7 @@ type IUserRepository interface {
 	SearchUsersByAttr(attrName, attrVal string) ([]model.User, error)
 	SelectAllUsersByIDs(ids string) ([]model.User, error)
 	SelectOneByCondition(conditionName, conditionVal string, attrNames ...string) (model.User, error)
+	SelectUsersEmailByID(ids string) ([]model.User, error)
 }
 
 func NewUserRepository(table string) IUserRepository {
@@ -248,5 +249,18 @@ func (umr *UserManagerRepository) SelectOneByCondition(conditionName, conditionV
 
 	sql := "select " + attrs + " from " + umr.table + " where " + conditionName + "=? limit 1"
 	err = umr.mysqlConn.Get(&user, sql, conditionVal)
+	return
+}
+
+func (umr *UserManagerRepository) SelectUsersEmailByID(ids string) (userList []model.User, err error) {
+	if ids == "" {
+		return
+	}
+	if err = umr.Conn(); err != nil {
+		return
+	}
+
+	sqlStr := "select username, email from " + umr.table + " where id in (" + ids + ")"
+	err = umr.mysqlConn.Select(&userList, sqlStr)
 	return
 }
