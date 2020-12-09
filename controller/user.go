@@ -27,6 +27,7 @@ type IUserController interface {
 	GetUserStateOptions(c *gin.Context)
 	SearchUsers(c *gin.Context)
 	GetAllUserByIDs(c *gin.Context)
+	ApplyAdmin(c *gin.Context)
 }
 
 func NewUserController() IUserController {
@@ -178,6 +179,7 @@ func (uc *UserController) Login(c *gin.Context) {
 	result["id"] = id
 	result["username"] = username
 	result["isRoot"] = session.IsRoot
+	result["state"] = state
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
 
@@ -368,6 +370,28 @@ func (uc *UserController) PutState(c *gin.Context) {
 			}
 		}
 	}()
+}
+
+// ApplyAdmin 申请升级为管理员
+func (uc *UserController) ApplyAdmin(c *gin.Context) {
+	// 1. 解析请求
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "用户ID必须为数字")
+		return
+	}
+	// 2. 修改到数据库
+	if err = uc.UserService.PutUserState(id, model.VerifyAdmin); err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "no exists")
+		} else {
+			logger.Record("申请升级管理员出错", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		}
+		return
+	}
+	// 3. 返回结果
+	common.ResolveResult(c, true, e.SUCCESS, nil)
 }
 
 // GetUsersByPage 获取用户

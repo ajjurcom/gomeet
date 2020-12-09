@@ -90,7 +90,7 @@ func InitRouter() *gin.Engine {
 		 */
 		apiUser.PUT("/user", userController.Put)
 		apiUser.PUT("/user_password", userController.PutPassword)
-
+		apiUser.PUT("/apply_admin/:id", userController.ApplyAdmin)
 		/*
 		 * 用户组
 		 */
