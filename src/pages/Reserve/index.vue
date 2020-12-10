@@ -35,9 +35,19 @@
                     </Select>
                     <div class="item-division"></div>
                 </div>
-                <div class="params-more" @click="showMoreParams">
-                    更多搜索
-                    <Icon class="params-more-icon" size="24" type="ios-more" />
+                <div class="params-select">
+                    <router-link
+                        class="params-more"
+                        :to="{
+                            name: 'FastReserve',
+                        }">
+                        快速预定
+                        <Icon class="params-more-icon" size="16" type="ios-link" />
+                    </router-link>
+                    <div class="params-more" @click="showMoreParams">
+                        更多搜索
+                        <Icon class="params-more-icon" size="24" type="ios-more" />
+                    </div>
                 </div>
             </div>
             <div class="params-bottom" :style="{'height': divClass.moreParamsDiv.height + 'px', 'opacity': divClass.moreParamsDiv.opacity}">

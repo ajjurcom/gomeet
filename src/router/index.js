@@ -22,6 +22,7 @@ import UserEditPwd from 'pages/User/EditPwd';
 import UserManager from 'pages/Manager/User/List';
 import UserGroup from 'pages/Manager/UserGroup';
 import Reserve from 'pages/Reserve';
+import FastReserve from 'pages/FastReserve';
 import ReserveManager from 'pages/ReserveManager';
 import AppointmentManager from 'pages/Manager/Appointment';
 
@@ -166,6 +167,14 @@ const routes = [
             roles: ['user', 'admin', 'root']
         },
         component: Reserve
+    },
+    {
+        name: 'FastReserve',
+        path: '/fast',
+        meta: {
+            roles: ['user', 'admin', 'root']
+        },
+        component: FastReserve
     },
     {
         name: 'ReserveManager',
