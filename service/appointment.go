@@ -12,6 +12,7 @@ type IAppointmentService interface {
 	PutAppointment(appointment model.Appointment, addMembers, deleteMembers string) error
 	PutState(id int, state string) error
 	IsAppointmentConflict(appointment model.Appointment, way string) (bool, error)
+	GetAppointmentsIDByTime(appointment model.Appointment) ([]model.Appointment, error)
 	GetAllMembersAndCreatorIDByID(id int) (string, int, error)
 	GetAllReserve(day, startTime, meetingID string) ([]model.Appointment, error)
 	GetMyAllReserve(creatorID int) ([]model.Appointment, error)
@@ -77,6 +78,10 @@ func (as *AppointmentService) IsAppointmentConflict(appointment model.Appointmen
 		return
 	}
 	return
+}
+
+func (as *AppointmentService) GetAppointmentsIDByTime(appointment model.Appointment) ([]model.Appointment, error) {
+	return as.AppointmentRepository.SelectAppointmentsIDByTime(appointment)
 }
 
 func (as *AppointmentService) GetAllMembersAndCreatorIDByID(id int) (string, int, error) {

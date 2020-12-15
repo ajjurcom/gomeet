@@ -17,6 +17,7 @@ type IAppointmentRepository interface {
 	Put(appointment model.Appointment, addMembers, deleteMembers string) error
 	PutState(id int, state string) error
 	SelectConflictAppointments(appointment model.Appointment, limit int, attrNames ...string) ([]model.Appointment, error)
+	SelectAppointmentsIDByTime(appointment model.Appointment) ([]model.Appointment, error)
 	SelectOneByCondition(conditionName, conditionVal string, attrNames ...string) (model.Appointment, error)
 	SelectCreator(day, startTime, meetingID string) ([]model.Appointment, error)
 	SelectAppointmentsByCondition(conditionName, conditionVal string) ([]model.Appointment, error)
@@ -253,10 +254,25 @@ func (ar *AppointmentRepository) SelectConflictAppointments(appointment model.Ap
 
 	if limit != 0 {
 		sql += " limit ?"
+		err = ar.mysqlConn.Select(&appointments, sql, appointment.MeetingID, appointment.Day, appointment.StartTime,
+			appointment.EndTime, appointment.StartTime, appointment.EndTime, appointment.StartTime, appointment.EndTime, limit)
+	} else {
+		err = ar.mysqlConn.Select(&appointments, sql, appointment.MeetingID, appointment.Day, appointment.StartTime,
+			appointment.EndTime, appointment.StartTime, appointment.EndTime, appointment.StartTime, appointment.EndTime)
 	}
+	return
+}
 
-	err = ar.mysqlConn.Select(&appointments, sql, appointment.MeetingID, appointment.Day, appointment.StartTime,
-		appointment.EndTime, appointment.StartTime, appointment.EndTime, appointment.StartTime, appointment.EndTime, limit)
+func (ar *AppointmentRepository) SelectAppointmentsIDByTime(appointment model.Appointment) (appointments []model.Appointment, err error) {
+	if err = ar.Conn(); err != nil {
+		return
+	}
+	sql := "select meeting_id from " + ar.appointmentTable + " where day=? " +
+		"and (((start_time >= ? and start_time < ?) " +
+		"or (end_time > ? and end_time <= ?)) " +
+		"or (start_time <= ? and end_time >= ?))"
+	err = ar.mysqlConn.Select(&appointments, sql, appointment.Day, appointment.StartTime,
+		appointment.EndTime, appointment.StartTime, appointment.EndTime, appointment.StartTime, appointment.EndTime)
 	return
 }
 

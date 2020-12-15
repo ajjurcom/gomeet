@@ -114,19 +114,51 @@ func (ac *AppointmentController) FastPost(c *gin.Context) {
 	campusID := c.Query("campus_id")
 	meetingScale := c.Query("meeting_scale")
 	meetingType := c.Query("meeting_type")
-	fmt.Println(campusID, meetingScale, meetingType)
 	appointment := model.Appointment{}
 	if err := c.ShouldBindJSON(&appointment); err != nil {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
 		return
 	}
-	fmt.Println(appointment)
-	// 2. 查找一个随机的空余会议室ID
-
-	// 3. 添加会议
-
-	// 4. 返回会议室详细信息
-	common.ResolveResult(c, true, e.SUCCESS, nil)
+	// 2. 查找一个空闲的会议室
+	appointments, err := ac.AppointmentService.GetAppointmentsIDByTime(appointment)
+	if err != nil {
+		fmt.Println(err)
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
+		return
+	}
+	meetingID := make([]string, len(appointments))
+	for i, v := range appointments {
+		meetingID[i] = strconv.Itoa(v.MeetingID)
+	}
+	meetingIDList := common.MemberListToStr(meetingID)
+	meeting, err := ac.MeetingService.GetMeetingByInfo(meetingIDList, campusID, meetingType, meetingScale)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "该时间段会议室已满, 您可以更换时间或会议室类型")
+		} else {
+			logger.Record("获取空闲会议室失败", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		}
+		return
+	}
+	// 3. 会议室详细信息
+	result := map[string]interface{}{
+		"appointment": model.Appointment{},
+	}
+	appointment.MeetingID = meeting.ID
+	if appointment.Locate, err = ac.getLocate(appointment.MeetingID); err != nil {
+		logger.Record("获取会议室的位置错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+	// 4. 添加会议
+	if err := ac.AppointmentService.CreateAppointment(appointment); err != nil {
+		logger.Record("添加会议错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		return
+	}
+	result["appointment"] = appointment
+	common.ResolveResult(c, true, e.SUCCESS, result)
 }
 
 func (ac *AppointmentController) Delete(c *gin.Context) {

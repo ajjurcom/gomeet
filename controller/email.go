@@ -105,6 +105,11 @@ func (pve *AppointmentVerifyEmail) SendEmail(success bool) (err error) {
 	 * 2. 替换邮件模板变量
 	 * 3. 发送邮件
 	 */
+	defer func() {
+		if err := recover(); err != nil {
+			logger.Record("发送邮件奔溃")
+		}
+	}()
 	repo := repository.NewEmailRepository("email")
 	emailService := service.NewEmailService(repo)
 	var content, subject string
@@ -120,8 +125,8 @@ func (pve *AppointmentVerifyEmail) SendEmail(success bool) (err error) {
 	content = strings.Replace(content, "${{username}}", pve.user.Username, 1)
 	content = strings.Replace(content, "${{theme}}", pve.appointment.Theme, 1)
 	if success {
-		l := strings.Split(pve.appointment.Day, "/")
-		time := l[2] + "-" + l[0] + "-" + l[1] + " " + pve.appointment.StartTime + "-" + pve.appointment.EndTime
+		day := pve.appointment.Day[:4] + "-" + pve.appointment.Day[4:6] + "-" + pve.appointment.Day[6:]
+		time := day + " " + pve.appointment.StartTime + "-" + pve.appointment.EndTime
 		content = strings.Replace(content, "${{time}}", time, 1)
 		content = strings.Replace(content, "${{locate}}", pve.appointment.Locate, 1)
 		content = strings.Replace(content, "${{content}}", pve.appointment.Content, 1)
@@ -148,8 +153,8 @@ func (nme *NotifyMembersEmail) SendEmail(success bool) (err error) {
 		return err
 	}
 
-	l := strings.Split(nme.appointment.Day, "/")
-	time := l[2] + "-" + l[0] + "-" + l[1] + " " + nme.appointment.StartTime + "-" + nme.appointment.EndTime
+	day := nme.appointment.Day[:4] + "-" + nme.appointment.Day[4:6] + "-" + nme.appointment.Day[6:]
+	time := day + " " + nme.appointment.StartTime + "-" + nme.appointment.EndTime
 
 	content = strings.Replace(content, "${{time}}", time, 1)
 	content = strings.Replace(content, "${{theme}}", nme.appointment.Theme, 1)

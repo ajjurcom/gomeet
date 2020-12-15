@@ -19,6 +19,7 @@ type IMeetingRepository interface {
 	SelectMeetingCountCountByBuilding(buildingID int) (int, error)
 	SelectAllMeetingTypes() []string
 	SelectAllScaleTypes() []string
+	SelectMeetingByInfo(meetingsID, campusID, meetingType, meetingScale string) (model.Meeting, error)
 }
 
 type MeetingRepository struct {
@@ -194,6 +195,20 @@ func (mr *MeetingRepository) SelectAllMeetingsByParams(buildingID int, layer int
 	}
 	//err = mr.mysqlConn.Select(&meetings, sqlStr, buildingID)
 	err = mr.mysqlConn.Select(&meetings, sqlStr)
+	return
+}
+
+func (mr *MeetingRepository) SelectMeetingByInfo(meetingsID, campusID, meetingType, meetingScale string) (meeting model.Meeting, err error) {
+	if err = mr.Conn(); err != nil {
+		return
+	}
+
+	sql := "select meeting.id from building, meeting where "
+	if meetingsID != "" {
+		sql += "meeting.id not in(" + meetingsID +") and "
+	}
+	sql += "building.campus_id=? and meeting.building_id=building.id and meeting.meeting_type=? and meeting.scale=? limit 1"
+	err = mr.mysqlConn.Get(&meeting, sql, campusID, meetingType, meetingScale)
 	return
 }
 
