@@ -79,7 +79,7 @@
                         <Col span="12" style="width:400px">
                             <Select
                                 ref="searchInput"
-                                v-model="requestObj.members"
+                                v-model="search.members"
                                 multiple
                                 filterable
                                 placeholder="输入关键字搜索用户"
@@ -175,7 +175,6 @@ export default {
                 end_time: '',
                 theme: '',
                 content: '',
-                members: [],
                 meeting_scale: '',
                 meeting_type: '',
                 campus_id: 0,
@@ -185,6 +184,7 @@ export default {
                 time: [new Date().getHours()+':00', new Date().getHours()+1+':00'],
             },
             search: {
+                members: [],
                 searchWays: ["username", "sno", "phone"],
                 paramsMap: {
                     'sno': '学号',
@@ -234,8 +234,8 @@ export default {
                         this.groupUsers[changeGroup].idList = res.idList || [];
                         this.groupUsers[changeGroup].userList = res.userList || [];
                         // 3. 添加到参会成员中/从参会成员中删除
-                        let addMembersID = NoContainEle(this.requestObj.members, this.groupUsers[changeGroup].idList);
-                        this.requestObj.members = this.requestObj.members.concat(addMembersID);
+                        let addMembersID = NoContainEle(this.search.members, this.groupUsers[changeGroup].idList);
+                        this.search.members = this.search.members.concat(addMembersID);
                         this.search.results = this.search.results.concat(
                             this.groupUsers[changeGroup].userList.filter(item => addMembersID.indexOf(item.id) !== -1)
                         );
@@ -244,8 +244,8 @@ export default {
                         this.groupLoding = false;
                     });
                 } else {
-                    let addMembersID = NoContainEle(this.requestObj.members, this.groupUsers[changeGroup].idList);
-                    this.requestObj.members = this.requestObj.members.concat(addMembersID);
+                    let addMembersID = NoContainEle(this.search.members, this.groupUsers[changeGroup].idList);
+                    this.search.members = this.search.members.concat(addMembersID);
                     this.search.results = this.search.results.concat(
                         this.groupUsers[changeGroup].userList.filter(item => addMembersID.indexOf(item.id) !== -1)
                     );
@@ -253,7 +253,7 @@ export default {
                 }
             }
             if (this.groupUsers[changeGroup] && !isAdd) {
-                this.requestObj.members = DeleteElements(this.requestObj.members, this.groupUsers[changeGroup].idList);
+                this.search.members = DeleteElements(this.search.members, this.groupUsers[changeGroup].idList);
             }
         },
         handleSubmit() {
@@ -264,11 +264,14 @@ export default {
             this.requestObj.day = this.formValidate.date.format('MM/dd/yyyy');
             this.requestObj.start_time = this.formValidate.time[0];
             this.requestObj.end_time = this.formValidate.time[1];
+            this.requestObj.members = intArrayToStr(this.search.members); // todo
             this.loading = true;
             console.log('requestObj: ', this.requestObj);
-            setTimeout(() => {
+            this.$service.MainAPI.addAppointmentFast(this.requestObj).then(res => {
+                console.log('res -> ', res);
+            }).finally(() => {
                 this.loading = false;
-            }, 1000);
+            });
         },
         searchUsers(query) {
             if (query.trim() !== "") {

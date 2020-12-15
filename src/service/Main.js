@@ -7,6 +7,12 @@ export default class Main {
     static addAppointment(data) {
         return http.post('/appointment', data);
     }
+    static addAppointmentFast(data) {
+        return http.post(
+            `/appointment_fast?campus_id=${data.campus_id}&meeting_scale=${data.meeting_scale}&meeting_type=${data.meeting_type}`,
+            data
+        );
+    }
     static deleteAppointment(id, creator_id) {
         return http.delete(`/appointment/${id}?creator_id=${creator_id}`);
     }
