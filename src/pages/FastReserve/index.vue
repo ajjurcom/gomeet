@@ -261,7 +261,11 @@ export default {
                 this.$Message.error('会议主题不能为空');
                 return;
             }
-            this.requestObj.day = this.formValidate.date.format('MM/dd/yyyy');
+            if (!this.search.members || this.search.members.length === 0) {
+                this.$Message.error('成员不能为空');
+                return;
+            }
+            this.requestObj.day = DateFormat(this.formValidate.date);
             this.requestObj.start_time = this.formValidate.time[0];
             this.requestObj.end_time = this.formValidate.time[1];
             this.requestObj.members = intArrayToStr(this.search.members); // todo

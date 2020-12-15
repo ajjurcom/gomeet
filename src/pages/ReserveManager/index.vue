@@ -486,9 +486,8 @@ export default {
             return value;
         },
         dateFormate(value) {
-            value = value || '';
-            const l = value.split('/');
-            return l[2] + '-' + l[0] + '-' + l[1];
+            value = value || 'yyyyMMdd';
+            return value.slice(0,4) + '-' + value.slice(4,6) + '-' + value.slice(6,8);
         }
     },
     created() {

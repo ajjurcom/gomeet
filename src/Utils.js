@@ -109,7 +109,7 @@ export const ReserveFormat = (date) => {
  * @returns "10/27/2020" 
  */
 export const DateFormat = (date) => {
-    return date.format('MM/dd/yyyy');
+    return date.format('yyyyMMdd');
 }
 
 /**
