@@ -83,6 +83,7 @@ func InitRouter() *gin.Engine {
 		 * 会议
 		 */
 		apiUser.POST("/appointment", appointmentController.Post)
+		apiUser.POST("/appointment_fast", appointmentController.FastPost)
 		apiUser.DELETE("/appointment/:id", appointmentController.Delete)
 		apiUser.PUT("/appointment", appointmentController.Put)
 		/*

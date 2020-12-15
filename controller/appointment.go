@@ -8,12 +8,14 @@ import (
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
 type IAppointmentController interface {
 	Post(c *gin.Context)
+	FastPost(c *gin.Context)
 	Delete(c *gin.Context)
 	Put(c *gin.Context)
 	PutState(c *gin.Context)
@@ -98,6 +100,32 @@ func (ac *AppointmentController) Post(c *gin.Context) {
 		common.ResolveResult(c, false, e.BACK_ERROR, nil)
 		return
 	}
+	common.ResolveResult(c, true, e.SUCCESS, nil)
+}
+
+func (ac *AppointmentController) FastPost(c *gin.Context) {
+	/*
+	 * 1. 解析请求
+	 * 2. 查找一个随机的空余会议室ID
+	 * 3. 添加会议
+	 * 4. 返回会议室详细信息
+	 */
+	// 1. 解析请求
+	campusID := c.Query("campus_id")
+	meetingScale := c.Query("meeting_scale")
+	meetingType := c.Query("meeting_type")
+	fmt.Println(campusID, meetingScale, meetingType)
+	appointment := model.Appointment{}
+	if err := c.ShouldBindJSON(&appointment); err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
+		return
+	}
+	fmt.Println(appointment)
+	// 2. 查找一个随机的空余会议室ID
+
+	// 3. 添加会议
+
+	// 4. 返回会议室详细信息
 	common.ResolveResult(c, true, e.SUCCESS, nil)
 }
 
