@@ -42,7 +42,7 @@
                             name: 'FastReserve',
                         }">
                         快速预定
-                        <Icon class="params-more-icon" size="16" type="ios-link" />
+                        <Icon class="params-more-icon" size="18" type="ios-link" />
                     </router-link>
                     <div class="params-more" @click="showMoreParams">
                         更多搜索

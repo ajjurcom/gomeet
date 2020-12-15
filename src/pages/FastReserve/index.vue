@@ -4,14 +4,14 @@
             <Form class="register-form" :label-width="120">
                 <FormItem label="日期" prop="date">
                     <Col span="12">
-                        <DatePicker :value="formValidate.date" type="date" :options="options.date" placeholder="Select date" style="width: 200px"></DatePicker>
+                        <DatePicker v-model="formValidate.date" type="date" :options="options.date" placeholder="Select date" style="width: 200px"></DatePicker>
                     </Col>
                 </FormItem>
                 <FormItem label="时间" prop="time">
                     <Col span="12">
                         <TimePicker
                             hide-disabled-options
-                            :value="formValidate.time"
+                            v-model="formValidate.time"
                             :disabled-hours="disabledTime"
                             format="HH:00"
                             type="timerange"
@@ -123,7 +123,35 @@
                         @click="handleSubmit">预约</Button>
                 </FormItem>
             </Form>
-            
+            <Modal
+                v-model="appointmentModal"
+                title="预定成功">
+                <div class="appointment-item">
+                    <div class="appointment-title">发起人：</div>
+                    <div class="appointment-content">{{appointment.creator_name}}</div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-title">时间：</div>
+                    <div class="appointment-content">
+                        {{appointment.day | dateFormate}} {{appointment.start_time}}-{{appointment.end_time}}
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-title">地点：</div>
+                    <div class="appointment-content">
+                        <!-- 仙溪校区 - 博学楼 - F5-502 高雅阁会议室 -->
+                        {{appointment.locate}}
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <span class="appointment-title">主题：</span>
+                    <div class="appointment-content">{{appointment.theme}}</div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-title">内容：</div>
+                    <div class="appointment-content">{{appointment.content}}</div>
+                </div>
+            </Modal>
         </div>
     </div>
 </template>
@@ -141,6 +169,23 @@
 }
 </style>
 
+<style scoped>
+.appointment-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 10px 0;
+}
+.appointment-title {
+    width: 80px;
+    font-weight: 500;
+    text-align: right;
+}
+.appointment-content {
+    width: 400px;
+}
+</style>
+
 <script>
 import {intArrayToStr, GetDateObj, ReserveFormat, GetNumFromScale, GetNumberArr, DateFormat, FindDeleteIndex, NoContainEle, DeleteElements} from '@/Utils';
 export default {
@@ -149,6 +194,8 @@ export default {
         return {
             loading: false,
             groupLoding: false,
+            appointment: {},
+            appointmentModal: false,
             currentHour: new Date().getHours(),
             options: {
                 date: {
@@ -181,7 +228,7 @@ export default {
             },
             formValidate: {
                 date: new Date(),
-                time: [new Date().getHours()+':00', new Date().getHours()+1+':00'],
+                time: [],
             },
             search: {
                 members: [],
@@ -211,9 +258,19 @@ export default {
             return [0,1,2,3,4,5,6,7,23];
         }
     },
+    watch: {
+        appointmentModal(value) {
+            if (!value) {
+                this.$nextTick(() => {
+                    this.$router.push({
+                        name: 'ReserveManager'
+                    });
+                });
+            }
+        }
+    },
     methods: {
         changeMember(value) {
-            console.log(value);
             // 1. 计算是新增组还是删除组
             const oldGroups = this.$refs.groups.value;
             let changeGroup = -1;
@@ -224,7 +281,6 @@ export default {
                 isAdd = false;
                 changeGroup = oldGroups[FindDeleteIndex(oldGroups, value)];
             }
-            console.log('changeGroup', changeGroup);
             // 2. 请求组中成员数据
             if (isAdd) {
                 if (!this.groupUsers[changeGroup]) {
@@ -270,9 +326,9 @@ export default {
             this.requestObj.end_time = this.formValidate.time[1];
             this.requestObj.members = intArrayToStr(this.search.members); // todo
             this.loading = true;
-            console.log('requestObj: ', this.requestObj);
             this.$service.MainAPI.addAppointmentFast(this.requestObj).then(res => {
-                console.log('res -> ', res);
+                this.appointment = res.appointment;
+                this.appointmentModal = true;
             }).finally(() => {
                 this.loading = false;
             });
@@ -313,7 +369,16 @@ export default {
             }
         },
     },
+    filters: {
+        dateFormate(value) {
+            value = value || 'yyyyMMdd';
+            return value.slice(0,4) + '-' + value.slice(4,6) + '-' + value.slice(6,8);
+        }
+    },
     created() {
+        const d = new Date();
+        this.formValidate.time[0] = d.getHours()+':00';
+        this.formValidate.time[1] = d.getHours()+1+':00';
         this.$service.MainAPI.getMeetingOptions().then((res) => {
             this.options.campus = res.campusList || [];
             this.options.meetingScales = res.meetingScales || [];
