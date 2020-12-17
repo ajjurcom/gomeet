@@ -217,7 +217,6 @@
             </div>
             <div class="date-timeline">
                 <div class="timeline-info">
-                    <!-- {{currentTime.hour}}:{{currentTime.minute}}:{{currentTime.second}} -->
                 </div>
                 <div class="timeline-reserves">
                     <div
