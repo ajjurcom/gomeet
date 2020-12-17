@@ -30,6 +30,24 @@
                     <div class="appointment-title">内容：</div>
                     <div class="appointment-content">{{appointment.content}}</div>
                 </div>
+                <div class="appointment-item">
+                    <div class="appointment-title">参会成员：</div>
+                    <div class="appointment-content">
+                        <Row>
+                            <Col span="12" style="width:400px">
+                                <Select
+                                    disabled
+                                    v-model="search.members"
+                                    multiple
+                                    placeholder="输入关键字搜索用户">
+                                    <Option v-for="user in search.results" :value="user.id" :key="user.id">
+                                        {{user.username}}({{user.sno}})
+                                    </Option>
+                                </Select>
+                            </Col>
+                        </Row>
+                    </div>
+                </div>
             </Modal>
             <Modal
                 class="invitation-modal"
@@ -148,7 +166,7 @@
                             class="button"
                             type="primary"
                             @click.stop="showEditModal(item)">
-                            管理
+                            修改
                         </Button>
                         <Poptip
                             confirm
@@ -304,7 +322,6 @@ export default {
                 editModal: false,
                 appointmentModal: false,
                 appointmentClickAble: true,
-                invitationModal: false,
                 groupLoding: false
             },
             stateMap: {
@@ -388,7 +405,6 @@ export default {
             if (!this.control.appointmentClickAble) {
                 return
             }
-            this.control.appointmentClickAble = false;
             if (this.appointment.id && this.appointment.id === id) {
                 this.control.appointmentModal = true;
                 this.control.appointmentClickAble = true;
@@ -400,9 +416,10 @@ export default {
             }).finally(() => {
                 this.control.appointmentClickAble = true;
             });
-        },
-        showInvitationModal() {
-            this.control.invitationModal = true;
+            this.$service.MainAPI.getUsersByID(id, 'appointment').then(res => {
+                this.search.members = res.idList || [];
+                this.search.results = res.userList || [];
+            });
         },
         showEditModal(obj) {
             this.updateAppointment.id = obj.id;

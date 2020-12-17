@@ -295,7 +295,6 @@ export default {
                 this.control.appointmentClickAble = true;
             });
             this.$service.MainAPI.getUsersByID(id, 'appointment').then(res => {
-                console.log('res -> ', res);
                 this.search.members = res.idList || [];
                 this.search.results = res.userList || [];
             });
