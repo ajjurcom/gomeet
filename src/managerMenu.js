@@ -26,45 +26,19 @@ const getManagerMenu = context => {
         },
         {
             title: '校区',
-            name: "campus",
+            name: "campusmanager",
             icon: 'ios-school',
-            children: [
-                {
-                    title: '管理校区',
-                    name: 'campusmanager',
-                    to: {
-                        name: 'CampusManager'
-                    }
-                },
-                {
-                    title: '新增校区',
-                    name: 'campusadd',
-                    to: {
-                        name: 'CampusAdd'
-                    }
-                }
-            ]
+            to: {
+                name: 'CampusManager',
+            }
         },
         {
             title: '建筑',
-            name: 'building',
+            name: 'buildingmanager',
             icon: 'ios-pin',
-            children: [
-                {
-                    title: '管理建筑',
-                    name: 'buildingmanager',
-                    to: {
-                        name: 'BuildingManager'
-                    }
-                },
-                {
-                    title: '新增建筑',
-                    name: 'buildingadd',
-                    to: {
-                        name: 'BuildingAdd'
-                    }
-                }
-            ]
+            to: {
+                name: 'BuildingManager'
+            },
         },
         {
             title: '会议室',

@@ -9,8 +9,8 @@ import viewDesign from 'view-design';
 import LoginComponent from 'pages/Login';
 import RegisterComponent from 'pages/Register';
 import CampusManager from 'pages/Manager/Campus/List';
-import CampusEdit from 'pages/Manager/Campus/Edit';
-import CampusAdd from 'pages/Manager/Campus/Add';
+// import CampusEdit from 'pages/Manager/Campus/Edit';
+// import CampusAdd from 'pages/Manager/Campus/Add';
 import BuildingManager from 'pages/Manager/Building/List';
 import BuildingEdit from 'pages/Manager/Building/Edit';
 import BuildingAdd from 'pages/Manager/Building/Add';
@@ -54,22 +54,22 @@ const routes = [
         },
         component: CampusManager
     },
-    {
-        name: 'CampusEdit',
-        path: '/back/campus/edit',
-        meta: {
-            roles: ['admin', 'root']
-        },
-        component: CampusEdit
-    },
-    {
-        name: 'CampusAdd',
-        path: '/back/campus/add',
-        meta: {
-            roles: ['admin', 'root']
-        },
-        component: CampusAdd
-    },
+    // {
+    //     name: 'CampusEdit',
+    //     path: '/back/campus/edit',
+    //     meta: {
+    //         roles: ['admin', 'root']
+    //     },
+    //     component: CampusEdit
+    // },
+    // {
+    //     name: 'CampusAdd',
+    //     path: '/back/campus/add',
+    //     meta: {
+    //         roles: ['admin', 'root']
+    //     },
+    //     component: CampusAdd
+    // },
     {
         name: 'BuildingManager',
         path: '/back/building/manager',

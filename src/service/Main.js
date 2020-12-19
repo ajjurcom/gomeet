@@ -133,6 +133,9 @@ export default class Main {
     static getBuildingByCampusPage(onePageNum, page, campus_id) {
         return http.get(`/buildings/${onePageNum}/${page}?campus_id=${campus_id}`);
     }
+    static searchBuildings(onePageNum, page, keyword) {
+        return http.get(`/search_buildings/${onePageNum}/${page}?keyword=${keyword}`);
+    }
     static getBuildingByID(id) {
         return http.get(`/building/${id}`);
     }

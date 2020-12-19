@@ -1,10 +1,21 @@
 <template>
     <div class="container-wrap">
         <div class="container">
-            <div class="select-building">
-                <Select v-model="requestObj.campusID" style="width:200px" placeholder="选择校区"  @on-change="changeCampus">
+            <div class="options">
+                <Select v-if="!search.showInput" class="item" v-model="requestObj.campusID" style="width:200px" placeholder="选择校区"  @on-change="changeCampus">
                     <Option v-for="item in campusList" :value="item.id" :key="item.campus_name">{{ item.campus_name }}</Option>
                 </Select>
+                <Button v-if="!search.showInput" class="item" type="info" @click="initSearch">搜索建筑</Button>
+                <Button
+                    v-if="!search.showInput"
+                    class="item"
+                    type="info"
+                    :to="{
+                        name: 'BuildingAdd',
+                    }">新增建筑</Button>
+                <Input v-if="search.showInput" v-model="search.value" placeholder="输入建筑名" style="width: 200px" />
+                <Button v-if="search.showInput" class="item" type="info" :loading="search.loading" @click="searchBuilding">搜索</Button>
+                <Button v-if="search.showInput" class="item" type="error" @click="cancelSearch">取消</Button>
             </div>
             <div v-if="totalCount !== 0" class="list-items">
                 <div
@@ -36,7 +47,7 @@
                     transfer
                 />
             </div>
-            <no-data v-if="totalCount === 0" title="该校区下暂无建筑"></no-data>
+            <no-data v-if="totalCount === 0" title="暂无建筑"></no-data>
         </div>
     </div>
 </template>
@@ -50,8 +61,11 @@
         min-width: 1024px;
         margin: 0 auto;
         padding: 20px 0;
-        .select-building {
+        .options {
             margin-bottom: 20px;
+            .item {
+                margin-left: 10px;
+            }
         }
         .list-items {
             width: 100%;
@@ -100,6 +114,11 @@ export default {
     },
     data() {
         return {
+            search: {
+                showInput: false,
+                loading: false,
+                value: '',
+            },
             campusList: [],
             totalCount: 0,
             requestObj: {
@@ -112,16 +131,45 @@ export default {
         }
     },
     methods: {
+        initSearch() {
+            this.totalCount = 0;
+            this.itemList = [];
+            this.search.showInput=true;
+        },
+        cancelSearch() {
+            this.search.showInput=false;
+            this.getDataList();
+        },
+        searchBuilding() {
+            this.requestObj.page = 1;
+            this.getSearchDataList();
+        },
+        getSearchDataList() {
+            if (this.search.value.trim() == '') {
+                this.$Message.error('搜索值不能为空');
+                return;
+            }
+            this.search.loading = true;
+            this.$service.MainAPI.searchBuildings(this.requestObj.onePageNum, this.requestObj.page, this.search.value).then(res => {
+                this.totalCount = res.count;
+                this.itemList = res.buildingList;
+                const msg = this.totalCount === 0 ? '搜索完成, 无建筑' : '搜索完成';
+                this.$Message.success(msg);
+            }).finally(() => {
+                this.search.loading = false;
+            });
+        },
         getDataList() {
             this.$service.MainAPI.getBuildingByCampusPage(this.requestObj.onePageNum, this.requestObj.page, this.requestObj.campusID).then(res => {
                 this.totalCount = res.count;
                 this.itemList = res.buildingList;
-            })
+            });
         },
         changeCampus() {
             this.$router.replace({
                 query: {'campus_id': this.requestObj.campusID}
             });
+            this.requestObj.page = 1;
             this.getDataList();
         },
         changePage(val) {
@@ -130,7 +178,11 @@ export default {
                 this.$Message.info('选择校区');
                 return
             }
-            this.getDataList();
+            if (this.search.showInput) {
+                this.getSearchDataList();
+            } else {
+                this.getDataList();
+            }
         },
         changeSize(val) {
             this.requestObj.onePageNum = val;
@@ -138,13 +190,21 @@ export default {
                 this.$Message.info('选择校区');
                 return
             }
-            this.getDataList();
+            if (this.search.showInput) {
+                this.getSearchDataList();
+            } else {
+                this.getDataList();
+            }
         },
         deleteBuilding(id) {
             this.loading = true;
             this.$service.MainAPI.deleteBuilding(id).then(res => {
                 this.$Message.info('删除成功');
-                this.getDataList();
+                if (this.search.showInput) {
+                    this.getSearchDataList();
+                } else {
+                    this.getDataList();
+                }
             }).finally(() => {
                 this.loading = false;
             });
