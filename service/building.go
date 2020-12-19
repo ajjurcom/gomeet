@@ -3,6 +3,7 @@ package service
 import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
+	"strconv"
 )
 
 type IBuildingService interface {
@@ -11,7 +12,9 @@ type IBuildingService interface {
 	UpdateBuilding(building model.Building) error
 	GetBuildingByID(id int) (model.Building, error)
 	GetBuildingsByPage(page, onePageCount, campusID int) ([]model.Building, error)
+	GetBuildingsByKeyword(page, onePageCount int, keyword string) ([]model.Building, error)
 	GetBuildingCountByCampus(campusID int) (int, error)
+	GetBuildingCountByKeyword(buildingKeyword string) (int, error)
 	GetAllBuildingsByCampus(campusID int) ([]model.Building, error)
 	GetBuildingLayer(campusID int) (int, error)
 	IsBuildingExists(buildingID int) (bool, error)
@@ -49,12 +52,20 @@ func (bs *BuildingService) GetBuildingsByPage(page, onePageCount, campusID int) 
 	return bs.BuildingRepository.SelectBuildingsByPage(page, onePageCount, campusID)
 }
 
+func (bs *BuildingService) GetBuildingsByKeyword(page, onePageCount int, keyword string) ([]model.Building, error) {
+	return bs.BuildingRepository.SearchBuildingsByKeyword(page, onePageCount, keyword)
+}
+
 func (bs *BuildingService) GetBuildingByID(id int) (model.Building, error) {
 	return bs.BuildingRepository.SelectBuildingByID(id)
 }
 
 func (bs *BuildingService) GetBuildingCountByCampus(campusID int) (int, error) {
-	return bs.BuildingRepository.SelectBuildingCountByCampus(campusID)
+	return bs.BuildingRepository.SelectBuildingCount("campus_id", strconv.Itoa(campusID), true)
+}
+
+func (bs *BuildingService) GetBuildingCountByKeyword(buildingKeyword string) (int, error) {
+	return bs.BuildingRepository.SelectBuildingCount("building_name", buildingKeyword, false)
 }
 
 func (bs *BuildingService) GetAllBuildingsByCampus(campusID int) ([]model.Building, error) {

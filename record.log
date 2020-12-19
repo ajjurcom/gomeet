@@ -302,3 +302,9 @@ err: [535 Login Fail. Please enter your authorization code to login. More inform
 err: [535 Login Fail. Please enter your authorization code to login. More information in http://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=1001256]
 2020-12-10T16:48:58.193+0800	ERROR	logger/init.go:31	发送会议参会通知邮件错误
 err: [535 Login Fail. Please enter your authorization code to login. More information in http://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=1001256]
+2020-12-19T19:08:55.714+0800	ERROR	logger/init.go:31	获取数据库出错
+err: [Error 1054: Unknown column 'campusID' in 'where clause']
+2020-12-19T19:11:48.321+0800	ERROR	logger/init.go:31	获取数据库出错
+err: [Error 1054: Unknown column 'campusID' in 'where clause']
+2020-12-19T19:12:22.019+0800	ERROR	logger/init.go:31	获取数据库出错
+err: [Error 1054: Unknown column 'campusID' in 'where clause']

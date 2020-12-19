@@ -15,7 +15,8 @@ type IBuildingRepository interface {
 	UpdateBuilding(building model.Building) error
 	SelectBuildingByID(id int) (model.Building, error)
 	SelectBuildingsByPage(page, onePageCount, campusID int) ([]model.Building, error)
-	SelectBuildingCountByCampus(campusID int) (int, error)
+	SearchBuildingsByKeyword(page, onePageCount int, keyword string) ([]model.Building, error)
+	SelectBuildingCount(attrName, attrVal string, isEqual bool) (int, error)
 	IsBuildingExists(id int) (bool, error)
 	SelectAllBuildingsByCampus(campusID int) ([]model.Building, error)
 	SelectBuildingLayer(campusID int) (int, error)
@@ -122,6 +123,18 @@ func (bmr *BuildingManagerRepository) SelectBuildingsByPage(page, onePageCount, 
 	return
 }
 
+func (bmr *BuildingManagerRepository) SearchBuildingsByKeyword(page, onePageCount int, keyword string) (buildings []model.Building, err error) {
+	if err = bmr.Conn(); err != nil {
+		return
+	}
+
+	page -= 1
+	startIndex := strconv.Itoa(page * onePageCount)
+	sqlStr := "select id, campus_id, building_name, layer, count from " + bmr.buildingTable + " where building_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	err = bmr.mysqlConn.Select(&buildings, sqlStr)
+	return
+}
+
 func (bmr *BuildingManagerRepository) SelectBuildingByID(id int) (building model.Building, err error) {
 	if err = bmr.Conn(); err != nil {
 		return
@@ -133,13 +146,19 @@ func (bmr *BuildingManagerRepository) SelectBuildingByID(id int) (building model
 	return
 }
 
-func (bmr *BuildingManagerRepository) SelectBuildingCountByCampus(campusID int) (count int, err error) {
+func (bmr *BuildingManagerRepository) SelectBuildingCount(attrName, attrVal string, isEqual bool) (count int, err error) {
 	if err = bmr.Conn(); err != nil {
 		return
 	}
 
-	sqlStr := "select count(*) from " + bmr.buildingTable + " where campus_id = ?"
-	err = bmr.mysqlConn.QueryRow(sqlStr, campusID).Scan(&count)
+	sqlStr := "select count(*) from " + bmr.buildingTable + " where " + attrName
+	if isEqual {
+		sqlStr += " = ?"
+		err = bmr.mysqlConn.QueryRow(sqlStr, attrVal).Scan(&count)
+		return
+	}
+	sqlStr += " like ('%" + attrVal + "%')"
+	err = bmr.mysqlConn.QueryRow(sqlStr).Scan(&count)
 	return
 }
 

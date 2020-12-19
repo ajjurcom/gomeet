@@ -17,6 +17,7 @@ type IBuildingController interface {
 	DeleteBuilding(c *gin.Context)
 	PutBuilding(c *gin.Context)
 	GetBuildingsByPage(c *gin.Context)
+	SearchBuildings(c *gin.Context)
 	GetBuildingByID(c *gin.Context)
 	GetAllBuildingsByCampus(c *gin.Context)
 	GetBuildingLayer(c *gin.Context)
@@ -160,6 +161,47 @@ func (bc *BuildingController) GetBuildingsByPage(c *gin.Context) {
 	}
 	// 获取校区
 	buildingList, err := bc.BuildingService.GetBuildingsByPage(page, onePageCount, campusID)
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	result["count"] = count
+	result["buildingList"] = buildingList
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+// SearchBuildings 搜索建筑，分页返回
+func (bc *BuildingController) SearchBuildings(c *gin.Context) {
+	result := map[string]interface{}{
+		"buildingList": []model.Campus{},
+		"count": 0,
+	}
+	// 1. 解析请求
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	onePageCount, err := strconv.Atoi(c.Param("onePageCount"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	keyword := c.Query("keyword")
+	if strings.Trim(keyword, " ") == "" {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "keyword参数不能为空")
+		return
+	}
+	// 2. 数据操作
+	// 获取校区数量
+	count, err := bc.BuildingService.GetBuildingCountByKeyword(keyword)
+	if err != nil {
+		logger.Record("获取数据库出错", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+	// 获取校区
+	buildingList, err := bc.BuildingService.GetBuildingsByKeyword(page, onePageCount, keyword)
 	if err != nil {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
 		return

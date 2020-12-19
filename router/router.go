@@ -60,6 +60,7 @@ func InitRouter() *gin.Engine {
 		 * 建筑所需API
 		 */
 		api.GET("/buildings/:onePageCount/:page", buildingController.GetBuildingsByPage)
+		api.GET("/search_buildings/:onePageCount/:page", buildingController.SearchBuildings)
 		api.GET("/building/:id", buildingController.GetBuildingByID)
 		/*
 		 * 会议室所需API
