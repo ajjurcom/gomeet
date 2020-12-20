@@ -3,6 +3,7 @@ package service
 import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
+	"strconv"
 )
 
 type IMeetingService interface {
@@ -12,6 +13,8 @@ type IMeetingService interface {
 	GetMeetingByID(id int) (model.Meeting, error)
 	GetMeetingCountByBuilding(buildingID int) (int, error)
 	GetMeetingsByPage(page, onePageCount, buildingID int) ([]model.Meeting, error)
+	GetMeetingCountByKeyword(keyword string) (int, error)
+	GetMeetingsByKeyword(page, onePageCount int, keyword string)  ([]model.Meeting, error)
 	GetAllMeetingTypes() []string
 	GetAllScaleTypes() []string
 	GetAllMeetingByBuilding(buildingID int) ([]model.Meeting, error)
@@ -62,7 +65,15 @@ func (ms *MeetingService) GetMeetingByID(id int) (model.Meeting, error) {
 }
 
 func (ms *MeetingService) GetMeetingCountByBuilding(buildingID int) (int, error) {
-	return ms.MeetingRepository.SelectMeetingCountCountByBuilding(buildingID)
+	return ms.MeetingRepository.SelectMeetingCount("building_id", strconv.Itoa(buildingID), true)
+}
+
+func (ms *MeetingService) GetMeetingCountByKeyword(keyword string) (int, error) {
+	return ms.MeetingRepository.SelectMeetingCount("meeting_name", keyword, false)
+}
+
+func (ms *MeetingService) GetMeetingsByKeyword(page, onePageCount int, keyword string)  ([]model.Meeting, error) {
+	return ms.MeetingRepository.SearchMeetingsByKeyword(page, onePageCount, keyword)
 }
 
 func (ms *MeetingService) GetMeetingsByPage(page, onePageCount, buildingID int) ([]model.Meeting, error) {

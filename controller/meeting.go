@@ -20,6 +20,7 @@ type IMeetingController interface {
 	GetMeetingByID(c *gin.Context)
 	GetMeetingsByPage(c *gin.Context)
 	GetMeetingOptions(c *gin.Context)
+	SearchMeetings(c *gin.Context)
 }
 
 func NewMeetingController() IMeetingController {
@@ -256,5 +257,47 @@ func (mc *MeetingController) GetMeetingOptions(c *gin.Context) {
 
 	result["meetingTypes"] = mc.MeetingService.GetAllMeetingTypes()
 	result["meetingScales"] = mc.MeetingService.GetAllScaleTypes()
+	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+// SearchMeeting 查找会议室，分页返回
+func (mc *MeetingController) SearchMeetings(c *gin.Context) {
+	result := map[string]interface{}{
+		"meetingList": []model.Meeting{},
+		"count": 0,
+	}
+	// 1. 解析请求
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	onePageCount, err := strconv.Atoi(c.Param("onePageCount"))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
+	keyword := c.Query("keyword")
+	if strings.Trim(keyword, " ") == "" {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result, "keyword参数不能为空")
+		return
+	}
+	// 2. 数据操作
+	// 获取建筑会议室总数量
+	count, err := mc.MeetingService.GetMeetingCountByKeyword(keyword)
+	if err != nil {
+		logger.Record("获取建筑会议室数量出错", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+	// 获取会议室
+	meetingList, err := mc.MeetingService.GetMeetingsByKeyword(page, onePageCount, keyword)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Record("获取建筑的会议室错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
+		return
+	}
+	result["count"] = count
+	result["meetingList"] = meetingList
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }

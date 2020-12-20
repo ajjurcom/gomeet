@@ -7,6 +7,7 @@ import (
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
@@ -202,7 +203,7 @@ func (bc *BuildingController) SearchBuildings(c *gin.Context) {
 	}
 	// 获取校区
 	buildingList, err := bc.BuildingService.GetBuildingsByKeyword(page, onePageCount, keyword)
-	if err != nil {
+	if err != nil  && err != sql.ErrNoRows {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
 		return
 	}

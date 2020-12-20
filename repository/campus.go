@@ -128,6 +128,7 @@ func (cmr *CampusManagerRepository) SelectCampusByPage(page, onePageCount int) (
 		return
 	}
 
+	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
 	sqlStr := "select id, campus_name from " + cmr.table + " order by id limit " + startIndex + ", " + strconv.Itoa(onePageCount)
 	err = cmr.mysqlConn.Select(&campus, sqlStr)

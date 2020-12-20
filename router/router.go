@@ -69,6 +69,7 @@ func InitRouter() *gin.Engine {
 		api.GET("/campus_buildings/:campus_id", buildingController.GetAllBuildingsByCampus)
 		api.GET("/meeting/:id", meetingController.GetMeetingByID)
 		api.GET("/meetings/:onePageCount/:page", meetingController.GetMeetingsByPage)
+		api.GET("/search_meetings/:onePageCount/:page", meetingController.SearchMeetings)
 		api.GET("/meeting_options", meetingController.GetMeetingOptions)
 		/*
 		 * 预定页面所需API

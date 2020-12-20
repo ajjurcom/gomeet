@@ -15,8 +15,9 @@ type IMeetingRepository interface {
 	UpdateMeeting(meeting model.Meeting) error
 	SelectMeetingByID(id int) (model.Meeting, error)
 	SelectMeetingsByBuilding(buildingID int, pageAndOnePageCount ...int) ([]model.Meeting, error)
+	SearchMeetingsByKeyword(page, onePageCount int, keyword string) ([]model.Meeting, error)
 	SelectAllMeetingsByParams(buildingID int, layer int, meetingType []string, scales []string) ([]model.Meeting, error)
-	SelectMeetingCountCountByBuilding(buildingID int) (int, error)
+	SelectMeetingCount(attrName, attrVal string, isEqual bool) (int, error)
 	SelectAllMeetingTypes() []string
 	SelectAllScaleTypes() []string
 	SelectMeetingByInfo(meetingsID, campusID, meetingType, meetingScale string) (model.Meeting, error)
@@ -147,14 +148,33 @@ func (mr *MeetingRepository) SelectMeetingsByBuilding(buildingID int, pageAndOne
 	return
 }
 
-func (mr *MeetingRepository) SelectMeetingCountCountByBuilding(buildingID int) (count int, err error) {
+func (mr *MeetingRepository) SearchMeetingsByKeyword(page, onePageCount int, keyword string) (meetings []model.Meeting, err error) {
 	if err = mr.Conn(); err != nil {
 		return
 	}
 
-	sqlStr := "select count(*) from " + mr.table + " where building_id = ?"
-	err = mr.mysqlConn.QueryRow(sqlStr, buildingID).Scan(&count)
+	page -= 1
+	startIndex := strconv.Itoa(page * onePageCount)
+	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number from " + mr.table + " where meeting_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	err = mr.mysqlConn.Select(&meetings, sqlStr)
 	return
+}
+
+func (mr *MeetingRepository) SelectMeetingCount(attrName, attrVal string, isEqual bool) (count int, err error) {
+	if err = mr.Conn(); err != nil {
+		return
+	}
+
+	sql := "select count(*) from " + mr.table + " where " + attrName
+	if isEqual {
+		sql += " = ?"
+		err = mr.mysqlConn.QueryRow(sql, attrVal).Scan(&count)
+		return
+	}
+	sql += " like ('%" + attrVal + "%')"
+	err = mr.mysqlConn.QueryRow(sql).Scan(&count)
+	return
+
 }
 
 func (mr *MeetingRepository) SelectAllMeetingTypes() []string {

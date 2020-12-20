@@ -308,3 +308,9 @@ err: [Error 1054: Unknown column 'campusID' in 'where clause']
 err: [Error 1054: Unknown column 'campusID' in 'where clause']
 2020-12-19T19:12:22.019+0800	ERROR	logger/init.go:31	获取数据库出错
 err: [Error 1054: Unknown column 'campusID' in 'where clause']
+2020-12-20T15:25:22.333+0800	ERROR	logger/init.go:31	获取建筑会议室数量出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'meeting where building_id = ?' at line 1]
+2020-12-20T15:26:30.559+0800	ERROR	logger/init.go:31	获取建筑会议室数量出错
+err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'meeting where building_id = ?' at line 1]
+2020-12-20T15:39:10.150+0800	ERROR	logger/init.go:31	获取建筑会议室数量出错
+err: [Error 1305: FUNCTION gomeet.meeting_namelike does not exist]
