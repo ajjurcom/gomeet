@@ -42,24 +42,11 @@ const getManagerMenu = context => {
         },
         {
             title: '会议室',
-            name: 'meeting',
+            name: 'meetingmanager',
             icon: 'md-text',
-            children: [
-                {
-                    title: '管理会议室',
-                    name: 'meetingmanager',
-                    to: {
-                        name: 'MeetingManager'
-                    }
-                },
-                {
-                    title: '新增会议室',
-                    name: 'meetingadd',
-                    to: {
-                        name: 'MeetingAdd'
-                    }
-                },
-            ]
+            to: {
+                name: 'MeetingManager'
+            },
         },
     ];
 

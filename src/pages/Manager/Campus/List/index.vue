@@ -46,7 +46,7 @@
             <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
-                    :page="requestObj.page"
+                    :current="requestObj.page"
                     :page-size="requestObj.onePageNum"
                     show-elevator
                     show-sizer
@@ -126,7 +126,7 @@ export default {
             addModal: false,
             totalCount: 0,
             requestObj: {
-                page: 0,
+                page: 1,
                 onePageNum: 10
             },
             itemList: [],

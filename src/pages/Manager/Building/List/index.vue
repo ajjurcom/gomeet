@@ -37,7 +37,7 @@
             <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
-                    :page="requestObj.page"
+                    :current="requestObj.page"
                     :page-size="requestObj.onePageNum"
                     show-elevator
                     show-sizer
@@ -134,10 +134,12 @@ export default {
         initSearch() {
             this.totalCount = 0;
             this.itemList = [];
-            this.search.showInput=true;
+            this.search.showInput = true;
         },
         cancelSearch() {
-            this.search.showInput=false;
+            this.search.showInput = false;
+            this.search.value = '';
+            this.requestObj.page = 1;
             this.getDataList();
         },
         searchBuilding() {

@@ -86,7 +86,7 @@
             <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
-                    :page="requestListParams.page"
+                    :current="requestListParams.page"
                     :page-size="requestListParams.onePageNum"
                     show-elevator
                     show-sizer

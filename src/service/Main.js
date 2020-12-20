@@ -151,6 +151,9 @@ export default class Main {
     static putMeeting(data) {
         return http.put('/meeting', data);
     }
+    static searchMeetings(onePageNum, page, keyword) {
+        return http.get(`/search_meetings/${onePageNum}/${page}?keyword=${keyword}`);
+    }
     static getMeetingByID(id) {
         return http.get(`/meeting/${id}`);
     }

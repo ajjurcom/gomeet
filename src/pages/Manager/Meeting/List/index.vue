@@ -2,7 +2,7 @@
     <div class="container-wrap">
         <div class="container">
             <div class="select-items">
-                <Select class="select-item" v-model="getMeetingsParams.campusID" placeholder="校区" @on-change="changeCampus">
+                <Select v-if="!search.showInput" class="select-item" v-model="getMeetingsParams.campusID" placeholder="校区" @on-change="changeCampus">
                     <Option 
                         v-for="item in campusList"
                         :value="item.id"
@@ -11,7 +11,7 @@
                         {{item.campus_name}}
                     </Option>
                 </Select>
-                <Select class="select-item" v-model="getMeetingsParams.buildingID" placeholder="建筑, 先选择校区" @on-change="changeBuilding" :disabled="buildingList.length === 0 ? true : false">
+                <Select v-if="!search.showInput" class="select-item" v-model="getMeetingsParams.buildingID" placeholder="建筑, 先选择校区" @on-change="changeBuilding" :disabled="buildingList.length === 0 ? true : false">
                     <Option 
                         v-for="item in buildingList"
                         :value="item.id"
@@ -20,8 +20,19 @@
                         {{item.building_name}}
                     </Option>
                 </Select>
+                <Button v-if="!search.showInput" class="item" type="info" @click="initSearch">搜索会议室</Button>
+                <Button
+                    v-if="!search.showInput"
+                    class="item"
+                    type="info"
+                    :to="{
+                        name: 'MeetingAdd',
+                    }">新增会议室</Button>
+                <Input v-if="search.showInput" v-model="search.value" placeholder="输入会议室名进行搜索" style="width: 200px" />
+                <Button v-if="search.showInput" class="item" type="info" :loading="search.loading" @click="searchMeeting">搜索</Button>
+                <Button v-if="search.showInput" class="item" type="error" @click="cancelSearch">取消</Button>
             </div>
-            <div v-if="totalCount !== 0 && buildingList.length !== 0" class="list-items">
+            <div v-if="totalCount !== 0" class="list-items">
                 <div
                     class="list-item"
                     v-for="item in itemList"
@@ -45,10 +56,10 @@
                     </div>
                 </div>
             </div>
-            <div v-if="totalCount !== 0 && buildingList.length !== 0" class="list-page">
+            <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
-                    :page="getMeetingsParams.page"
+                    :current="getMeetingsParams.page"
                     :page-size="getMeetingsParams.onePageNum"
                     show-elevator
                     show-sizer
@@ -58,7 +69,7 @@
                     transfer
                 />
             </div>
-            <no-data v-if="totalCount === 0 || buildingList.length === 0" title="该选项暂无会议室"></no-data>
+            <no-data v-if="totalCount === 0" title="暂无会议室"></no-data>
         </div>
     </div>
 </template>
@@ -77,8 +88,11 @@
             flex-direction: row;
             margin-bottom: 20px;
             .select-item {
-                width: 300px;
+                width: 200px;
                 margin-right: 20px;
+            }
+            .item {
+                margin-left: 10px;
             }
         }
         .list-items {
@@ -139,6 +153,11 @@ export default {
     },
     data() {
         return {
+            search: {
+                showInput: false,
+                loading: false,
+                value: '',
+            },
             campusList: [],
             buildingList: [],
             totalCount: 0,
@@ -153,11 +172,43 @@ export default {
         }
     },
     methods: {
+        initSearch() {
+            this.totalCount = 0;
+            this.itemList = [];
+            this.search.showInput = true;
+        },
+        cancelSearch() {
+            this.search.showInput = false;
+            this.search.value = '';
+            this.getMeetingsParams.page = 1;
+            if (this.getMeetingsParams.campusID > 0 && this.getMeetingsParams.buildingID > 0) {
+                this.getDataList();
+            }
+        },
+        searchMeeting() {
+            this.getMeetingsParams.page = 1;
+            this.getSearchDataList();
+        },
+        getSearchDataList() {
+            if (this.search.value.trim() == '') {
+                this.$Message.error('搜索值不能为空');
+                return;
+            }
+            this.search.loading = true;
+            this.$service.MainAPI.searchMeetings(this.getMeetingsParams.onePageNum, this.getMeetingsParams.page, this.search.value).then(res => {
+                this.totalCount = res.count;
+                this.itemList = res.meetingList;
+                const msg = this.totalCount === 0 ? '搜索完成, 无会议室' : '搜索完成';
+                this.$Message.success(msg);
+            }).finally(() => {
+                this.search.loading = false;
+            });
+        },
         getDataList() {
             this.$service.MainAPI.getMeetingsByPage(this.getMeetingsParams.onePageNum, this.getMeetingsParams.page, this.getMeetingsParams.buildingID).then(res => {
                 this.totalCount = res.count;
                 this.itemList = res.meetingList;
-            })
+            });
         },
         changeCampus(value) {
             this.itemList = [];
@@ -178,7 +229,12 @@ export default {
                         'building_id': this.getMeetingsParams.buildingID
                     }
                 });
-                this.getDataList();
+                this.getMeetingsParams.page = 1;
+                if (this.search.showInput) {
+                    this.getSearchDataList();
+                } else {
+                    this.getDataList();
+                }
             }
         },
         changePage(val) {
@@ -187,7 +243,11 @@ export default {
                 this.$Message.info('选择建筑');
                 return
             }
-            this.getDataList();
+            if (this.search.showInput) {
+                this.getSearchDataList();
+            } else {
+                this.getDataList();
+            }
         },
         changeSize(val) {
             this.getMeetingsParams.onePageNum = val;
@@ -195,12 +255,16 @@ export default {
                 this.$Message.info('选择建筑');
                 return
             }
-            this.getDataList();
+            if (this.search.showInput) {
+                this.getSearchDataList();
+            } else {
+                this.getDataList();
+            }
         },
         deleteBuilding(id) {
             this.loading = true;
             this.$service.MainAPI.deleteMeeting(id).then(res => {
-                this.$Message.info('删除成功');
+                this.$Message.success('删除成功');
                 this.getDataList();
             }).finally(() => {
                 this.loading = false;

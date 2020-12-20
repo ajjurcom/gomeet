@@ -78,7 +78,7 @@
             <div v-if="totalCount !== 0" class="list-page">
                 <Page
                     :total="totalCount"
-                    :page="getMeetingsParams.page"
+                    :current="getMeetingsParams.page"
                     :page-size="getMeetingsParams.onePageNum"
                     show-elevator
                     show-sizer
