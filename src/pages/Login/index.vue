@@ -134,7 +134,7 @@
 </style>
 
 <script>
-import {showMessage, setLocalStorage} from '@/Utils';
+import {showMessage, setCookie, setLocalStorage} from '@/Utils';
 export default {
     name: "Login",
     data () {
@@ -189,8 +189,8 @@ export default {
                     showMessage('error', '获取token失败');
                 }
                 else {
-                    // 保存token
-                    setLocalStorage('loginToken', res.loginToken);
+                    // 保存cookie
+                    setCookie('loginToken', res.loginToken, res.expire * 60 * 60 * 1000);
                     // 保存用户ID、Name、isRoot到store和localStroge
                     this.$store.commit('App/setUserID', res.id || -1);
                     this.$store.commit('App/setUserName', res.username || 'Guest');

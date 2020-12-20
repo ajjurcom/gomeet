@@ -14,7 +14,7 @@ export const variables = {
 
 export const WebHttp = axios.create({
     baseURL: variables.getApiUrl(),
-    withCredentials: false
+    withCredentials: true
 });
 
 WebHttp.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
@@ -23,7 +23,6 @@ WebHttp.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 // 请求前
 WebHttp.interceptors.request.use(config => {
     viewDesign.LoadingBar.start();
-    config.headers['loginToken'] = getLocalStorage('loginToken') || '';
     return config;
 }, error => {
     viewDesign.LoadingBar.error();

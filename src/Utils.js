@@ -42,6 +42,36 @@ export const showMessage = (type, content) => {
 };
 
 /**
+ * setCookie
+ * @param {*} name
+ * @param {*} value
+ * @param {*} expire million seconds
+ */
+export const setCookie = (name, value, expire = 365 * 24 * 60 * 60 * 1000) => {
+  let exp = new Date();
+  exp.setTime(exp.getTime() + expire);
+  document.cookie = `${name}=${escape(value)}; path=/;expires=${exp.toGMTString()}`;
+}
+
+/**
+ * getCookie
+ * @param {*} name
+ */
+export const getCookie = (name) => {
+  let reg = new RegExp(`(^| )${name}=([^;]*)(;|$)`);
+  let arr = document.cookie.match(reg);
+  return arr ? unescape(arr[2]) : null;
+}
+
+/**
+ * clearCookie
+ * @param {*} name
+ */
+export const clearCookie = (name) => {
+  setCookie(name, '', -1);
+}
+
+/**
  * setLocalStorage 设置localStorage
  * @params {*} name
  * @params {*} value
