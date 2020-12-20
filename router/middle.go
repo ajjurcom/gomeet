@@ -16,7 +16,8 @@ func CorsMiddleware() gin.HandlerFunc {
 		origin := c.Request.Header.Get("Origin")
 		tokenName := config.Cfg.Section("jwt").Key("tokenName").String()
 		if origin != "" {
-			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
+			c.Header("Access-Control-Allow-Credentials", "true")
 			c.Header("Access-Control-Allow-Methods", "POST, DELETE, PUT, GET, OPTIONS")
 			c.Header("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization, " + tokenName)
 			c.Header("Access-Control-Allow-Credentials", "true")
@@ -37,11 +38,12 @@ func VerifyPower(role string) gin.HandlerFunc {
 		// 1. 获取token
 		var (
 			code int = e.SUCCESS
-			token string = c.Request.Header.Get(config.Cfg.Section("jwt").Key("tokenName").String())
+			//token string = c.Request.Header.Get(config.Cfg.Section("jwt").Key("tokenName").String())
 			session *model.Session
 		)
+		token, err := c.Cookie(config.Cfg.Section("jwt").Key("tokenName").String())
 		// 2. 检验有效性
-		if token == "" {
+		if err != nil {
 			code = e.NOT_POWER
 		} else {
 			var err error

@@ -176,6 +176,7 @@ func (uc *UserController) Login(c *gin.Context) {
 	}
 	// 8. 返回数据
 	result[name] = token
+	result["expire"], _ = config.Cfg.Section("jwt").Key("expire").Int()
 	result["id"] = id
 	result["username"] = username
 	result["isRoot"] = session.IsRoot
@@ -422,7 +423,6 @@ func (uc *UserController) GetUsersByPage(c *gin.Context) {
 		common.ResolveResult(c, false, e.BACK_ERROR, result)
 		return
 	}
-
 
 	userList, err := uc.UserService.GetUserByPage(page, onePageCount, state)
 	if err != nil && err != sql.ErrNoRows {
