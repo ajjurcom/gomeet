@@ -9,8 +9,6 @@ import viewDesign from 'view-design';
 import LoginComponent from 'pages/Login';
 import RegisterComponent from 'pages/Register';
 import CampusManager from 'pages/Manager/Campus/List';
-// import CampusEdit from 'pages/Manager/Campus/Edit';
-// import CampusAdd from 'pages/Manager/Campus/Add';
 import BuildingManager from 'pages/Manager/Building/List';
 import BuildingEdit from 'pages/Manager/Building/Edit';
 import BuildingAdd from 'pages/Manager/Building/Add';
@@ -54,22 +52,6 @@ const routes = [
         },
         component: CampusManager
     },
-    // {
-    //     name: 'CampusEdit',
-    //     path: '/back/campus/edit',
-    //     meta: {
-    //         roles: ['admin', 'root']
-    //     },
-    //     component: CampusEdit
-    // },
-    // {
-    //     name: 'CampusAdd',
-    //     path: '/back/campus/add',
-    //     meta: {
-    //         roles: ['admin', 'root']
-    //     },
-    //     component: CampusAdd
-    // },
     {
         name: 'BuildingManager',
         path: '/back/building/manager',
@@ -193,15 +175,29 @@ const router = new Router({
 
 router.beforeEach((to, from, next) => {
     try {
+        if (to.name === 'Login') {
+            next();
+            return;
+        }
+        // 验证cookie
+        const tokenCookie = 'loginToken';
+        let reg = new RegExp(`(^| )${tokenCookie}=([^;]*)(;|$)`);
+        let arr = document.cookie.match(reg);
+        let cookie = arr ? unescape(arr[2]) : '';
+        if (cookie === '') {
+            next({path: "/login"});
+            return;
+        }
+        // 验证role
         const store = window.localStorage.getItem('store') || "{}";
         const storeJson = JSON.parse(store) || {};
         let role = storeJson.App ? storeJson.App.currentRole ? storeJson.App.currentRole : "guest" : "guest";
         if(!to.meta.roles.includes(role)) {
             next({path: "/login"});
-        } else {
-            viewDesign.LoadingBar.start();
-            next();
+            return;
         }
+        viewDesign.LoadingBar.start();
+        next();
     } catch(e) {
         next({path: "/login"});
     }

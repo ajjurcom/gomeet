@@ -37,7 +37,7 @@
                                         id: this.$store.getters['App/getUserID']
                                     }
                                 }">修改信息</MenuItem>
-                                <MenuItem
+                            <MenuItem
                                 name="usereditpwd"
                                 :to="{
                                     name: 'UserEditPwd',
@@ -117,7 +117,7 @@
 
 <script>
     import DynamicMenuItem from './components/DynamicMenuItem';
-    import {removeLocalStorage} from '@/Utils';
+    import {clearCookie} from '@/Utils';
     export default {
         name: 'DynamicMenu',
         props: {
@@ -160,7 +160,7 @@
                         onOk: () => {
                             this.$Message.info('退出成功');
                             this.$store.commit('App/setCurrentRole', 'guest');
-                            removeLocalStorage('loginToken');
+                            clearCookie('loginToken');
                             this.$router.push({
                                 name: 'Login'
                             });

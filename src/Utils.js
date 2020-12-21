@@ -45,11 +45,13 @@ export const showMessage = (type, content) => {
  * setCookie
  * @param {*} name
  * @param {*} value
- * @param {*} expire million seconds
+ * @param {*} expire hours
  */
-export const setCookie = (name, value, expire = 365 * 24 * 60 * 60 * 1000) => {
+export const setCookie = (name, value, expire = 1) => {
+  expire = expire * 60 * 60 * 1000;
   let exp = new Date();
   exp.setTime(exp.getTime() + expire);
+  console.log('exp时间：', exp);
   document.cookie = `${name}=${escape(value)}; path=/;expires=${exp.toGMTString()}`;
 }
 
@@ -209,30 +211,3 @@ export const NoContainEle = (l1, l2) => {
 export const DeleteElements = (l1, l2) => {
   return l1.filter(item => l2.indexOf(item) === -1);
 }
-
-/**
- * GetNumFromScale
- * @function myTask任务函数 
- * @way {hour | minutes} str
- */
-// export const OnTimeTask = (myTask, way) => {
-//     const date = new Date();
-//     const dateM = date.getMinutes();
-//     const dateS = date.getSeconds();
-//     const dateMS = 1000 - date.getMilliseconds();
-//     let interval, after;
-//     if (way && way === 'minutes') {
-//         interval = 60000;
-//         after = interval - dateS * 1000 - dateMS;
-//     } else {
-//         interval = 3600000;
-//         after = interval - dateM * 60000 - dateS * 1000 - dateMS;
-//     }
-//     console.log('after 毫秒 -> ', after);
-//     setTimeout(function () {
-//         myTask();
-//         setInterval(() => {
-//             myTask();
-//         }, interval);
-//     }, after);
-// }

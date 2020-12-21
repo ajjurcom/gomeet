@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {showMessage, getLocalStorage} from '@/Utils';
+import {showMessage} from '@/Utils';
 import Vue from 'vue';
 import viewDesign from 'view-design';
 import vue from "../main";
