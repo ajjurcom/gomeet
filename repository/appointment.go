@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type IAppointmentRepository interface {
@@ -247,15 +248,17 @@ func (ar *AppointmentRepository) SelectConflictAppointments(appointment model.Ap
 		attrs = strings.Trim(attrs, ",")
 	}
 
-	sql := "select " + attrs + " from " + ar.appointmentTable + " where meeting_id=? and day=? " +
+	sql := "select " + attrs + " from " + ar.appointmentTable + " where meeting_id=? and day=? and state != ? and state != ? " +
 		"and (((start_time >= ? and start_time < ?) " +
 		"or (end_time > ? and end_time <= ?)) " +
 		"or (start_time <= ? and end_time >= ?))"
 
 	if limit != 0 {
 		sql += " limit ?"
-		err = ar.mysqlConn.Select(&appointments, sql, appointment.MeetingID, appointment.Day, appointment.StartTime,
-			appointment.EndTime, appointment.StartTime, appointment.EndTime, appointment.StartTime, appointment.EndTime, limit)
+		err = ar.mysqlConn.Select(&appointments, sql, appointment.MeetingID, model.AppointmentCancel,
+			model.AppointmentAdoptCancel, appointment.Day, appointment.StartTime,
+			appointment.EndTime, appointment.StartTime, appointment.EndTime,
+			appointment.StartTime, appointment.EndTime, limit)
 	} else {
 		err = ar.mysqlConn.Select(&appointments, sql, appointment.MeetingID, appointment.Day, appointment.StartTime,
 			appointment.EndTime, appointment.StartTime, appointment.EndTime, appointment.StartTime, appointment.EndTime)
@@ -267,11 +270,12 @@ func (ar *AppointmentRepository) SelectAppointmentsIDByTime(appointment model.Ap
 	if err = ar.Conn(); err != nil {
 		return
 	}
-	sql := "select meeting_id from " + ar.appointmentTable + " where day=? " +
+	sql := "select meeting_id from " + ar.appointmentTable + " where day=? and state != ? and state != ? " +
 		"and (((start_time >= ? and start_time < ?) " +
 		"or (end_time > ? and end_time <= ?)) " +
 		"or (start_time <= ? and end_time >= ?))"
-	err = ar.mysqlConn.Select(&appointments, sql, appointment.Day, appointment.StartTime,
+	err = ar.mysqlConn.Select(&appointments, sql, appointment.Day, model.AppointmentCancel,
+		model.AppointmentAdoptCancel, appointment.StartTime,
 		appointment.EndTime, appointment.StartTime, appointment.EndTime, appointment.StartTime, appointment.EndTime)
 	return
 }
@@ -301,12 +305,12 @@ func (ar *AppointmentRepository) SelectCreator(day, startTime, meetingID string)
 		return
 	}
 
-	sql := "select meeting_id, creator_name, day, start_time, end_time from " + ar.appointmentTable + " where day=? and start_time>=?"
+	sql := "select meeting_id, creator_name, day, start_time, end_time from " + ar.appointmentTable + " where day=? and start_time>=? and state != ? and state != ?"
 	if meetingID != "" {
 		sql += " and meeting_id in (" + meetingID + ")"
 	}
 
-	err = ar.mysqlConn.Select(&appointments, sql, day, startTime)
+	err = ar.mysqlConn.Select(&appointments, sql, day, startTime, model.AppointmentCancel, model.AppointmentAdoptCancel)
 	return
 }
 
@@ -315,9 +319,12 @@ func (ar *AppointmentRepository) SelectAppointmentsByCondition(conditionName, co
 		return
 	}
 
+	now := time.Now()
+	day := now.Format("20060102")
+	startTime := now.Format("15") + ":00"
 	sql := "select id, meeting_id, day, start_time, end_time, state, theme, content " +
-		"from " + ar.appointmentTable + " where " + conditionName + " = ?"
-	err = ar.mysqlConn.Select(&appointments, sql, conditionVal)
+		"from " + ar.appointmentTable + " where " + conditionName + " = ? and state != ? and state != ? and ((day = ? and start_time >= ?) or (day > ?)) order by day, start_time"
+	err = ar.mysqlConn.Select(&appointments, sql, conditionVal, model.AppointmentCancel, model.AppointmentAdoptCancel, day, startTime, day)
 	return
 }
 
@@ -329,9 +336,12 @@ func (ar *AppointmentRepository) SelectAppointmentsByID(ids string) (appointment
 		return
 	}
 
+	now := time.Now()
+	day := now.Format("20060102")
+	startTime := now.Format("15") + ":00"
 	sql := "select id, meeting_id, day, start_time, end_time, state, theme, content " +
-		"from " + ar.appointmentTable + " where id in (" + ids + ")"
-	err = ar.mysqlConn.Select(&appointments, sql)
+		"from " + ar.appointmentTable + " where id in (" + ids + ") and state != ? and state != ? and ((day = ? and start_time >= ?) or (day > ?)) order by day, start_time"
+	err = ar.mysqlConn.Select(&appointments, sql, model.AppointmentCancel, model.AppointmentAdoptCancel, day, startTime, day)
 	return
 }
 
@@ -340,11 +350,14 @@ func (ar *AppointmentRepository) SelectAppointmentsByPage(page, onePageCount int
 		return
 	}
 
+	now := time.Now()
+	day := now.Format("20060102")
+	startTime := now.Format("15") + ":00"
 	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
 	sql := "select id, day, start_time, end_time, state, theme from " + ar.appointmentTable + " where " +
-		"state = ? order by id desc limit " + startIndex + "," + strconv.Itoa(onePageCount)
-	err = ar.mysqlConn.Select(&appointments, sql, state)
+		"state = ? and ((day = ? and start_time >= ?) or (day > ?)) order by id desc limit " + startIndex + "," + strconv.Itoa(onePageCount)
+	err = ar.mysqlConn.Select(&appointments, sql, state, day, startTime, day)
 	return
 }
 
@@ -353,7 +366,10 @@ func (ar *AppointmentRepository) SelectCountByState(state string) (count int, er
 		return
 	}
 
-	sql := "select count(*) from " + ar.appointmentTable + " where state=?"
-	err = ar.mysqlConn.QueryRow(sql, state).Scan(&count)
+	now := time.Now()
+	day := now.Format("20060102")
+	startTime := now.Format("15") + ":00"
+	sql := "select count(*) from " + ar.appointmentTable + " where state=? and ((day = ? and start_time >= ?) or (day > ?))"
+	err = ar.mysqlConn.QueryRow(sql, state, day, startTime, day).Scan(&count)
 	return
 }

@@ -118,7 +118,7 @@ func (bmr *BuildingManagerRepository) SelectBuildingsByPage(page, onePageCount, 
 
 	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
-	sqlStr := "select id, campus_id, building_name, layer, count from " + bmr.buildingTable + " where campus_id = ? order by id desc limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	sqlStr := "select id, campus_id, building_name, layer from " + bmr.buildingTable + " where campus_id = ? order by id desc limit " + startIndex + ", " + strconv.Itoa(onePageCount)
 	err = bmr.mysqlConn.Select(&buildings, sqlStr, campusID)
 	return
 }
@@ -130,7 +130,7 @@ func (bmr *BuildingManagerRepository) SearchBuildingsByKeyword(page, onePageCoun
 
 	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
-	sqlStr := "select id, campus_id, building_name, layer, count from " + bmr.buildingTable + " where building_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	sqlStr := "select id, campus_id, building_name, layer from " + bmr.buildingTable + " where building_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
 	err = bmr.mysqlConn.Select(&buildings, sqlStr)
 	return
 }

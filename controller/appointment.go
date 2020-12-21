@@ -166,7 +166,7 @@ func (ac *AppointmentController) Delete(c *gin.Context) {
 	 * 1. 解析请求, 获得删除会议的ID
 	 * 2. 检查删除的会议是否为该用户创建
 	 * 3. 将会议中的所有成员查询出来
-	 * 4. 删除会议
+	 * 4. 将该会议标记为退订: cancel / adopt-cancel
 	 */
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -201,12 +201,19 @@ func (ac *AppointmentController) Delete(c *gin.Context) {
 		logger.Record("会议通过审核，获取会议详情失败", err)
 		return
 	}
-	if err := ac.AppointmentService.DeleteAppointment(id, members); err != nil {
-		logger.Record("删除会议错误", err)
-		common.ResolveResult(c, false, e.BACK_ERROR, nil)
+	state := model.AppointmentCancel
+	if appointment.State == model.AppointmentAdopt {
+		state = model.AppointmentAdoptCancel
+	}
+	if err := ac.AppointmentService.PutState(id, state); err != nil {
+		if err == sql.ErrNoRows {
+			common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "会议不存在")
+		} else {
+			logger.Record("删除会议，修改会议状态错误", err)
+			common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		}
 		return
 	}
-
 	common.ResolveResult(c, true, e.SUCCESS, nil)
 	// 只有会议通过审核才发送退订通知
 	if appointment.State == model.AppointmentAdopt {

@@ -314,3 +314,13 @@ err: [Error 1064: You have an error in your SQL syntax; check the manual that co
 err: [Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'meeting where building_id = ?' at line 1]
 2020-12-20T15:39:10.150+0800	ERROR	logger/init.go:31	获取建筑会议室数量出错
 err: [Error 1305: FUNCTION gomeet.meeting_namelike does not exist]
+2020-12-21T21:36:19.233+0800	ERROR	logger/init.go:31	获取我的所有会议错误
+err: [sql: expected 1 arguments, got 2]
+2020-12-21T21:49:22.445+0800	ERROR	logger/init.go:31	获取我的所有会议错误
+err: [sql: expected 4 arguments, got 3]
+2020-12-21T21:50:01.997+0800	ERROR	logger/init.go:31	获取我的所有会议错误
+err: [Error 1241: Operand should contain 1 column(s)]
+2020-12-21T22:36:11.441+0800	ERROR	logger/init.go:31	获取会议室数量错误
+err: [sql: expected 4 arguments, got 3]
+2020-12-21T22:36:15.734+0800	ERROR	logger/init.go:31	获取会议室数量错误
+err: [sql: expected 4 arguments, got 3]

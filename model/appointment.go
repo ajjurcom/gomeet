@@ -16,9 +16,11 @@ type Appointment struct {
 }
 
 const (
-	AppointmentVerify = "verify"
-	AppointmentAdopt  = "adopt"
-	AppointmentRefuse = "refuse"
+	AppointmentVerify      = "verify"
+	AppointmentAdopt       = "adopt"
+	AppointmentRefuse      = "refuse"
+	AppointmentCancel      = "cancel"
+	AppointmentAdoptCancel = "adopt-cancel"
 )
 
 func AppointmentStates() []string {
