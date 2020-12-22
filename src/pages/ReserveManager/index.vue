@@ -41,7 +41,7 @@
                                     multiple
                                     placeholder="输入关键字搜索用户">
                                     <Option v-for="user in search.results" :value="user.id" :key="user.id">
-                                        {{user.username}}({{user.sno}})
+                                        {{user.username}}({{user.val}})
                                     </Option>
                                 </Select>
                             </Col>
@@ -419,6 +419,7 @@ export default {
             this.$service.MainAPI.getUsersByID(id, 'appointment').then(res => {
                 this.search.members = res.idList || [];
                 this.search.results = res.userList || [];
+                this.replaceShowVal('sno');
             });
         },
         showEditModal(obj) {
