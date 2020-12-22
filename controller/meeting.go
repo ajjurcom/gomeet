@@ -176,6 +176,7 @@ func (mc *MeetingController) PutMeeting(c *gin.Context) {
 func (mc *MeetingController) GetMeetingByID(c *gin.Context) {
 	result := map[string]interface{}{
 		"meeting": model.Meeting{},
+		"building": model.Building{},
 	}
 
 	// 1. 解析请求数据
@@ -194,8 +195,14 @@ func (mc *MeetingController) GetMeetingByID(c *gin.Context) {
 		}
 		return
 	}
+	building, err := mc.BuildingService.GetBuildingByID(meeting.BuildingID)
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
+		return
+	}
 	// 3. 返回结果
 	result["meeting"] = meeting
+	result["building"] = building
 	common.ResolveResult(c, true, e.SUCCESS, result)
 }
 

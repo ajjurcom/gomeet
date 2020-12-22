@@ -294,7 +294,11 @@ func (uc *UserController) PutState(c *gin.Context) {
 		return
 	}
 	// 2. 验证权限
-	token := c.Request.Header.Get(config.Cfg.Section("jwt").Key("tokenName").String())
+	token, err := c.Cookie(config.Cfg.Section("jwt").Key("tokenName").String())
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "无权限")
+		return
+	}
 	session, _ := common.ParseToken(token)
 	if !session.IsRoot && (newState == "verify_admin" || newState == "normal_admin" || newState == "root") {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "该操作只能由Root发起")
