@@ -177,7 +177,6 @@ export default {
             this.options.campusOptions = res.campusList;
             this.options.scaleOptions = res.meetingScales;
             this.options.typeOptions = res.meetingTypes;
-
         });
     }
 }

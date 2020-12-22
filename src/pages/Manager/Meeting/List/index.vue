@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     <div class="list-item-buttons">
-                        <Button class="list-item-button" @click="meetingEdit(item.id, getMeetingsParams.campusID)" type="info">修改</Button>
+                        <Button class="list-item-button" @click="meetingEdit(item.id)" type="info">修改</Button>
                         <Poptip
                             confirm
                             title="删除将无法恢复"
@@ -270,15 +270,12 @@ export default {
                 this.loading = false;
             });
         },
-        meetingEdit(meetingID, campusID) {
+        meetingEdit(meetingID) {
             this.$router.push({
                 name: 'MeetingEdit',
                 params: {
                     id: meetingID
                 },
-                query: {
-                    campus_id: campusID
-                }
             })
         }
     },

@@ -20,7 +20,7 @@
                     <Input v-model="formValidate.layer" placeholder="Enter number of the building floors"></Input>
                 </FormItem>
                 <FormItem>
-                    <Button type="primary" :loading="loading" @click="handleSubmit('formValidate')">添加</Button>
+                    <Button type="primary" :loading="loading" @click="handleSubmit('formValidate')">修改</Button>
                     <Button @click="handleReset('formValidate')" style="margin-left: 8px">Reset</Button>
                 </FormItem>
                 <FormItem></FormItem>

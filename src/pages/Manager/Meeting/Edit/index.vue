@@ -170,17 +170,14 @@ export default {
     created() {
         // 1. 获取会议室信息
         this.formValidate.id = Number(this.$route.params.id) || -1;
-        this.formValidate.campus_id = Number(this.$route.query.campus_id) || -1;
-        if (this.formValidate.id === -1 || this.formValidate.campus_id === -1) {
-            this.$Message.error("必要要有会议室ID和校区ID");
+        if (this.formValidate.id === -1) {
+            this.$Message.error("必须要有会议室ID");
             return;
         }
         this.$service.MainAPI.getMeetingByID(this.formValidate.id).then(res => {
             this.formValidate = res.meeting;
-            this.formValidate.campus_id = Number(this.$route.query.campus_id);
-            this.$service.MainAPI.getBuildingLayer(this.formValidate.building_id).then((res) => {
-                this.options.meetingLayer = Array.from({length: res.building_layer}).map((v, k) => k+1) || [];
-            });
+            this.options.meetingLayer = res.building ? Array.from({length: res.building.layer}).map((v, k) => k+1) : 0;
+            this.formValidate.campus_id = res.building ? res.building.campus_id : 0;
             this.$service.MainAPI.getAllBuildingsByCampus(this.formValidate.campus_id).then((res) => {
                 this.options.buildingOptions = res.buildings || [];
             });

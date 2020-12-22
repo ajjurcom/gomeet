@@ -51,7 +51,6 @@ export const setCookie = (name, value, expire = 1) => {
   expire = expire * 60 * 60 * 1000;
   let exp = new Date();
   exp.setTime(exp.getTime() + expire);
-  console.log('exp时间：', exp);
   document.cookie = `${name}=${escape(value)}; path=/;expires=${exp.toGMTString()}`;
 }
 
