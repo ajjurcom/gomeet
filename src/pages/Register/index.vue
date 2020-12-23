@@ -23,6 +23,12 @@
                     <FormItem label="邮箱" prop="email">
                         <Input v-model="formValidate.email" placeholder="Enter your e-mail"></Input>
                     </FormItem>
+                    <FormItem class="verify-code" label="验证码" prop="code">
+                        <Input class="verify-code-input" v-model="formValidate.code" placeholder="Verify code"></Input>
+                        <Button type="success" :disabled="code.countDown > 0" @click="sendCode">
+                            {{code.info}}{{code.countDown ?  `(${code.countDown}s)` : ''}}
+                        </Button>
+                    </FormItem>
                     <FormItem label="密码" prop="password">
                         <Input type="password" v-model="formValidate.password" placeholder="Enter your password"></Input>
                     </FormItem>
@@ -95,6 +101,13 @@
 }
 </style>
 
+<style scoped>
+.verify-code-input {
+    width: 130px;
+    margin-right: 10px;
+}
+</style>
+
 <script>
 import {showMessage} from '@/Utils';
 export default {
@@ -122,6 +135,10 @@ export default {
         };
         return {
             loading: false,
+            code: {
+                info: '点击获取验证码',
+                countDown: 0
+            },
             campusList: [],
             formValidate: {
                 sno: '',
@@ -130,7 +147,9 @@ export default {
                 email: '',
                 password: '',
                 passwdCheck: '',
+                code: '',
             },
+            timer: null,
             ruleValidate: {
                 sno: [
                     { required: true, message: 'The sno cannot be empty', trigger: 'blur' },
@@ -147,6 +166,11 @@ export default {
                 email: [
                     { required: true, message: 'Mailbox cannot be empty', trigger: 'blur' },
                     { type: 'email', message: 'Incorrect email format', trigger: 'blur' }
+                ],
+                code: [
+                    { required: true, message: 'the code has 6 number', trigger: 'blur' },
+                    { type: 'string', min: 6, message: 'the code has 6 number' },
+                    { type: 'string', max: 6, message: 'the code has 6 number' },
                 ],
                 password: [
                     { required: true, message: 'The password cannot be empty', trigger: 'blur' },
@@ -184,6 +208,33 @@ export default {
         },
         handleReset (name) {
             this.$refs[name].resetFields();
+        },
+        sendCode() {
+            this.$refs['formValidate'].validateField('email', (valid) => {
+                if (valid !== '') {
+                    this.$Message.error('请填写正确邮箱');
+                    return;
+                }
+                // 发送获取验证码请求
+                this.$service.MainAPI.getVerifyCode(this.formValidate.email).then(res => {
+                    this.countDown();
+                });
+            });
+        },
+        countDown() {
+            if (this.timer !== null) {
+                return;
+            }
+            this.code.info = '已发送';
+            this.code.countDown = 60;
+            this.timer = setInterval(() => {
+                this.code.countDown--;
+                if (this.code.countDown === 0) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                    this.code.info = '点击获取验证码';
+                }
+            }, 1000);
         }
     }
 };

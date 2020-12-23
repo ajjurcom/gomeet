@@ -40,6 +40,9 @@ export default class Main {
     /*
      * 用户API
      */
+    static getVerifyCode(email) {
+        return http.get(`/verify_code?email=${email}`);
+    };
     static login(data) {
         return http.post('/session', data);
     }

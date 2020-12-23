@@ -219,9 +219,6 @@ export default {
                 this.loading = false;
             });
         }
-    },
-    created() {
-        this.$Message.info('请登录');
     }
 };
 </script>
