@@ -324,3 +324,7 @@ err: [Error 1241: Operand should contain 1 column(s)]
 err: [sql: expected 4 arguments, got 3]
 2020-12-21T22:36:15.734+0800	ERROR	logger/init.go:31	获取会议室数量错误
 err: [sql: expected 4 arguments, got 3]
+2020-12-23T10:01:32.689+0800	ERROR	logger/init.go:31	新建用户错误
+err: [Error 1062: Duplicate entry '20170310123' for key 'user.uidx_name']
+2020-12-23T10:04:51.036+0800	ERROR	logger/init.go:31	新建用户错误
+err: [Error 1062: Duplicate entry '20170310123' for key 'user.uidx_name']

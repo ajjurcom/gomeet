@@ -10,6 +10,7 @@ type User struct {
 	GroupList    string `json:"group_list" db:"group_list"`
 	Appointments string `json:"appointments" db:"appointments"`
 	Email        string `json:"email" db:"email" binding:"required,email"`
+	Code         string `json:"code" db:"code"`
 }
 
 const (

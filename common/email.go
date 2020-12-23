@@ -15,6 +15,7 @@ const (
 	FailedAppointmentVerify = "会议审核不通过"
 	PassNotifyMembers = "会议参会通知"
 	FailedNotifyMembers = "会议退订通知"
+	EmailVerifyCode = "注册验证码(邮箱)"
 )
 
 func SendEmail(mailTo []string, subject string, body string) error {

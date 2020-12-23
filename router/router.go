@@ -39,6 +39,7 @@ func InitRouter() *gin.Engine {
 		/*
 		 * 用户
 		 */
+		api.GET("/verify_code", userController.VerifyCode)
 		api.GET("/members/:id", userController.GetAllUserByIDs)
 		api.GET("/users", userController.SearchUsers)
 		api.POST("/user", userController.Post)

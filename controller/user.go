@@ -3,10 +3,15 @@ package controller
 import (
 	"com/mittacy/gomeet/common"
 	"com/mittacy/gomeet/config"
+	"com/mittacy/gomeet/database"
 	"com/mittacy/gomeet/e"
 	"com/mittacy/gomeet/logger"
 	"database/sql"
+	"fmt"
+	"github.com/gomodule/redigo/redis"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"com/mittacy/gomeet/model"
 	"com/mittacy/gomeet/repository"
@@ -28,6 +33,7 @@ type IUserController interface {
 	SearchUsers(c *gin.Context)
 	GetAllUserByIDs(c *gin.Context)
 	ApplyAdmin(c *gin.Context)
+	VerifyCode(c *gin.Context)
 }
 
 func NewUserController() IUserController {
@@ -61,7 +67,17 @@ func (uc *UserController) Post(c *gin.Context) {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil)
 		return
 	}
-	// 2. 加密密码, 插入数据库
+	// 2. 验证邮箱验证码
+	code, err := redis.String(database.RedisDB.Do("Get", user.Email))
+	if err != nil {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "验证码已过期, 请重新获取验证码")
+		return
+	}
+	if user.Code != code {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "验证码错误")
+		return
+	}
+	// 3. 加密密码, 插入数据库
 	user.Password = common.Encryption(user.Password)
 	if err := uc.UserService.CreateUser(&user); err != nil {
 		// 处理错误：用户是否存在、学号是否存在
@@ -77,7 +93,7 @@ func (uc *UserController) Post(c *gin.Context) {
 		common.ResolveResult(c, false, e.BACK_ERROR, nil)
 		return
 	}
-	// 3. 返回结果
+	// 4. 返回结果
 	common.ResolveResult(c, true, e.SUCCESS, nil)
 }
 
@@ -586,4 +602,38 @@ func (uc *UserController) GetAllUserByIDs(c *gin.Context) {
 	result["idList"] = idList
 	result["userList"] = userList
 	common.ResolveResult(c, true, e.SUCCESS, result)
+}
+
+/*
+ * VerifyCode 发送验证码到用户邮箱
+ */
+func (uc *UserController) VerifyCode(c *gin.Context) {
+	email := c.DefaultQuery("email", "")
+	if email == "" {
+		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "缺少email参数")
+		return
+	}
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	code := fmt.Sprintf("%06v", rnd.Int31n(1000000))
+	// 发送邮件，发送成功后，将{key: email, val: code}存入redis
+	user := model.User{Email: email, Code: code}
+	emailController := NewEmail("emailVerifyCode", user)
+	if emailController == nil {
+		logger.Record("获取邮件接口错误")
+		common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		return
+	}
+	if err := emailController.SendEmail(true); err != nil {
+		logger.Record("发送验证码邮件失败", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		return
+	}
+
+	expire := 300
+	_, err := redis.String(database.RedisDB.Do("set", email, code, "EX", expire))
+	if err != nil {
+		common.ResolveResult(c, false, e.BACK_ERROR, nil)
+		return
+	}
+	common.ResolveResult(c, true, e.SUCCESS, nil)
 }

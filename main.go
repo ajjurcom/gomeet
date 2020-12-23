@@ -30,6 +30,12 @@ func main() {
 	}
 	defer database.CloseMysql()
 
+	if err := database.InitRedis(); err != nil {
+		logger.Record("连接Redis错误", err)
+		panic(err)
+	}
+	defer database.CloseRedis()
+
 	// 4. 路由
 	r := router.InitRouter()
 

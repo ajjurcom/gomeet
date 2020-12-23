@@ -24,6 +24,8 @@ func NewEmail(emailName string, obj ...interface{}) IEmail {
 		return &AppointmentVerifyEmail{obj[0].(model.User), obj[1].(model.Appointment)}
 	case "notifyMembers":
 		return &NotifyMembersEmail{obj[0].([]model.User), obj[1].(model.Appointment)}
+	case "emailVerifyCode":
+		return &EmailVerifyCodeEmail{obj[0].(model.User)}
 	default:
 		return nil
 	}
@@ -45,6 +47,10 @@ type AppointmentVerifyEmail struct {
 type NotifyMembersEmail struct {
 	user []model.User
 	appointment model.Appointment
+}
+
+type EmailVerifyCodeEmail struct {
+	user model.User
 }
 
 func (pve *UserVerifyEmail) SendEmail(success bool) (err error) {
@@ -169,4 +175,27 @@ func (nme *NotifyMembersEmail) SendEmail(success bool) (err error) {
 		}
 	}
 	return nil
+}
+
+func (vce *EmailVerifyCodeEmail) SendEmail(bool) (err error) {
+	/*
+	 * 1. 获取邮件模板
+	 * 2. 替换邮件模板变量
+	 * 3. 发送邮件
+	 */
+	// 1. 获取邮件模板
+	repo := repository.NewEmailRepository("email")
+	emailService := service.NewEmailService(repo)
+	var content string
+	subject := common.EmailVerifyCode
+	if content, err = emailService.GetContent(subject); err != nil {
+		return err
+	}
+
+	// 2. 替换邮件模板变量
+	// 生成随机6位数字，存储到redis
+	content = strings.Replace(content, "${{code}}", vce.user.Code, 1)
+	content = strings.Replace(content, "${{gomeet_url}}", config.Cfg.Section("server").Key("gomeet_url").String(), 1)
+	// 3. 发送邮件
+	return common.SendEmail([]string{vce.user.Email}, subject, content)
 }
