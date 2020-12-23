@@ -328,3 +328,11 @@ err: [sql: expected 4 arguments, got 3]
 err: [Error 1062: Duplicate entry '20170310123' for key 'user.uidx_name']
 2020-12-23T10:04:51.036+0800	ERROR	logger/init.go:31	新建用户错误
 err: [Error 1062: Duplicate entry '20170310123' for key 'user.uidx_name']
+2020-12-23T19:02:13.973+0800	ERROR	logger/init.go:31	修改会议状态错误
+err: [Error 1265: Data truncated for column 'state' at row 1]
+2020-12-23T21:13:00.008+0800	INFO	logger/init.go:29	!!! 获取会议所有成员错误, 请尽快处理 !!!
+2020-12-23T21:14:00.004+0800	INFO	logger/init.go:29	!!! 获取会议所有成员错误, 请尽快处理 !!!
+2020-12-23T21:15:00.008+0800	INFO	logger/init.go:29	!!! 获取会议所有成员错误, 请尽快处理 !!!
+2020-12-23T21:16:00.005+0800	INFO	logger/init.go:29	!!! 获取会议所有成员错误, 请尽快处理 !!!
+2020-12-23T21:17:00.003+0800	INFO	logger/init.go:29	!!! 获取会议所有成员错误, 请尽快处理 !!!
+2020-12-23T21:18:00.003+0800	INFO	logger/init.go:29	!!! 获取会议所有成员错误, 请尽快处理 !!!

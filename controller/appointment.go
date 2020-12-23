@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"time"
 )
 
 type IAppointmentController interface {
@@ -24,6 +25,7 @@ type IAppointmentController interface {
 	GetAppointment(c *gin.Context)
 	GetAppointmentByPage(c *gin.Context)
 	GetAppointmentStates(c *gin.Context)
+	TransferExpireAppointment()
 }
 
 func NewAppointmentController() IAppointmentController {
@@ -342,18 +344,8 @@ func (ac *AppointmentController) PutState(c *gin.Context) {
 				logger.Record("获取会议室的位置错误", err)
 				return
 			}
-		}
-		if appointment.State == model.AppointmentRefuse {
+		} else if appointment.State == model.AppointmentRefuse {
 			isPass = false
-			// 删除会议
-			members, _, err := ac.AppointmentService.GetAllMembersAndCreatorIDByID(appointment.ID)
-			if err != nil {
-				logger.Record("管理员拒绝会议通过，删除会议失败", err)
-			} else {
-				if err = ac.AppointmentService.DeleteAppointment(appointment.ID, members); err != nil {
-					logger.Record("管理员拒绝会议通过，删除会议失败", err)
-				}
-			}
 		}
 		email := NewEmail("appointmentVerify", user, appointment)
 		if email == nil {
@@ -569,4 +561,40 @@ func (ac *AppointmentController) getLocate(meetingID int) (string, error) {
 
 	locate = campus.CampusName + " - " + building.BuildingName + " - F" + strconv.Itoa(meeting.Layer) + "-" + meeting.RoomNumber + "（" + meeting.MeetingName + "）"
 	return locate, nil
+}
+
+// 清除过期会议，转移到 日志表
+func (ac *AppointmentController) TransferExpireAppointment() {
+	/*
+	 * 1. 获取当前时间
+	 * 2. 会议室查询过期会议
+	 * 3. 遍历每个会议，将会议逐个转移到日志表
+	 */
+	fmt.Println(time.Now(), "开始转移过期会议")
+	// 1. 获取当前时间
+	now := time.Now()
+	day := now.Format("20060102")
+	endTime := now.Format("15") + ":00"
+	// 2. 会议室查询过期会议
+	appointments, err := ac.AppointmentService.GetExpireAppointment(day, endTime)
+	if err != nil {
+		logger.Record("!!! 获取过期会议错误, 请尽快处理 !!!")
+		return
+	}
+	// 3. 遍历每个会议，将会议逐个转移到日志表
+	for _, v := range appointments {
+		fmt.Println("转移会议: ", v)
+		members, _, err := ac.AppointmentService.GetAllMembersAndCreatorIDByID(v.ID)
+		if err != nil {
+			fmt.Println("会议转移失败!")
+			logger.Record("!!! 获取会议所有成员错误, 请尽快处理 !!!")
+			return
+		}
+		if err = ac.AppointmentService.TransferAppointment(v, members); err != nil {
+			fmt.Println("会议转移失败!")
+			logger.Record("!!! 转移会议错误, 请尽快处理 !!!")
+			return
+		}
+	}
+	fmt.Println(time.Now(), "会议转移成功!")
 }

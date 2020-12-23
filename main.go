@@ -2,6 +2,7 @@ package main
 
 import (
 	"com/mittacy/gomeet/config"
+	"com/mittacy/gomeet/controller"
 	"com/mittacy/gomeet/database"
 	"com/mittacy/gomeet/logger"
 	"com/mittacy/gomeet/router"
@@ -39,8 +40,10 @@ func main() {
 	// 4. 路由
 	r := router.InitRouter()
 
-	// 5. 服务器配置，启动服务
+	// 5. 启动定时任务
+	controller.InitCron()
 
+	// 6. 服务器配置，启动服务
 	// 命令行指定端口，如果没有则使用配置文件的端口
 	serverConfig, err := config.Cfg.GetSection("server")
 	if err != nil {
