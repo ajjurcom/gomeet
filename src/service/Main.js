@@ -2,6 +2,15 @@ import {WebHttp as http} from './index.js';
 
 export default class Main {
     /*
+     * 统计数据
+     */
+    static statisticsOptions() {
+        return http.get('/statistics_options');
+    }
+    static statisticsAppointment(startDay, endDay, updateDate, statisticsType) {
+        return http.get(`/statistics?updateDate=${updateDate}&startDay=${startDay}&endDay=${endDay}&statisticsType=${statisticsType}`);
+    }
+    /*
      * 会议预约
      */
     static addAppointment(data) {

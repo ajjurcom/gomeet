@@ -309,7 +309,7 @@ export default {
                 'state': state
             }
             this.$service.MainAPI.putAppointmentState(obj).then(() => {
-                this.$Message.info("修改成功");
+                this.$Message.success("操作成功");
                 this.getDataList();
             }).finally(() => {
                 this.control.puting = false;

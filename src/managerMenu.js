@@ -48,6 +48,14 @@ const getManagerMenu = context => {
                 name: 'MeetingManager'
             },
         },
+        {
+            title: '数据统计',
+            name: 'statistics',
+            icon: 'md-text',
+            to: {
+                name: 'Statistics'
+            },
+        },
     ];
 
     return menu;

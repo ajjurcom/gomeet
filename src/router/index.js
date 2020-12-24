@@ -23,6 +23,7 @@ import Reserve from 'pages/Reserve';
 import FastReserve from 'pages/FastReserve';
 import ReserveManager from 'pages/ReserveManager';
 import AppointmentManager from 'pages/Manager/Appointment';
+import Statistics from 'pages/Manager/Statistics';
 
 Vue.use(Router);
 Vue.use(viewDesign);
@@ -165,6 +166,14 @@ const routes = [
             roles: ['user', 'admin', 'root']
         },
         component: ReserveManager
+    },
+    {
+        name: 'Statistics',
+        path: '/statistics',
+        meta: {
+            roles: ['admin', 'root'],
+        },
+        component: Statistics
     }
 ];
 
