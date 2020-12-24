@@ -51,7 +51,7 @@ const getManagerMenu = context => {
         {
             title: '数据统计',
             name: 'statistics',
-            icon: 'md-text',
+            icon: 'ios-podium',
             to: {
                 name: 'Statistics'
             },
