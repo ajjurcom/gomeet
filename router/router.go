@@ -25,9 +25,15 @@ func InitRouter() *gin.Engine {
 	scheduleController := controller.NewScheduleController()
 	groupController := controller.NewGroupController()
 	appointmentController := controller.NewAppointmentController()
+	recordController := controller.NewRecordController()
 
 	api := r.Group(relativePath)
 	{
+		/*
+		 * 统计数据
+		 */
+		api.GET("/statistics", recordController.StatisticsAppointment)
+		api.GET("/statistics_options", recordController.StatisticsOptions)
 		/*
 		 * 会议
 		 */

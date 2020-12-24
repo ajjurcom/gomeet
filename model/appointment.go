@@ -15,6 +15,12 @@ type Appointment struct {
 	Locate      string `json:"locate" db:"locate"`
 }
 
+type Item struct {
+	Title string `json:"title"`
+	Num   int    `json:"num"`
+	Ratio float32    `json:"ratio"`
+}
+
 const (
 	AppointmentVerify      = "verify"
 	AppointmentAdopt       = "adopt"

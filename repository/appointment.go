@@ -26,7 +26,6 @@ type IAppointmentRepository interface {
 	SelectAppointmentsByPage(page, onePageCount int, state string) ([]model.Appointment, error)
 	SelectCountByState(state string) (int, error)
 	SelectExpireAppointment(day string, endTime string) ([]model.Appointment, error)
-	TransferAppointment(appointment model.Appointment, members string) error
 }
 
 func NewAppointmentRepository(appointmentTable, userTable string) IAppointmentRepository {
@@ -385,61 +384,4 @@ func (ar *AppointmentRepository) SelectExpireAppointment(day string, endTime str
 		" from " + ar.appointmentTable + " where day < ? or (day = ? and end_time <= ?)"
 	err = ar.mysqlConn.Select(&appointments, sql, day, day, endTime)
 	return
-}
-
-func (ar *AppointmentRepository) TransferAppointment(appointment model.Appointment, members string) error {
-	/*
-	 * 1. 插入 日志表
-	 * 2. 从会议表删除
-	 */
-	if err := ar.Conn(); err != nil {
-		return err
-	}
-
-	tx, err := ar.mysqlConn.Begin()
-	if err != nil {
-		return err
-	}
-	// 1. 插入 日志表
-	sql := "insert into record(creator_id, creator_name, meeting_id, day, start_time, end_time, state) " +
-		"values(?,?,?,?,?,?,?)"
-	if _, err = tx.Exec(sql, appointment.CreatorID, appointment.CreatorName, appointment.MeetingID, appointment.Day,
-		appointment.StartTime, appointment.EndTime, appointment.State); err != nil {
-		tx.Rollback()
-		return err
-	}
-	// 2. 从会议表删除
-	// 查询所有成员的group_list
-	var users []model.User
-	if members != "" {
-		sql = "select id, appointments from " + ar.userTable + " where id in (" + members + ")"
-		if err := ar.mysqlConn.Select(&users, sql); err != nil {
-			return err
-		}
-	}
-	// 删除该会议室
-	sql = "delete from " + ar.appointmentTable + " where id = ?"
-	if _, err = tx.Exec(sql, appointment.ID); err != nil {
-		tx.Rollback()
-		return err
-	}
-	// 从所有成员中删除该会议
-	if members != "" {
-		idStr := strconv.Itoa(appointment.ID)
-		sql = "update " + ar.userTable + " set appointments=? where id=?"
-		for _, user := range users {
-			tmp := common.MemberStrToList(user.Appointments)
-			index := common.StrIndexOf(tmp, idStr)
-			if index != -1 {
-				tmp = append(tmp[:index], tmp[index+1:]...)
-				_, err := tx.Exec(sql, common.MemberListToStr(tmp), user.ID)
-				if err != nil {
-					tx.Rollback()
-					return err
-				}
-			}
-		}
-	}
-	tx.Commit()
-	return nil
 }

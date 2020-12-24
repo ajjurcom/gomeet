@@ -10,6 +10,7 @@ type Meeting struct {
 	MeetingType   string `json:"meeting_type" db:"meeting_type" binding:"required"`
 	Scale         string `json:"scale" db:"scale" binding:"required"`
 	RoomNumber    string `json:"room_number" db:"room_number"`
+	ReverseCount  int `json:"reverse_count"`
 }
 
 var meetingTypeDict = map[string]bool{

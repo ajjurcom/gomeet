@@ -15,12 +15,14 @@ type IMeetingRepository interface {
 	UpdateMeeting(meeting model.Meeting) error
 	SelectMeetingByID(id int) (model.Meeting, error)
 	SelectMeetingsByBuilding(buildingID int, pageAndOnePageCount ...int) ([]model.Meeting, error)
+	SelectMeetingsByID(ids string) ([]model.Meeting, error)
 	SearchMeetingsByKeyword(page, onePageCount int, keyword string) ([]model.Meeting, error)
 	SelectAllMeetingsByParams(buildingID int, layer int, meetingType []string, scales []string) ([]model.Meeting, error)
 	SelectMeetingCount(attrName, attrVal string, isEqual bool) (int, error)
 	SelectAllMeetingTypes() []string
 	SelectAllScaleTypes() []string
 	SelectMeetingByInfo(meetingsID, campusID, meetingType, meetingScale string) (model.Meeting, error)
+	SelectAllMeetingsID() ([]model.Meeting, error)
 }
 
 type MeetingRepository struct {
@@ -148,6 +150,21 @@ func (mr *MeetingRepository) SelectMeetingsByBuilding(buildingID int, pageAndOne
 	return
 }
 
+func (mr *MeetingRepository) SelectMeetingsByID(ids string) (meetings []model.Meeting, err error) {
+	if err = mr.Conn(); err != nil {
+		return
+	}
+
+	if ids == "" {
+		return
+	}
+
+	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number " +
+		"from " + mr.table + " where id in (" + ids + ") order by field(ID, " + ids + ")"
+	err = mr.mysqlConn.Select(&meetings, sqlStr)
+	return
+}
+
 func (mr *MeetingRepository) SearchMeetingsByKeyword(page, onePageCount int, keyword string) (meetings []model.Meeting, err error) {
 	if err = mr.Conn(); err != nil {
 		return
@@ -229,6 +246,15 @@ func (mr *MeetingRepository) SelectMeetingByInfo(meetingsID, campusID, meetingTy
 	}
 	sql += "building.campus_id=? and meeting.building_id=building.id and meeting.meeting_type=? and meeting.scale=? limit 1"
 	err = mr.mysqlConn.Get(&meeting, sql, campusID, meetingType, meetingScale)
+	return
+}
+
+func (mr *MeetingRepository) SelectAllMeetingsID() (meetings []model.Meeting, err error) {
+	if err = mr.Conn(); err != nil {
+		return
+	}
+	sql := "select id from " + mr.table
+	err = mr.mysqlConn.Select(&meetings, sql)
 	return
 }
 

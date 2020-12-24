@@ -21,7 +21,6 @@ type IAppointmentService interface {
 	GetAppointmentsByPage(page, onePageCount int, state string) ([]model.Appointment, error)
 	GetCountByState(state string) (int, error)
 	GetExpireAppointment(day string, endTime string) ([]model.Appointment, error)
-	TransferAppointment(model.Appointment, string) error
 }
 
 func NewAppointmentService(repository repository.IAppointmentRepository) IAppointmentService {
@@ -117,8 +116,4 @@ func (as *AppointmentService) GetCountByState(state string) (int, error) {
 
 func (as *AppointmentService) GetExpireAppointment(day string, endTime string) ([]model.Appointment, error) {
 	return as.AppointmentRepository.SelectExpireAppointment(day, endTime)
-}
-
-func (as *AppointmentService) TransferAppointment(appointment model.Appointment, members string) error {
-	return as.AppointmentRepository.TransferAppointment(appointment, members)
 }

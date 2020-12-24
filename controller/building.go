@@ -164,7 +164,6 @@ func (bc *BuildingController) GetBuildingsByPage(c *gin.Context) {
 	// 获取校区
 	buildingList, err := bc.BuildingService.GetBuildingsByPage(page, onePageCount, campusID)
 	if err != nil {
-		fmt.Println(err)
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result)
 		return
 	}

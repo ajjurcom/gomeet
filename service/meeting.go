@@ -13,6 +13,7 @@ type IMeetingService interface {
 	GetMeetingByID(id int) (model.Meeting, error)
 	GetMeetingCountByBuilding(buildingID int) (int, error)
 	GetMeetingsByPage(page, onePageCount, buildingID int) ([]model.Meeting, error)
+	GetMeetingsByID(ids string) ([]model.Meeting, error)
 	GetMeetingCountByKeyword(keyword string) (int, error)
 	GetMeetingsByKeyword(page, onePageCount int, keyword string)  ([]model.Meeting, error)
 	GetAllMeetingTypes() []string
@@ -20,6 +21,7 @@ type IMeetingService interface {
 	GetAllMeetingByBuilding(buildingID int) ([]model.Meeting, error)
 	GetAllMeetingsByParams(buildingID int, layer int, meetingType []string, scales []string) ([]model.Meeting, error)
 	GetMeetingByInfo(meetingsID, campusID, meetingType, meetingScale string) (model.Meeting, error)
+	GetAllMeetingsID() ([]int, error)
 }
 
 func NewMeetingService(meetingRepo repository.IMeetingRepository) IMeetingService {
@@ -80,6 +82,10 @@ func (ms *MeetingService) GetMeetingsByPage(page, onePageCount, buildingID int) 
 	return ms.MeetingRepository.SelectMeetingsByBuilding(buildingID, page, onePageCount)
 }
 
+func (ms *MeetingService) GetMeetingsByID(ids string) ([]model.Meeting, error) {
+	return ms.MeetingRepository.SelectMeetingsByID(ids)
+}
+
 func (ms *MeetingService) GetAllMeetingTypes() []string {
 	return ms.MeetingRepository.SelectAllMeetingTypes()
 }
@@ -100,4 +106,15 @@ func (ms *MeetingService) GetMeetingByInfo(meetingsID, campusID, meetingType, me
 	return ms.MeetingRepository.SelectMeetingByInfo(meetingsID, campusID, meetingType, meetingScale)
 }
 
+func (ms *MeetingService) GetAllMeetingsID() ([]int, error) {
+	meetings, err := ms.MeetingRepository.SelectAllMeetingsID()
+	if err != nil {
+		return []int{}, err
+	}
+	ids := make([]int, len(meetings))
+	for i, v := range meetings {
+		ids[i] = v.ID
+	}
+	return ids, nil
+}
 
