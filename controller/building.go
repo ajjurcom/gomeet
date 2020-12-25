@@ -8,7 +8,6 @@ import (
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
 	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"

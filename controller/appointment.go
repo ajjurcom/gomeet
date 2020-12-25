@@ -8,7 +8,6 @@ import (
 	"com/mittacy/gomeet/repository"
 	"com/mittacy/gomeet/service"
 	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
@@ -469,12 +468,8 @@ func (ac *AppointmentController) GetAppointment(c *gin.Context) {
 	}
 
 	if appointment.Locate, err = ac.getLocate(appointment.MeetingID); err != nil {
-		if err == sql.ErrNoRows {
-			common.ResolveResult(c, false, e.INVALID_PARAMS, result, "该会议不存在")
-		} else {
-			logger.Record("获取会议室的位置错误", err)
-			common.ResolveResult(c, false, e.BACK_ERROR, result)
-		}
+		logger.Record("获取会议室的位置错误", err)
+		common.ResolveResult(c, false, e.BACK_ERROR, result)
 		return
 	}
 
@@ -543,16 +538,25 @@ func (ac *AppointmentController) getLocate(meetingID int) (string, error) {
 	locate := ""
 	meeting, err := ac.MeetingService.GetMeetingByID(meetingID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "会议室可能已被删除", nil
+		}
 		return locate, err
 	}
 
 	building, err := ac.BuildingService.GetBuildingByID(meeting.BuildingID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "会议室所在可能已被删除", nil
+		}
 		return locate, err
 	}
 
 	campus, err := ac.CampusService.GetCampusByID(building.CampusID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "会议室所在校区可能已被删除", nil
+		}
 		return locate, err
 	}
 

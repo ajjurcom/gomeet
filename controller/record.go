@@ -143,7 +143,7 @@ func (rc *RecordController) StatisticsAppointment(c *gin.Context) {
 		}
 		tmp := count - statisticsAppointment[model.AppointmentVerify] - statisticsAppointment[model.AppointmentRefuse]
 		item3 := model.Item{
-			Title: "审核通过率",
+			Title: "审核通过数",
 			Num: tmp,
 			Ratio: ratio3,
 		}

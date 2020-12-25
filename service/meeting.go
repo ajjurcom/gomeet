@@ -63,7 +63,7 @@ func (ms *MeetingService) UpdateMeeting(meeting model.Meeting) error {
 }
 
 func (ms *MeetingService) GetMeetingByID(id int) (model.Meeting, error) {
-	return ms.MeetingRepository.SelectMeetingByID((id))
+	return ms.MeetingRepository.SelectMeetingByID(id)
 }
 
 func (ms *MeetingService) GetMeetingCountByBuilding(buildingID int) (int, error) {
