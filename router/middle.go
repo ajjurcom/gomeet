@@ -16,6 +16,7 @@ func CorsMiddleware() gin.HandlerFunc {
 		origin := c.Request.Header.Get("Origin")
 		tokenName := config.Cfg.Section("jwt").Key("tokenName").String()
 		if origin != "" {
+			c.Header("Access-Control-Allow-Origin", "http://meet.mittacy.com")
 			c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
 			c.Header("Access-Control-Allow-Credentials", "true")
 			c.Header("Access-Control-Allow-Methods", "POST, DELETE, PUT, GET, OPTIONS")
