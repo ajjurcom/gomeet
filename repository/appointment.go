@@ -306,12 +306,12 @@ func (ar *AppointmentRepository) SelectCreator(day, startTime, meetingID string)
 		return
 	}
 
-	sql := "select meeting_id, creator_name, day, start_time, end_time from " + ar.appointmentTable + " where day=? and start_time>=? and state != ? and state != ?"
+	sql := "select meeting_id, creator_name, day, start_time, end_time from " + ar.appointmentTable + " where day=? and start_time>=? and state = ? or state = ?"
 	if meetingID != "" {
 		sql += " and meeting_id in (" + meetingID + ")"
 	}
 
-	err = ar.mysqlConn.Select(&appointments, sql, day, startTime, model.AppointmentCancel, model.AppointmentAdoptCancel)
+	err = ar.mysqlConn.Select(&appointments, sql, day, startTime, model.AppointmentVerify, model.AppointmentAdopt)
 	return
 }
 
