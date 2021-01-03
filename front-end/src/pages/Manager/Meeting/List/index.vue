@@ -39,6 +39,7 @@
                     :key="item.id">
                     <div class="list-item-content">
                         <div class="list-item-content-top">
+                            {{search.showInput ? '建筑: ' + item.building_name + ' - ' : ''}}
                             {{item.layer}}楼{{item.room_number}}  - {{item.meeting_name}}
                         </div>
                         <div class="list-item-content--bottom">
