@@ -91,23 +91,23 @@ func InitRouter() *gin.Engine {
 		/*
 		 * 会议
 		 */
-		apiUser.POST("/appointment", appointmentController.Post)
-		apiUser.POST("/appointment_fast", appointmentController.FastPost)
-		apiUser.DELETE("/appointment/:id", appointmentController.Delete)
-		apiUser.PUT("/appointment", appointmentController.Put)
+		apiUser.POST("/appointment", appointmentController.Post)	// 创建会议
+		apiUser.POST("/appointment_fast", appointmentController.FastPost) 	// 快速创建会议，智能推荐
+		apiUser.DELETE("/appointment/:id", appointmentController.Delete)	// 删除会议
+		apiUser.PUT("/appointment", appointmentController.Put)	// 修改会议信息
 		/*
 		 * 用户
 		 */
-		apiUser.PUT("/user", userController.Put)
-		apiUser.PUT("/user_password", userController.PutPassword)
-		apiUser.PUT("/apply_admin/:id", userController.ApplyAdmin)
+		apiUser.PUT("/user", userController.Put)	// 修改用户信息
+		apiUser.PUT("/user_password", userController.PutPassword)	// 修改用户密码
+		apiUser.PUT("/apply_admin/:id", userController.ApplyAdmin)	// 用户申请升级为管理员
 		/*
 		 * 用户组
 		 */
-		apiUser.POST("/user_group", groupController.Post)
-		apiUser.DELETE("/user_group/:id", groupController.Delete)
-		apiUser.PUT("/user_name", groupController.PutName)
-		apiUser.PUT("/user_member", groupController.PutMember)
+		apiUser.POST("/user_group", groupController.Post)		// 创建用户组
+		apiUser.DELETE("/user_group/:id", groupController.Delete)	// 删除用户组
+		apiUser.PUT("/user_name", groupController.PutName)	// 修改用户组名字
+		apiUser.PUT("/user_member", groupController.PutMember)	// 修改用户组成员
 	}
 
 	apiAdmin := r.Group(relativePath)
@@ -116,30 +116,30 @@ func InitRouter() *gin.Engine {
 		/*
 		 * 会议API
 		 */
-		apiAdmin.PUT("/appointment_state", appointmentController.PutState)
+		apiAdmin.PUT("/appointment_state", appointmentController.PutState)	// 修改会议状态
 		/*
 		 * 管理用户API
 		 */
-		apiAdmin.DELETE("/user/:id", userController.Delete)
-		apiAdmin.PUT("/user_state/:id", userController.PutState)
+		apiAdmin.DELETE("/user/:id", userController.Delete)	// 删除用户
+		apiAdmin.PUT("/user_state/:id", userController.PutState)	// 修改用户状态
 		/*
 		 * 校区所需API
 		 */
-		apiAdmin.POST("/campus", campusController.PostCampus)
-		apiAdmin.DELETE("/campus/:id", campusController.DeleteCampus)
-		apiAdmin.PUT("/campus", campusController.PutCampus)
+		apiAdmin.POST("/campus", campusController.PostCampus)	// 创建校区
+		apiAdmin.DELETE("/campus/:id", campusController.DeleteCampus)	// 删除校区
+		apiAdmin.PUT("/campus", campusController.PutCampus)	// 修改校区信息
 		/*
 		 * 建筑所需API
 		 */
-		apiAdmin.POST("/building", buildingController.PostBuilding)
-		apiAdmin.DELETE("/building/:id", buildingController.DeleteBuilding)
-		apiAdmin.PUT("/building", buildingController.PutBuilding)
+		apiAdmin.POST("/building", buildingController.PostBuilding)		// 增加建筑
+		apiAdmin.DELETE("/building/:id", buildingController.DeleteBuilding)	// 删除建筑
+		apiAdmin.PUT("/building", buildingController.PutBuilding)	// 修改建筑信息
 		/*
 		 * 会议室所需API
 		 */
-		apiAdmin.POST("/meeting", meetingController.PostMeeting)
-		apiAdmin.DELETE("/meeting/:id", meetingController.DeleteMeeting)
-		apiAdmin.PUT("/meeting", meetingController.PutMeeting)
+		apiAdmin.POST("/meeting", meetingController.PostMeeting)	// 创建会议室
+		apiAdmin.DELETE("/meeting/:id", meetingController.DeleteMeeting)	// 删除会议室
+		apiAdmin.PUT("/meeting", meetingController.PutMeeting)	// 修改会议室信息
 	}
 
 	apiRoot := r.Group(relativePath)

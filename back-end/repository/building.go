@@ -130,7 +130,7 @@ func (bmr *BuildingManagerRepository) SearchBuildingsByKeyword(page, onePageCoun
 
 	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
-	sqlStr := "select id, campus_id, building_name, layer from " + bmr.buildingTable + " where building_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	sqlStr := "select " + bmr.buildingTable + ".id, campus_id, campus.campus_name, building_name, layer from " + bmr.buildingTable + " join campus where campus.id = building.campus_id and building_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
 	err = bmr.mysqlConn.Select(&buildings, sqlStr)
 	return
 }

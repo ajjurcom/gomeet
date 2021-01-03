@@ -194,14 +194,14 @@ func (bc *BuildingController) SearchBuildings(c *gin.Context) {
 		return
 	}
 	// 2. 数据操作
-	// 获取校区数量
+	// 获取建筑数量
 	count, err := bc.BuildingService.GetBuildingCountByKeyword(keyword)
 	if err != nil {
 		logger.Record("获取数据库出错", err)
 		common.ResolveResult(c, false, e.BACK_ERROR, result)
 		return
 	}
-	// 获取校区
+	// 获取建筑
 	buildingList, err := bc.BuildingService.GetBuildingsByKeyword(page, onePageCount, keyword)
 	if err != nil  && err != sql.ErrNoRows {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, result)

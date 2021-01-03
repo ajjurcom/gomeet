@@ -5,12 +5,13 @@ type Meeting struct {
 	MeetingName   string `json:"meeting_name" db:"meeting_name" binding:"required"`
 	CampusID      int    `json:"campus_id" db:"campus_id"`
 	BuildingID    int    `json:"building_id" db:"building_id" binding:"required"`
+	BuildingName  string `json:"building_name" db:"building_name"`
 	BuildingLayer int    `json:"building_layer" db:"building_layer"`
 	Layer         int    `json:"layer" db:"layer" binding:"required"`
 	MeetingType   string `json:"meeting_type" db:"meeting_type" binding:"required"`
 	Scale         string `json:"scale" db:"scale" binding:"required"`
 	RoomNumber    string `json:"room_number" db:"room_number"`
-	ReverseCount  int `json:"reverse_count"`
+	ReverseCount  int    `json:"reverse_count"`
 }
 
 var meetingTypeDict = map[string]bool{
