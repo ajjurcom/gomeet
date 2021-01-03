@@ -22,7 +22,9 @@
                     class="list-item"
                     v-for="item in itemList"
                     :key="item.id">
-                    <div class="list-item-content">{{item.building_name}} - 楼高{{item.layer}}层</div>
+                    <div class="list-item-content">
+                        {{search.showInput ? `${item.campus_name} - ` : ''}} {{item.building_name}} - 楼高{{item.layer}}层
+                    </div>
                     <div class="list-item-buttons">
                         <Button class="list-item-button" @click="buildingEdit(item.id)" type="info">修改</Button>
                         <Poptip
