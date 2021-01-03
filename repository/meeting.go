@@ -172,7 +172,9 @@ func (mr *MeetingRepository) SearchMeetingsByKeyword(page, onePageCount int, key
 
 	page -= 1
 	startIndex := strconv.Itoa(page * onePageCount)
-	sqlStr := "select id, meeting_name, layer, meeting_type, scale, room_number from " + mr.table + " where meeting_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
+	sqlStr := "select " + mr.table + ".id, meeting_name, building_name, meeting.layer, meeting_type, scale, " +
+		"room_number from " + mr.table + " join building where meeting.building_id=building.id " +
+		"and meeting_name like '%" + keyword + "%' limit " + startIndex + ", " + strconv.Itoa(onePageCount)
 	err = mr.mysqlConn.Select(&meetings, sqlStr)
 	return
 }
