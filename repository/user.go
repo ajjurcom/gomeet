@@ -210,7 +210,7 @@ func (umr *UserManagerRepository) SearchUsersByAttr(attrName, attrVal string) (u
 	var sqlStr string
 	switch attrName {
 	case "username", "sno":
-		sqlStr = "select id, sno, username from " + umr.table + " where " + attrName + " like ('%" + attrVal + "%')"
+		sqlStr = "select id, sno, username, state from " + umr.table + " where " + attrName + " like ('%" + attrVal + "%')"
 	case "phone":
 		sqlStr = "select id, phone, username from " + umr.table + " where " + attrName + " like ('%" + attrVal + "%')"
 	default:
