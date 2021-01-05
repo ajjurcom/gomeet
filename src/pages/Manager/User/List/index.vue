@@ -2,7 +2,7 @@
     <div class="container-wrap">
         <div class="container">
             <div class="select-items">
-                <Select class="select-item" v-model="getMeetingsParams.state" placeholder="状态" @on-change="changeState">
+                <Select v-if="!search.showInput" class="select-item" v-model="getMeetingsParams.state" placeholder="状态" @on-change="changeState">
                     <Option 
                         v-for="state in stateList"
                         :value="state"
@@ -11,8 +11,12 @@
                         {{stateMap[state]}}
                     </Option>
                 </Select>
+                <Button v-if="!search.showInput" class="item" type="info" @click="initSearch">搜索用户</Button>
+                <Input v-if="search.showInput" v-model="search.value" placeholder="输入用户名" style="width: 200px" />
+                <Button v-if="search.showInput" class="item" type="info" :loading="search.loading" @click="searchUsers">搜索</Button>
+                <Button v-if="search.showInput" class="item" type="error" @click="cancelSearch">取消</Button>
             </div>
-            <div v-if="totalCount !== 0" class="list-items">
+            <div v-if="totalCount !== 0 || search.showInput" class="list-items">
                 <div
                     class="list-item"
                     v-for="item in itemList"
@@ -20,12 +24,12 @@
                     @click="showUserInfo(item.id)">
                     <div class="list-item-content">
                         <div class="list-item-text">
-                            {{item.sno}} - {{item.username}}
+                            {{item.sno}} - {{item.username}}{{search.showInput ? `（${stateMap[item.state]}）` : ''}}
                         </div>
                     </div>
                     <div class="list-item-buttons">
                         <Poptip
-                            v-if="getMeetingsParams.state === 'verify_user'"
+                            v-if="item.state === 'verify_user'"
                             confirm
                             title="通过用户后将无法恢复"
                             @click.native.stop=""
@@ -33,7 +37,7 @@
                             <Button class="list-item-button" :loading="loading" type="primary">通过</Button>
                         </Poptip>
                         <Poptip
-                            v-if="getMeetingsParams.state === 'verify_user'"
+                            v-if="item.state === 'verify_user'"
                             confirm
                             title="拒绝用户后将无法恢复"
                             @click.native.stop=""
@@ -41,7 +45,7 @@
                             <Button class="list-item-button" :loading="loading" type="error">拒绝</Button>
                         </Poptip>
                         <Poptip
-                            v-if="getMeetingsParams.state === 'verify_admin'"
+                            v-if="item.state === 'verify_admin'"
                             confirm
                             title="通过用户后将无法恢复"
                             @click.native.stop=""
@@ -49,7 +53,7 @@
                             <Button class="list-item-button" :loading="loading" type="primary">通过</Button>
                         </Poptip>
                         <Poptip
-                            v-if="getMeetingsParams.state === 'verify_admin'"
+                            v-if="item.state === 'verify_admin'"
                             confirm
                             title="拒绝用户后将无法恢复"
                             @click.native.stop=""
@@ -57,7 +61,7 @@
                             <Button class="list-item-button" :loading="loading" type="error">拒绝</Button>
                         </Poptip>
                         <Poptip
-                            v-if="getMeetingsParams.state === 'normal_admin'"
+                            v-if="item.state === 'normal_admin' && isRoot"
                             confirm
                             title="确定退回普通用户?"
                             @click.native.stop=""
@@ -65,7 +69,15 @@
                             <Button class="list-item-button" :loading="loading" type="error">取消管理员身份</Button>
                         </Poptip>
                         <Poptip
-                            v-if="getMeetingsParams.state === 'normal_user'"
+                            v-if="item.state === 'normal_user' && isRoot"
+                            confirm
+                            title="确定给予管理员权限？"
+                            @click.native.stop=""
+                            @on-ok="putUserState(item.id, 'normal_admin')">
+                            <Button class="list-item-button" :loading="loading" type="primary">升级为管理员</Button>
+                        </Poptip>
+                        <Poptip
+                            v-if="item.state === 'normal_user'"
                             confirm
                             title="删除用户后将无法恢复"
                             @click.native.stop=""
@@ -107,8 +119,11 @@
             flex-direction: row;
             margin-bottom: 20px;
             .select-item {
-                width: 300px;
-                margin-right: 20px;
+                width: 180px;
+                margin-right: 10px;
+            }
+            .item {
+                margin-left: 10px;
             }
         }
         .list-items {
@@ -164,14 +179,18 @@ export default {
     },
     data() {
         return {
+            search: {
+                showInput: false,
+                loading: false,
+                value: '',
+            },
             isRoot: this.$store.getters['App/getUserIsRoot'],
             stateMap: {
                 "verify_user": "待审核用户",
                 "normal_user": "正常用户",
-                "refuse_user": "拒绝用户",
-                "blacklist": "黑名单",
                 "verify_admin": "待审核管理员",
-                "normal_admin": "正常管理员"
+                "normal_admin": "管理员",
+                "root": "系统管理员"
             },
             stateList: [],
             putStateList: [],
@@ -261,6 +280,39 @@ export default {
                 this.detailsLoading = false;
             });
         },
+        initSearch() {
+            this.totalCount = 0;
+            this.itemList = [];
+            this.search.showInput = true;
+        },
+        searchUsers() {
+            this.getMeetingsParams.page = 1;
+            this.getUserDataList();
+        },
+        cancelSearch() {
+            this.search.showInput = false;
+            this.search.value = '';
+            this.getMeetingsParams.page = 1;
+            this.getDataList();
+        },
+        getUserDataList() {
+            if (this.search.value.trim() == '') {
+                this.$Message.error('搜索值不能为空');
+                return;
+            }
+            this.search.loading = true;
+            const searchObj = {
+                'searchWay': 'username',
+                'keyword': this.search.value
+            };
+            this.$service.MainAPI.searchUsers(searchObj).then(res => {
+                this.itemList = res.userList;
+                const msg = this.totalCount === 0 ? '搜索完成, 无用户' : '搜索完成';
+                this.$Message.success(msg);
+            }).finally(() => {
+                this.search.loading = false;
+            });
+        }
     },
     created() {
         // 获取选项

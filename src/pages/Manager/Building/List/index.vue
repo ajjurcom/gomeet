@@ -155,7 +155,7 @@ export default {
             }
             this.search.loading = true;
             this.$service.MainAPI.searchBuildings(this.requestObj.onePageNum, this.requestObj.page, this.search.value).then(res => {
-                this.totalCount = res.count;
+                this.totalCount = res.count || 0;
                 this.itemList = res.buildingList;
                 const msg = this.totalCount === 0 ? '搜索完成, 无建筑' : '搜索完成';
                 this.$Message.success(msg);
