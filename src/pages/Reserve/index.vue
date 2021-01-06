@@ -842,7 +842,11 @@ export default {
                         this.params.buildingID = this.options.buildingList.length > 0 ? this.options.buildingList[0].id : 0 || 0;
                     case 'campus':
                     case 'building':
-                        this.options.layer = this.options.buildingList.length > 0 ? this.options.buildingList[0].layer : 0 || 0;
+                        for (let item of this.options.buildingList) {
+                            if (item.id === this.params.buildingID) {
+                                this.options.layer = item.layer || 0;
+                            }
+                        }
                     default:
                         this.options.meetingList = res.meetingList || [];
                 }
