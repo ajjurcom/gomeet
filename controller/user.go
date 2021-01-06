@@ -231,8 +231,8 @@ func (uc *UserController) Put(c *gin.Context) {
 	}
 
 	// 2. 验证用户信息，避免利用自己的token修改他人的信息
-	token := c.Request.Header.Get(config.Cfg.Section("jwt").Key("tokenName").String())
-	if token == "" {
+	token, err := c.Cookie(config.Cfg.Section("jwt").Key("tokenName").String())
+	if err != nil || token == "" {
 		common.ResolveResult(c, false, e.INVALID_PARAMS, nil, "你不可修改他人信息")
 		return
 	}
